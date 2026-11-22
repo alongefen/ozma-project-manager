@@ -57,31 +57,31 @@
 
 ## שלב 0: אפיון ותכנון
 
-### P0.1 PRD, תוכנית ומסמכי ניהול
+### משימה P0.1: PRD, תוכנית ומסמכי ניהול
 - תלוי ב: —
 - שער: G0 בסיום
 - קבצים: `AGENTS.md`, `docs/PRD.md`, `docs/OPEN_QUESTIONS.md`, `docs/WORK_PLAN.md`, `docs/DECISIONS.md`, `docs/NEXT_SESSION.md`, `docs/tasks/P0.1.md`
 - גמור: כל הודעת אלון ו-16 המסכים ממופים, העקיבות נבדקה, PR פתוח ולא מוזג.
 
-### P0.2 ארכיטקטורה והרשאות
+### משימה P0.2: ארכיטקטורה והרשאות
 - תלוי ב: P0.1
 - שער: G0 לפני התחלה, G1 בסיום
 - קבצים: `docs/ARCHITECTURE.md`, `docs/PERMISSIONS.md`, `docs/tasks/P0.2.md`
 - גמור: חלופות ועלויות, מודל נתונים, מבנה נתיבים, מודל איומים, גיבוי, וכלל שרת עם בדיקה לכל שורה במטריצה. בלי יצירת שירות ובלי מיגרציה.
 
-### P0.3 עיצוב ו-UX
+### משימה P0.3: עיצוב ו-UX
 - תלוי ב: P0.1
 - שער: G0 לפני התחלה, G1 בסיום
 - קבצים: `docs/DESIGN.md`, `docs/tasks/P0.3.md`
 - גמור: טוקנים, ניווט, רכיבים, כל מסכי הליבה בטלפון ובמחשב, כללי bidi, מצבי שגיאה וריק, ניגודיות שנמדדה.
 
-### P0.4 אימות מול התמלול והנספח
+### משימה P0.4: אימות מול התמלול והנספח
 - תלוי ב: P0.1
 - שער: G0 לפני התחלה; קבלת החומר או ויתור כתוב של אלון
 - קבצים: `docs/PRD.md`, `docs/OPEN_QUESTIONS.md`, `docs/DECISIONS.md`, `docs/tasks/P0.4.md`
 - גמור: כל שורה בסעיף 18 ב-PRD סומנה אושר, נסתר או לא נמצא, עם מראה מקום. החלטה נרשמת רק אם אלון אישר אותה.
 
-### P0.5 סנכרון ושער תכנון
+### משימה P0.5: סנכרון ושער תכנון
 - תלוי ב: P0.2, P0.3, P0.4
 - שער: G1 בסיום
 - קבצים: `AGENTS.md`, `docs/PRD.md`, `docs/OPEN_QUESTIONS.md`, `docs/WORK_PLAN.md`, `docs/DECISIONS.md`, `docs/NEXT_SESSION.md`, `docs/tasks/P0.5.md`
@@ -89,43 +89,43 @@
 
 ## שלב 1: תשתית
 
-### P1.1 שלד ותלויות
+### משימה P1.1: שלד ותלויות
 - תלוי ב: P0.5
 - שער: G1
 - קבצים: `package.json`, `package-lock.json`, `tsconfig.json`, `next.config.ts`, `postcss.config.mjs`, `eslint.config.mjs`, `vitest.config.ts`, `playwright.config.ts`, `.gitignore`, `.env.example`, `.github/**`, `src/app/layout.tsx`, `src/app/globals.css`, `docs/tasks/P1.1.md`
 - גמור: כל תלויות הליבה מותקנות כאן, כולל PDF ו-Excel; `lang=he` ו-`dir=rtl`; `.claude/settings.local.json` וסודות ב-gitignore; CI עובר; לא נוצר שירות.
 
-### P1.2 סכמה, מדיניות וטיפוסים
+### משימה P1.2: סכמה, מדיניות וטיפוסים
 - תלוי ב: P1.1
 - שער: D31 לפני יצירת שירות ולפני הפעלת מיגרציה
 - קבצים: `supabase/**`, `src/types/**`, `tests/db/**`, `docs/tasks/P1.2.md`
 - גמור: כל סכמת הליבה במשימה אחת, חסימה כברירת מחדל, בדיקות לכל תפקיד, שחזור לאחור מתועד, בלי לידים.
 
-### P1.3 רכיבי עיצוב ופורמטים
+### משימה P1.3: רכיבי עיצוב ופורמטים
 - תלוי ב: P1.1
 - שער: G1
 - קבצים: `src/components/ui/**`, `src/styles/**`, `src/lib/format/**`, `src/fonts/**`, `public/brand/**`, `tests/ui/**`, `docs/tasks/P1.3.md`
 - גמור: רכיבים לפי DESIGN, יעדי 44px, שדות 16px, bidi, טבלה שהופכת לכרטיסים, פונט מקומי.
 
-### P1.4 כניסה והרשאות שרת
+### משימה P1.4: כניסה והרשאות שרת
 - תלוי ב: P1.2, P1.3
 - שער: D31 לכל שירות חדש
 - קבצים: `src/lib/auth/**`, `src/lib/permissions/**`, `src/lib/db/**`, `src/lib/audit/**`, `src/app/(auth)/**`, `src/proxy.ts`, `tests/auth/**`, `docs/tasks/P1.4.md`
 - גמור: הזמנה, כניסה, שחזור, יציאה, השבתה, פונקציות הרשאה משותפות ותיעוד פעולות.
 
-### P1.5 מעטפת וניווט משותף
+### משימה P1.5: מעטפת וניווט משותף
 - תלוי ב: P1.4
 - שער: G1
 - קבצים: `src/components/shell/**`, `src/lib/navigation.ts`, `src/app/(app)/layout.tsx`, `src/app/(app)/page.tsx`, `src/app/(app)/projects/[id]/layout.tsx`, `tests/shell/**`, `docs/tasks/P1.5.md`
 - גמור: כל נתיבי הליבה כבר בניווט ובלשוניות, לפי הרשאה, והלשונית הפעילה נראית בטלפון.
 
-### P1.6 אחסון והעלאה משותפים
+### משימה P1.6: אחסון והעלאה משותפים
 - תלוי ב: P1.4
 - שער: D31 לכל שירות חדש
 - קבצים: `src/lib/storage/**`, `src/components/upload/**`, `src/app/api/storage/**`, `tests/storage/**`, `docs/tasks/P1.6.md`
 - גמור: אחסון פרטי, בדיקת סוג וגודל, HEIC, ניסיון חוזר, וממשק אחד לקבצים ולתמונות יומן.
 
-### P1.7 אינטגרציית תשתית
+### משימה P1.7: אינטגרציית תשתית
 - תלוי ב: P1.5, P1.6
 - שער: G2 בסיום
 - קבצים: `docs/WORK_PLAN.md`, `docs/NEXT_SESSION.md`, `tests/foundation/**`, `docs/tasks/P1.7.md`
@@ -133,55 +133,55 @@
 
 ## שלב 2: יכולות הליבה
 
-### P2.1 משתמשים והרשאות
+### משימה P2.1: משתמשים והרשאות
 - תלוי ב: P1.7
 - שער: G2
 - קבצים: `src/features/users/**`, `src/app/(app)/users/**`, `tests/users/**`, `docs/tasks/P2.1.md`
 - גמור: כל תפקיד ניתן ליצירה, עריכה והשבתה, ואין העלאת הרשאה עצמית.
 
-### P2.2 פרויקטים
+### משימה P2.2: פרויקטים
 - תלוי ב: P1.7
 - שער: G2
 - קבצים: `src/features/projects/**`, `src/app/(app)/projects/page.tsx`, `src/app/(app)/projects/new/**`, `src/app/(app)/projects/[id]/page.tsx`, `src/app/(app)/projects/[id]/edit/**`, `tests/projects/**`, `docs/tasks/P2.2.md`
 - גמור: רשימה, חיפוש, מונים, טופס, שיוכים ובידוד בין פרויקטים.
 
-### P2.3 משימות
+### משימה P2.3: משימות
 - תלוי ב: P1.7
 - שער: G2
 - קבצים: `src/features/tasks/**`, `src/app/(app)/projects/[id]/tasks/**`, `tests/tasks/**`, `docs/tasks/P2.3.md`
 - גמור: פתק, עריכה, סימון ומונים, בלי הרחבות.
 
-### P2.4 קבצים וקטגוריות
+### משימה P2.4: קבצים וקטגוריות
 - תלוי ב: P1.7
 - שער: G2
 - קבצים: `src/features/files/**`, `src/app/(app)/projects/[id]/files/**`, `tests/files/**`, `docs/tasks/P2.4.md`
 - גמור: ארבע קטגוריות, העלאה, חיפוש, פתיחה, הורדה, וקובץ ״לבן בלבד״ חסום למשרד.
 
-### P2.5 יומן פרויקט ויומן כללי
+### משימה P2.5: יומן פרויקט ויומן כללי
 - תלוי ב: P1.7
 - שער: G2
 - קבצים: `src/features/diary/**`, `src/app/(app)/projects/[id]/diary/**`, `src/app/(app)/diary/**`, `tests/diary/**`, `docs/tasks/P2.5.md`
 - גמור: מקור נתונים אחד, הוספה משני היומנים, תמונות, עריכה לפי מדיניות, ספירת ימים וקישורי דוח.
 
-### P2.6 כספים
+### משימה P2.6: כספים
 - תלוי ב: P1.7
 - שער: G2
 - קבצים: `src/features/finance/**`, `src/app/(app)/projects/[id]/finance/**`, `tests/finance/**`, `docs/tasks/P2.6.md`
 - גמור: כל מקרי 10.4 ב-PRD עוברים, הזנה במקלדת, אחוז, ימים, קישור Excel וקישור לייצוא. ספירת הימים נקראת מהמסד בלי תלות בקוד של P2.5.
 
-### P2.7 דוחות PDF
+### משימה P2.7: דוחות PDF
 - תלוי ב: P2.5
 - שער: G2
 - קבצים: `src/features/reports/**`, `src/app/(app)/reports/**`, `tests/reports/**`, `docs/tasks/P2.7.md`
 - גמור: בודד וטווח, 160 שורות שלמות, תמונות, עברית והרשאות.
 
-### P2.8 ייצוא Excel
+### משימה P2.8: ייצוא Excel
 - תלוי ב: P2.6
 - שער: G2
 - קבצים: `src/features/finance-export/**`, `src/app/(app)/exports/**`, `tests/export/**`, `docs/tasks/P2.8.md`
 - גמור: שורות וסכומים זהים למסך, מספרים, RTL, הגנה מנוסחאות והרשאות.
 
-### P2.9 אינטגרציית הליבה
+### משימה P2.9: אינטגרציית הליבה
 - תלוי ב: P2.1, P2.2, P2.3, P2.4, P2.5, P2.6, P2.7, P2.8
 - שער: G2
 - קבצים: `src/lib/navigation.ts`, `src/components/shell/**`, `tests/e2e/core/**`, `docs/WORK_PLAN.md`, `docs/NEXT_SESSION.md`, `docs/tasks/P2.9.md`
@@ -189,31 +189,31 @@
 
 ## שלב 3: איכות ומוכנות
 
-### P3.1 בדיקת אבטחה והרשאות
+### משימה P3.1: בדיקת אבטחה והרשאות
 - תלוי ב: P2.9
 - שער: G2
 - קבצים: `tests/security/**`, `docs/qa/SECURITY.md`, `docs/tasks/P3.1.md`
 - גמור: כל שורת מטריצה, גישה ישירה, ביטול גישה, הזרקות וסודות נבדקו. תיקונים מועברים ל-P3.5.
 
-### P3.2 מובייל, RTL, נגישות וביצועים
+### משימה P3.2: מובייל, RTL, נגישות וביצועים
 - תלוי ב: P2.9
 - שער: G2
 - קבצים: `tests/e2e/ux/**`, `docs/qa/UX.md`, `docs/tasks/P3.2.md`
 - גמור: שלושת הרוחבים, מכשירים אמיתיים, bidi, WCAG וזמני טעינה נבדקו. תיקונים מועברים ל-P3.5.
 
-### P3.3 הכנת קליטת נתונים
+### משימה P3.3: הכנת קליטת נתונים
 - תלוי ב: P2.9
 - שער: אישור היקף ודרך העברת הנתונים
 - קבצים: `scripts/import/**`, `tests/import/**`, `docs/DATA_IMPORT.md`, `docs/tasks/P3.3.md`
 - גמור: הרצה יבשה על נתונים בדויים, מיפוי, התאמת סכומים ונקודת חזרה. אין נתוני לקוח ב-git.
 
-### P3.4 גיבוי, פרטיות ותפעול
+### משימה P3.4: גיבוי, פרטיות ותפעול
 - תלוי ב: P2.9
 - שער: D31 לכל שירות חדש
 - קבצים: `scripts/ops/**`, `docs/OPERATIONS.md`, `docs/PRIVACY.md`, `docs/tasks/P3.4.md`
 - גמור: שחזור הודגם, יש אחראי לתקלה, ומפת ספקים ותקופות שמירה.
 
-### P3.5 תיקונים ושער מוכנות
+### משימה P3.5: תיקונים ושער מוכנות
 - תלוי ב: P3.1, P3.2, P3.3, P3.4
 - שער: G3 בסיום; D31 לכל מיגרציה
 - קבצים: `src/**`, `tests/**`, `supabase/**`, `package.json`, `package-lock.json`, `docs/WORK_PLAN.md`, `docs/NEXT_SESSION.md`, `docs/tasks/P3.5.md`
@@ -221,19 +221,19 @@
 
 ## שלב 4: ייצור ומסירה
 
-### P4.1 הקמת ייצור ופריסה
+### משימה P4.1: הקמת ייצור ופריסה
 - תלוי ב: P3.5
 - שער: G3; D31 לשירותים ולמיגרציה; אישור מפורש לפריסה
 - קבצים: `vercel.json`, `docs/RELEASE.md`, `docs/NEXT_SESSION.md`, `docs/tasks/P4.1.md`
 - גמור: סביבה נפרדת, בעלות מסודרת, smoke test ודרך חזרה.
 
-### P4.2 נתונים אמיתיים וקבלת לקוח
+### משימה P4.2: נתונים אמיתיים וקבלת לקוח
 - תלוי ב: P4.1
 - שער: אישור קליטה; G4 בסיום
 - קבצים: `docs/UAT.md`, `docs/NEXT_SESSION.md`, `docs/tasks/P4.2.md`
 - גמור: סכומים הותאמו, ובן ומנהל שטח השלימו את מסלוליהם.
 
-### P4.3 הדרכה ומסירה
+### משימה P4.3: הדרכה ומסירה
 - תלוי ב: P4.2
 - שער: G4
 - קבצים: `docs/USER_GUIDE.md`, `docs/WORK_PLAN.md`, `docs/NEXT_SESSION.md`, `docs/tasks/P4.3.md`
@@ -241,31 +241,31 @@
 
 ## שלב לידים: ממתין להכרעת אלון
 
-### PL.0 הכרעה ואפיון לידים
+### משימה PL.0: הכרעה ואפיון לידים
 - תלוי ב: P0.1
 - שער: Q01 לפני התחלה, GL בסיום
 - קבצים: `docs/LEADS.md`, `docs/tasks/PL.0.md`
 - גמור: תכולה, עלות מעודכנת, חלופות WhatsApp, הסכמה, נוסח וסיכון כתובים ומוכנים להכרעה.
 
-### PL.1 סכמה, הרשאה ותלויות
+### משימה PL.1: סכמה, הרשאה ותלויות
 - תלוי ב: PL.0, P4.3
 - שער: GL, D31
 - קבצים: `package.json`, `package-lock.json`, `supabase/**`, `src/types/**`, `src/lib/permissions/**`, `src/features/users/**`, `tests/leads-db/**`, `docs/tasks/PL.1.md`
 - גמור: הרשאת לידים נפרדת ובידוד מוכח.
 
-### PL.2 מסכי לידים
+### משימה PL.2: מסכי לידים
 - תלוי ב: PL.1
 - שער: GL
 - קבצים: `src/features/leads/**`, `src/app/(app)/leads/**`, `src/lib/navigation.ts`, `tests/leads/**`, `docs/tasks/PL.2.md`
 - גמור: רשימה, כרטיס, היסטוריה ומדדים בטלפון ובמחשב.
 
-### PL.3 קליטה והודעת פתיחה
+### משימה PL.3: קליטה והודעת פתיחה
 - תלוי ב: PL.1
 - שער: GL, D31
 - קבצים: `src/features/lead-intake/**`, `src/app/api/leads/**`, `tests/lead-intake/**`, `docs/tasks/PL.3.md`
 - גמור: אימות מקור, אפס כפילויות וכשל גלוי. אין שליחה אמיתית ללא אישור.
 
-### PL.4 אינטגרציה ומסירת לידים
+### משימה PL.4: אינטגרציה ומסירת לידים
 - תלוי ב: PL.2, PL.3
 - שער: GL
 - קבצים: `tests/e2e/leads/**`, `docs/WORK_PLAN.md`, `docs/NEXT_SESSION.md`, `docs/tasks/PL.4.md`
