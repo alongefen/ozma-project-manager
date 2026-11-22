@@ -1,13 +1,12 @@
 import 'server-only';
 import { createHash } from 'node:crypto';
-import type { Actor, Db, FileRef, StorageService } from '@/types/contracts';
+import type { Actor, Db, FileRef, StorageService, UploadCompletion } from '@/types/contracts';
 import type { Json } from '@/types/database';
-import { StorageServiceInputSchemas, UuidSchema } from '@/types/contracts/schemas';
+import { StorageServiceInputSchemas, UploadCompletionSchema, UuidSchema } from '@/types/contracts/schemas';
 import { failure, mapError, rpc } from '@/lib/db/rpc';
 import { detectMime, renderDisplay, validateContent } from './content';
 
 type Description = { clientId: string; fileId: string; bucket: string; path: string };
-type Pending = { fileId: string; projectId: string; uploadedBy: string; purpose: 'document' | 'diary' | 'cover'; bucket: string; path: string; name: string; declaredMime: string; declaredSize: number };
 type Authorized = { bucket: string; path: string; name: string; mime: string; sizeBytes: number };
 type Options = { privileged: () => Db; url: string; publishableKey: string; renderDisplay?: typeof renderDisplay };
 export function createStorageService(options: Options): StorageService {
@@ -26,8 +25,14 @@ export function createStorageService(options: Options): StorageService {
     },
     async finishUpload(ctx, input) {
       const parsed = StorageServiceInputSchemas.finishUpload.safeParse(input); if (!parsed.success) return failure('VALIDATION');
-      const pending = await rpc<typeof input, Pending>(ctx, 'get_pending_upload', parsed.data);
+      const pending = await rpc<typeof input, UploadCompletion>(ctx, 'get_pending_upload', parsed.data);
       if (!pending.ok) return pending;
+      const completion = UploadCompletionSchema.safeParse(pending.value);
+      if (!completion.success) return failure('UNAVAILABLE');
+      // The RPC checks current uploader/session/project access and refuses terminal replay after attachment.
+      // Ready objects are returned as-is; no download, preview or privileged operation is repeated.
+      if (completion.data.state === 'ready') return { ok: true, value: completion.data.fileRef };
+      if (completion.data.state === 'rejected') return failure('VALIDATION');
       const actor = await rpc<Record<string, never>, Actor | null>(ctx, 'get_actor', {});
       if (!actor.ok) return actor;
       if (!actor.value || actor.value.userId !== pending.value.uploadedBy) return failure('UNAUTHENTICATED');

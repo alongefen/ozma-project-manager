@@ -1,19 +1,18 @@
 import 'server-only';
-import { z } from 'zod';
-import type { AuthAdmin, Db, RequestContext, Result, Saved } from '@/types/contracts';
-import { AuthAdminInputSchemas } from '@/types/contracts/schemas';
+import type { AuthAdmin, CompleteProfileCreationInput, CreateProfileInput, Db, ProfileCreationResult, RequestContext, Result, Saved } from '@/types/contracts';
+import { AuthAdminInputSchemas, ProfileCreationResultSchema } from '@/types/contracts/schemas';
 import { permissions } from '@/lib/permissions';
 import { failure, mapError, rpc } from '@/lib/db/rpc';
 
 type Options = { admin: () => Db };
-export async function createManagedUser(ctx: RequestContext, input: { email: string; password: string; fullName: string }, options: Options): Promise<Result<{ userId: string }>> {
+export async function createManagedUser(ctx: RequestContext, input: Parameters<AuthAdmin['createUser']>[1], options: Options): Promise<Result<{ userId: string }>> {
   const owner = await permissions.requireOwner(ctx, {});
   if (!owner.ok) return owner;
-  const parsed = AuthAdminInputSchemas.createUser.safeParse({ email: input.email?.trim().toLowerCase(), password: input.password });
-  if (!parsed.success || !z.string().trim().min(1).max(120).safeParse(input.fullName).success) return failure('VALIDATION');
+  const parsed = AuthAdminInputSchemas.createUser.safeParse({ ...input, email: input.email?.trim().toLowerCase() });
+  if (!parsed.success) return failure('VALIDATION');
   try {
     const admin = options.admin().auth.admin;
-    const created = await admin.createUser({ ...parsed.data, email_confirm: true });
+    const created = await admin.createUser({ email: parsed.data.email, password: parsed.data.password, email_confirm: true });
     if (created.error && !['email_exists', 'email_address_exists', 'user_already_exists'].includes(created.error.code ?? '')) return { ok: false, error: mapError(created.error) };
     let userId = created.data.user?.id;
     if (!userId) {
@@ -25,23 +24,28 @@ export async function createManagedUser(ctx: RequestContext, input: { email: str
       }
     }
     if (!userId) return failure('UNAVAILABLE');
-    // This atomic RPC is the ownership claim: a pre-existing profile fails before any password reset.
-    const profile = await rpc<{ email: string; fullName: string }, Saved>(ctx, 'create_profile', { email: parsed.data.email, fullName: input.fullName.trim() });
+    // The server receipt authorizes only this owner's matching request, never an arbitrary existing account.
+    const profile = await rpc<CreateProfileInput, ProfileCreationResult>(ctx, 'create_profile', {
+      requestId: parsed.data.requestId, email: parsed.data.email, fullName: parsed.data.fullName,
+    });
     if (!profile.ok) return profile;
+    if (!ProfileCreationResultSchema.safeParse(profile.value).success) return failure('UNAVAILABLE');
     if (profile.value.id !== userId) return failure('CONFLICT');
+    // A lost completion response must not replay the password change or session revocation.
+    if (!profile.value.passwordPending) return { ok: true, value: { userId } };
     if (created.error) {
       const reset = await admin.updateUserById(userId, { password: parsed.data.password });
       if (reset.error) return { ok: false, error: mapError(reset.error) };
-      const revoked = await rpc(ctx, 'revoke_user_sessions', { id: userId });
-      if (!revoked.ok) return revoked;
     }
+    // New Auth users already have the requested password. Completion atomically records it and revokes early sessions.
+    const completed = await rpc<CompleteProfileCreationInput, Saved>(ctx, 'complete_profile_creation', { requestId: parsed.data.requestId, userId });
+    if (!completed.ok) return completed;
     return { ok: true, value: { userId } };
   } catch { return failure('UNAVAILABLE'); }
 }
 export function createAuthAdmin(options: Options): AuthAdmin {
   return {
-    // The frozen Platform contract has no fullName; UsersApi can call createManagedUser with the supplied name.
-    createUser: (ctx, input) => createManagedUser(ctx, { ...input, fullName: input.email?.trim().toLowerCase() }, options),
+    createUser: (ctx, input) => createManagedUser(ctx, input, options),
     async setPassword(ctx, input) {
       const owner = await permissions.requireOwner(ctx, {}); if (!owner.ok) return owner;
       const parsed = AuthAdminInputSchemas.setPassword.safeParse(input); if (!parsed.success) return failure('VALIDATION');

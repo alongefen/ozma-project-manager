@@ -7,7 +7,7 @@ import {detectMime,renderDisplay,validateContent} from '../../src/lib/storage/co
 const userId='2db95268-54da-42fa-bf62-2648ac3cc579', fileId='6d54739e-32cf-44fb-9c7f-f26aef663d88', projectId='ad244885-d074-46c9-b57a-d620a903ba95',sessionId='bca55850-9259-4e3d-9ad1-358a269bd159';
 function fixture(bytes:Uint8Array=new Uint8Array([1,2,3])) {
   const actor={userId,fullName:'בדיקה',email:'test@example.invalid',isOwner:false};
-  const pending={fileId,projectId,uploadedBy:userId,purpose:'diary',bucket:'originals',path:`${projectId}/${fileId}`,name:'בדיקה.png',declaredMime:'image/png',declaredSize:bytes.length};
+  const pending={state:'pending',fileRef:null,fileId,projectId,uploadedBy:userId,purpose:'diary',bucket:'originals',path:`${projectId}/${fileId}`,name:'בדיקה.png',declaredMime:'image/png',declaredSize:bytes.length};
   const rpc=vi.fn(async(name:string)=>({error:null,data:name==='get_actor'?actor:name==='get_pending_upload'?pending:name==='begin_upload'?[{clientId:fileId,fileId,bucket:'originals',path:pending.path}]:{bucket:'originals',path:pending.path,name:pending.name}}));
   const getClaims=vi.fn().mockResolvedValue({data:{claims:{sub:userId,session_id:sessionId}},error:null});
   const ctx:RequestContext={actor,db:{rpc,auth:{getClaims}} as unknown as Db,today:'2026-11-22'};
@@ -18,6 +18,24 @@ function fixture(bytes:Uint8Array=new Uint8Array([1,2,3])) {
   return {ctx,rpc,pending,getClaims,storage,finish,privileged,service};
 }
 describe('אחסון: הרשאה, תוכן וניסיון חוזר',()=>{
+  it('terminal ready replay returns the prior file without downloading or rewriting it',async()=>{
+    const f=fixture();const fileRef={id:fileId,name:'בדיקה.png',mime:'image/png',sizeBytes:3,displayState:'ready'};
+    f.rpc.mockResolvedValue({data:{...f.pending,state:'ready',fileRef},error:null} as never);
+    expect(await f.service.finishUpload(f.ctx,{fileId})).toEqual({ok:true,value:fileRef});
+    expect(f.privileged).not.toHaveBeenCalled();expect(f.getClaims).not.toHaveBeenCalled();
+    expect(f.rpc).toHaveBeenCalledWith('get_pending_upload',{input:{fileId}});
+  });
+  it('terminal rejected replay stays a validation failure without privileged access',async()=>{
+    const f=fixture();f.rpc.mockResolvedValue({data:{...f.pending,state:'rejected',fileRef:null},error:null} as never);
+    expect(await f.service.finishUpload(f.ctx,{fileId})).toMatchObject({ok:false,error:{code:'VALIDATION'}});
+    expect(f.privileged).not.toHaveBeenCalled();
+  });
+  it.each(['UNAUTHENTICATED','NOT_FOUND','FORBIDDEN'])('terminal replay respects fresh database denial %s',async(code)=>{
+    const f=fixture();f.rpc.mockResolvedValue({data:null,error:{message:code}} as never);
+    expect(await f.service.finishUpload(f.ctx,{fileId})).toMatchObject({ok:false,error:{code}});
+    expect(f.privileged).not.toHaveBeenCalled();
+  });
+
   it('preview conversion failure retains the original as ready with a failed preview',async()=>{
     const png=await sharp({create:{width:10,height:10,channels:3,background:'#abcdef'}}).png().toBuffer();
     const f=fixture(png);

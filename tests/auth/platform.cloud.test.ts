@@ -25,7 +25,7 @@ describe.sequential('Auth ו-Platform בפועל מול ענן הפיתוח',()=
   it('owner creates a named account, changes its email and resets its password without provider mail',async()=>{
     const {admin,publicClient}=cloudClients();
     const email=`p13-managed-${randomUUID()}@example.invalid`;
-    const created=await createManagedUser(ben,{email,password:pass,fullName:'חשבון בדוי מנוהל'},{admin:()=>admin});
+    const created=await createManagedUser(ben,{requestId:randomUUID(),email,password:pass,fullName:'חשבון בדוי מנוהל'},{admin:()=>admin});
     expect(created.ok).toBe(true);if(!created.ok)return;
     const auth=createAuthService({db:publicClient(),authClient:cloudClients().admin});
     expect(await auth.signIn({email:email.toUpperCase(),password:pass})).toMatchObject({ok:true,value:{userId:created.value.userId,fullName:'חשבון בדוי מנוהל'}});
@@ -55,7 +55,7 @@ describe.sequential('Auth ו-Platform בפועל מול ענן הפיתוח',()=
     const {admin}=cloudClients();const provider=vi.fn(()=>admin);
     const service=createAuthAdmin({admin:provider});
     const forged={...worker.ctx,actor:{...worker.ctx.actor,isOwner:true}};
-    for(const result of [await service.createUser(forged,{email:`forbidden-${randomUUID()}@example.invalid`,password:pass}),await service.setPassword(forged,{userId:ben.actor.userId,password:pass}),await service.setEmail(forged,{userId:ben.actor.userId,email:'forbidden@example.invalid'})]) expect(result).toMatchObject({ok:false,error:{code:'FORBIDDEN'}});
+    for(const result of [await service.createUser(forged,{requestId:randomUUID(),fullName:'בדוי אסור',email:`forbidden-${randomUUID()}@example.invalid`,password:pass}),await service.setPassword(forged,{userId:ben.actor.userId,password:pass}),await service.setEmail(forged,{userId:ben.actor.userId,email:'forbidden@example.invalid'})]) expect(result).toMatchObject({ok:false,error:{code:'FORBIDDEN'}});
     expect(provider).not.toHaveBeenCalled();
   });
   it('actual provider logout blocks the JWT on the next application request',async()=>{

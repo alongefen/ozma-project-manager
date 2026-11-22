@@ -38,8 +38,11 @@ export async function cloudActor(owner:RequestContext,label:string) {
   const password=randomBytes(32).toString('base64url');
   const created=await admin.auth.admin.createUser({email,password,email_confirm:true});
   if(created.error || !created.data.user) throw new Error('יצירת משתמש בדוי נכשלה');
-  const profile=await owner.db.rpc('create_profile',{input:{email,fullName:`בדיקה ${label}`}});
+  const requestId=randomUUID();
+  const profile=await owner.db.rpc('create_profile',{input:{requestId,email,fullName:`בדיקה ${label}`}});
   if(profile.error) throw new Error('יצירת פרופיל בדוי נכשלה');
+  const completed=await owner.db.rpc('complete_profile_creation',{input:{requestId,userId:created.data.user.id}});
+  if(completed.error) throw new Error('השלמת פרופיל בדוי נכשלה');
   const signed=await db.auth.signInWithPassword({email,password});
   if(signed.error) throw new Error('כניסת משתמש בדוי נכשלה');
   return {ctx:await context(db),email,password};

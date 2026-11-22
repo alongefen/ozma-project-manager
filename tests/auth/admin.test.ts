@@ -4,9 +4,9 @@ vi.mock('server-only',()=>({}));
 import {createAuthAdmin,createManagedUser} from '../../src/lib/auth/admin';
 const actor={userId:'2db95268-54da-42fa-bf62-2648ac3cc579',fullName:'בעלים בדוי',email:'owner@example.invalid',isOwner:true};
 const target='6d54739e-32cf-44fb-9c7f-f26aef663d88';
-const input={email:'new@example.invalid',password:'fixture-password',fullName:'בדיקה חדשה'};
+const input={requestId:'2b9ffbe4-a9c6-4a47-a05a-d56337e7798c',email:'new@example.invalid',password:'fixture-password',fullName:'בדיקה חדשה'};
 function fixture() {
-  const rpc=vi.fn(async(name:string)=> name==='get_actor'?{data:actor,error:null}:name==='create_profile'?{data:{id:target,revision:1},error:null}:{data:null,error:null});
+  const rpc=vi.fn(async(name:string)=> name==='get_actor'?{data:actor,error:null}:name==='create_profile'?{data:{id:target,revision:1,passwordPending:true},error:null}:{data:null,error:null});
   const admin={createUser:vi.fn().mockResolvedValue({data:{user:{id:target}},error:null}),listUsers:vi.fn().mockResolvedValue({data:{users:[{id:target,email:input.email}]},error:null}),updateUserById:vi.fn().mockResolvedValue({data:{user:{id:target}},error:null})};
   const options={admin:vi.fn(()=>({auth:{admin}}) as unknown as Db)};
   const ctx:RequestContext={actor,db:{rpc} as unknown as Db,today:'2026-11-22'};
@@ -16,7 +16,7 @@ describe('ניהול חשבונות: סדר פעולות וכשל חלקי',()=>
   it('never sends a password to a database function',async()=>{
     const f=fixture();expect(await createManagedUser(f.ctx,input,f.options)).toMatchObject({ok:true,value:{userId:target}});
     expect(JSON.stringify(f.rpc.mock.calls)).not.toContain(input.password);
-    expect(f.rpc).toHaveBeenCalledWith('create_profile',{input:{email:input.email,fullName:input.fullName}});
+    expect(f.rpc).toHaveBeenCalledWith('create_profile',{input:{requestId:input.requestId,email:input.email,fullName:input.fullName}});
   });
   it('duplicate existing profile is never reset during creation retry',async()=>{
     const f=fixture();f.admin.createUser.mockResolvedValue({data:{user:null},error:{code:'email_exists'}});
@@ -33,18 +33,33 @@ describe('ניהול חשבונות: סדר פעולות וכשל חלקי',()=>
     expect(f.admin.updateUserById).toHaveBeenCalledTimes(2);
     expect(JSON.stringify(f.rpc.mock.calls)).not.toContain(input.password);
   });
-  // Known P1.2 contract blocker: no durable receipt for a claimed profile followed by failed password update.
-  // Keep as expected failure until the coordinated database fix; it.fails will fail if behavior changes.
-  it.fails('orphan-auth recovery remains finishable if password update fails after profile claim',async()=>{
-    const f=fixture();let claimed=false;
+  it('orphan-auth recovery remains finishable if password update fails after profile claim',async()=>{
+    const f=fixture();let completed=false;
     f.admin.createUser.mockResolvedValue({data:{user:null},error:{code:'email_exists'}});
     f.rpc.mockImplementation(async(name)=>{
       if(name==='get_actor') return {data:actor,error:null};
-      if(name==='create_profile') {if(claimed)return {data:null,error:{message:'CONFLICT'}} as never;claimed=true;return {data:{id:target,revision:1},error:null};}
+      if(name==='create_profile')return {data:{id:target,revision:1,passwordPending:!completed},error:null};
+      if(name==='complete_profile_creation')completed=true;
       return {data:null,error:null};
     });
     f.admin.updateUserById.mockResolvedValueOnce({data:{user:null},error:{message:'network'}}).mockResolvedValue({data:{user:{id:target}},error:null});
     expect(await createManagedUser(f.ctx,input,f.options)).toMatchObject({ok:false});
     expect(await createManagedUser(f.ctx,input,f.options)).toMatchObject({ok:true,value:{userId:target}});
+    expect(completed).toBe(true);
+    expect(f.rpc.mock.calls.some(([name])=>name==='revoke_user_sessions')).toBe(false);
+  });
+  it('lost completion response replays the receipt without resetting password again',async()=>{
+    const f=fixture();let completed=false;
+    f.admin.createUser.mockResolvedValue({data:{user:null},error:{code:'email_exists'}});
+    f.rpc.mockImplementation(async(name)=>{
+      if(name==='get_actor')return {data:actor,error:null};
+      if(name==='create_profile')return {data:{id:target,revision:1,passwordPending:!completed},error:null};
+      if(name==='complete_profile_creation'){completed=true;return {data:null,error:{message:'network'}} as never;}
+      return {data:null,error:null};
+    });
+    expect(await createManagedUser(f.ctx,input,f.options)).toMatchObject({ok:false});
+    expect(await createManagedUser(f.ctx,input,f.options)).toMatchObject({ok:true,value:{userId:target}});
+    expect(f.admin.updateUserById).toHaveBeenCalledTimes(1);
+    expect(f.rpc.mock.calls.filter(([name])=>name==='complete_profile_creation')).toHaveLength(1);
   });
 });
