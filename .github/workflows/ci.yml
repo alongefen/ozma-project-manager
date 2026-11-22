@@ -1,0 +1,35 @@
+name: בדיקות שלד
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: foundation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  foundation:
+    name: התקנה, lint, טיפוסים ובנייה
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:foundation
+      # אין עדיין בדיקות מוצר. Vitest מדווח במפורש כשאין קבצים.
+      # npm test עצמו נכשל כשאין בדיקות, כדי שלא להציג כיסוי שאינו קיים.
+      - run: npm test -- --passWithNoTests
+      - run: npm run build

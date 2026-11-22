@@ -1,0 +1,31 @@
+name: בדיקות ענן — כבוי עד P1.2 ואישור
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# קבוצה קבועה לכל הענפים; אין שתי ריצות מסד במקביל ואין ביטול של ריצה פעילה.
+concurrency:
+  group: supabase-development-tests
+  cancel-in-progress: false
+
+jobs:
+  cloud:
+    # נעילה מפורשת. P1.2 תסיר אותה רק לאחר מימוש הבדיקות ואישורי D31.
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run test:db
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
