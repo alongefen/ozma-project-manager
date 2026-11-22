@@ -550,9 +550,11 @@ FK משותף `(project_id, user_id)` אל `memberships` עם `on delete cascade
 | `src/types/contracts/<domain>.ts` | P1.2 | הטיפוסים שלמטה, ו-zod באותו שם עם הסיומת `Schema` |
 | `tests/db/support/**` | P1.2 | משתמשי בדיקה, לקוחות לפי תפקיד ונתונים בדויים |
 | `src/lib/{auth,db,permissions,storage,audit,format}` | P1.3 | התשתית המשותפת, לפי `Platform` שלמטה |
-| `src/lib/money` | P1.4.6 | חישוב יחיד. משמש גם את P1.4.7 |
+| `src/lib/money` | P1.4.6 | מנוע חישוב עצמאי אחרי P1.1 לפי A-28; החיבור לחוזים ולנתונים אחרי P1.3. משמש גם את P1.4.7 |
 | `src/features/<domain>/logic/{queries,commands,actions}.ts` | P1.4.x | מימוש החוזה של התחום בלבד |
 | `src/features/<domain>/{mobile,desktop}` | P2.x | תצוגה בלבד |
+
+לפי A-28, שלב החישובים של P1.4.6 רשאי להיבנות ולהתמזג במקביל ל-P1.2, רק ב-`src/lib/money/**`, ‏`tests/logic/finance/money/**` וקובץ המשימה. טיפוסי קלט/פלט מקומיים מינימליים תואמים מבנית ל-Money בסעיף 5.10; אין תלות בייבוא חוזים שטרם מוזגו ואין שינוי בקבצי P1.2. התאמת טיפוסים וחיבור ל-FinanceApi נבדקים אחרי P1.3, בלי מנוע חישוב נוסף.
 
 הכללים למשימות המקבילות:
 
