@@ -1117,6 +1117,8 @@ export interface FinanceExportApi {
 
 ## 7. דוח PDF והדפסה
 
+לפי A-29 אפשר לבנות אחרי P1.1 מנוע הפקה עצמאי ב-`src/features/reports/logic/rendering/**`, נכסים ב-`src/features/reports/assets/**` ובדיקות ב-`tests/logic/reports/rendering/**`. הקלט הוא נתונים בדויים ובייטים מוכנים; אין גישה למסד, אחסון, חוזים בבנייה או נתיב HTTP. החיבור לנתונים המורשים ול-ReportsApi נשאר אחרי P1.4.5. אין עריכת קבצי P1.2 או החישובים; תלויות והגדרות משותפות מתואמות בנפרד.
+
 אין ספייק (A-20). הגישה: תבנית HTML בעברית, Chromium בשרת ו-`pdf-lib` לצירוף עמודים.
 
 | נושא | כלל |
