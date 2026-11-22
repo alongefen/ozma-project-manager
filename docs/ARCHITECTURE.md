@@ -507,7 +507,7 @@ FK משותף `(project_id, user_id)` אל `memberships` עם `on delete cascade
 | הרשמה חופשית, אנונימית וספקים חיצוניים | כבויים | רק בן יוצר |
 | אימות דו-שלבי (MFA), טלפון | כבויים, כולל רישום TOTP, [שפעיל כברירת מחדל](https://supabase.com/docs/guides/auth/auth-mfa/totp) | A-09 |
 | ספק אימייל וסיסמה | פעיל | האימייל הוא שם המשתמש |
-| Confirm email | נשאר פעיל | אכיפת ניהול בידי בן נבדקת בנפרד לפי P05 |
+| Confirm email | כבוי בכוונה (A-35) | חיסכון בפעולות משתמש; אין להוסיף שלב אישור. ניהול בידי בן נבדק בנפרד לפי P05 |
 | Send Email Hook | לא מחברים hook לחסימת מיילים | אין דרישת אפס מיילים לפי A-34; אין הקמת שירות מיילים או SMTP חדש |
 | אורך סיסמה | 8 ומעלה | [המינימום המומלץ](https://supabase.com/docs/guides/auth/password-security) |
 | אורך חיי סשן | ללא תפוגה | כניסה מתמשכת. זו [ברירת המחדל](https://supabase.com/docs/guides/auth/sessions) |

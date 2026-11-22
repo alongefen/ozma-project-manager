@@ -20,7 +20,7 @@
 
 ## עדכון המעקב הנוכחי
 
-משימת `PM-MAIL-CLARIFICATION`: יישור המסמכים הפעילים להבהרת אלון A-34 — אין הקמת שירות מיילים, אך אין דרישת חסימה גורפת. בעלות תיעוד: `AGENTS.md`, ‏`docs/DECISIONS.md`, ‏`docs/ARCHITECTURE.md`, ‏`docs/WORK_PLAN.md`, ‏`docs/NEXT_SESSION.md`, ‏`docs/OPEN_QUESTIONS.md`, ‏`docs/PRD.md`, ‏`docs/PERMISSIONS.md`, ‏`docs/handoffs/P1.3.md`, ‏`docs/handoffs/PROJECT_MANAGER.md`, ‏`docs/tasks/PM-MAIL-CLARIFICATION.md`, רק בסעיפים המושפעים. אין קוד, שינוי ענן או עריכת מסירות היסטוריות. תיאום P1.2-FOLLOWUP מוזג ב-PR #16 ונשאר בתוקף.
+משימת `PM-EMAIL-CONFIRMATION`: עדכון תיעוד ממוקד לפי A-35 — Confirm email כבוי בכוונה. בעלות: `docs/DECISIONS.md`, ‏`docs/ARCHITECTURE.md`, ‏`docs/handoffs/P1.3.md`, ‏`docs/WORK_PLAN.md`, ‏`docs/NEXT_SESSION.md`, ‏`docs/tasks/PM-EMAIL-CONFIRMATION.md`. אין שינוי קוד, ענן, משימות פעילות או מסמך העברת מנהל הפרויקט. הבהרת שירותי המיילים A-34 והמשך P1.2 נשארים בתוקף.
 
 ## כללי עבודה
 
