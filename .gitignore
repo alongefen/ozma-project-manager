@@ -1,0 +1,36 @@
+# תוצרי התקנה ובנייה
+node_modules/
+.next/
+out/
+build/
+coverage/
+playwright-report/
+playwright/.cache/
+test-results/
+*.tsbuildinfo
+next-env.d.ts
+*.log
+.DS_Store
+
+# סודות והגדרות מקומיות
+.env*
+!.env.example
+.vercel/
+.supabase/
+supabase/.temp/
+.claude/settings.local.json
+.gstack/
+*.pem
+*.key
+
+# חומרי לקוח, מקורות וגיבויים — אינם נכסי מוצר
+private/
+source-materials/
+backups/
+transcripts/
+*.xlsx
+*.xls
+*.csv
+*.sql.gz
+*.dump
+*.zip
