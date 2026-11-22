@@ -94,7 +94,7 @@
 | גודל פונקציה | 250MB | רק נתיב הדוחות כולל Chromium | [מגבלות](https://vercel.com/docs/functions/limitations) |
 | קובץ באחסון | 50MB ב-Free, עד 500GB ב-Pro | ‏50MB עובד בשתי הסביבות | [מגבלות קובץ](https://supabase.com/docs/guides/storage/uploads/file-limits) |
 | העלאה מעל 6MB | מומלצת העלאה מתחדשת, במקטעים של 6MB | TUS עם אסימון חתום | [העלאה מתחדשת](https://supabase.com/docs/guides/storage/uploads/resumable-uploads) |
-| מייל מובנה | לצוות הפרויקט בלבד, שניים בשעה | חוסמים שליחה לגמרי, ראו סעיף 4 | [SMTP](https://supabase.com/docs/guides/auth/auth-smtp) |
+| מייל מובנה | לצוות הפרויקט בלבד, שניים בשעה | אין דרישת חסימה גורפת ואין הקמת SMTP חדש (A-34), ראו סעיף 4 | [SMTP](https://supabase.com/docs/guides/auth/auth-smtp) |
 | גיבוי מובנה | ‏7 ימים ב-Pro, בלי תוכן הקבצים | אין עבודת גיבוי בשלב הזה, ראו סעיף 8 | [גיבויים](https://supabase.com/docs/guides/platform/backups) |
 | HEIC ב-sharp | אין תמיכה מובנית ב-HEVC | פענוח נפרד לעותק התצוגה | [sharp](https://sharp.pixelplumbing.com/api-output/#heif) |
 
@@ -507,13 +507,15 @@ FK משותף `(project_id, user_id)` אל `memberships` עם `on delete cascade
 | הרשמה חופשית, אנונימית וספקים חיצוניים | כבויים | רק בן יוצר |
 | אימות דו-שלבי (MFA), טלפון | כבויים, כולל רישום TOTP, [שפעיל כברירת מחדל](https://supabase.com/docs/guides/auth/auth-mfa/totp) | A-09 |
 | ספק אימייל וסיסמה | פעיל | האימייל הוא שם המשתמש |
-| Confirm email | פעיל | שינוי אימייל עצמי אינו נכנס לתוקף |
-| Send Email Hook | פונקציית Postgres שמחזירה שגיאה תמיד | אפס מיילים, גם לא מהשירות המובנה. כשהיא פעילה [אין שימוש ב-SMTP](https://supabase.com/docs/guides/auth/auth-hooks/send-email-hook) |
+| Confirm email | נשאר פעיל | אכיפת ניהול בידי בן נבדקת בנפרד לפי P05 |
+| Send Email Hook | לא מחברים hook לחסימת מיילים | אין דרישת אפס מיילים לפי A-34; אין הקמת שירות מיילים או SMTP חדש |
 | אורך סיסמה | 8 ומעלה | [המינימום המומלץ](https://supabase.com/docs/guides/auth/password-security) |
 | אורך חיי סשן | ללא תפוגה | כניסה מתמשכת. זו [ברירת המחדל](https://supabase.com/docs/guides/auth/sessions) |
 | JWT | שעה | התוקף נבדק ממילא במסד בכל בקשה |
 | IP Address Forwarding | פעיל | בלעדיו כל הניסיונות נראים כאילו באו משרת אחד |
 | קצב `token` | 30 לחמש דקות ל-IP | חסימה זמנית (AUTH-03). [המנגנון](https://supabase.com/docs/guides/auth/rate-limits) כולל כניסה וריענון |
+
+לפי דיווח מנהל P1.3, ה-hook לא הופעל. הפונקציה `private.reject_auth_email` שנוצרה ב-P1.2 נשארת ללא חיבור; אין צורך במיגרציית ניקיון. ההבהרה אינה מוסיפה פיצ׳ר מיילים ואינה משנה את ניהול החשבונות בידי בן. ההגבלות הקיימות על הרשמה, recover ושינוי אימייל עצמי נבדקות לפי P05 בלי להסתמך על hook או על חסימת משלוח. אם מתגלה תלות טכנית ב-hook, מדווחים למנהל הפרויקט ולא מציגים את החסימה כמאומתת.
 
 ### 4.2 תהליכים
 
