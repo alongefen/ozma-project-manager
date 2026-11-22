@@ -68,7 +68,7 @@ describe.sequential('Diary real user-context orchestration',()=>{
  must(await api.moveEntry(owner,{id:entryId,expectedRevision:3,projectId:projectB,workDate:'2026-11-18'}));
  await setupRpc('remove_membership',{projectId:projectA,userId:worker.actor.userId,expectedRevision:1});
  const versions=must(await api.listVersions(worker,{id:entryId}));expect(versions.length).toBeGreaterThan(0);expect(versions.every(v=>v.projectId===projectB)).toBe(true);
- expect(await api.listEntries(worker,{projectId:projectA})).toMatchObject({ok:false,error:{code:'FORBIDDEN'}});
+ expect(await api.listEntries(worker,{projectId:projectA})).toMatchObject({ok:false,error:{code:'NOT_FOUND'}});
  expect(await api.getEntry(worker,{id:remainingEntry})).toMatchObject({ok:false,error:{code:'NOT_FOUND'}});
  expect(await api.correctEntry(worker,{id:remainingEntry,expectedRevision:1,body:'אסור לאחר הסרה',fileIds:[]})).toMatchObject({ok:false,error:{code:'NOT_FOUND'}});
  expect(await api.listForReport(worker,{scope:{kind:'entry',entryId:remainingEntry}})).toMatchObject({ok:false,error:{code:'NOT_FOUND'}});
