@@ -42,7 +42,7 @@ describe.sequential('FilesApi through the real server and existing storage', () 
   it('lists four categories for owner, hides owner-only and unselected uploader metadata/count/search', async () => {
     const api=createFilesApi(platform);
     const owner=unwrap(await api.listDocuments(ben,{projectId})); expect(owner.items).toHaveLength(4); expect(owner.countByCategory).toEqual({specification:1,plans:1,additional_plans:1,renderings:1});
-    const m=unwrap(await api.listDocuments(manager,{projectId,search:name})); expect(m.items).toHaveLength(2); expect(m.countByCategory.plans).toBe(0); expect(m.countByCategory.additional_plans).toBe(0); expect(m.items.every(x=>x.access===undefined)).toBe(true);
+    const m=unwrap(await api.listDocuments(manager,{projectId,search:name.toUpperCase()})); expect(m.items).toHaveLength(2); expect(m.countByCategory.plans).toBe(0); expect(m.countByCategory.additional_plans).toBe(0); expect(m.items.every(x=>x.access===undefined)).toBe(true);
     expect(await api.getDocument(manager,{id:docs[1].id})).toMatchObject({ok:false,error:{code:'NOT_FOUND'}});
     expect(await api.getDocument(manager,{id:docs[2].id})).toMatchObject({ok:false,error:{code:'NOT_FOUND'}});
     expect(unwrap(await api.listDocuments(worker,{projectId})).items).toHaveLength(3);
@@ -78,7 +78,7 @@ describe.sequential('FilesApi through the real server and existing storage', () 
   });
   it('removed member with the same JWT loses list/detail/search/signing', async () => {
     unwrap(await rpc(ben,'remove_membership',{userId:worker.actor.userId,projectId,expectedRevision:1}));
-    const api=createFilesApi(platform); const listed=await api.listDocuments(worker,{projectId,search:name});
+    const api=createFilesApi(platform); const listed=await api.listDocuments(worker,{projectId,search:name.toUpperCase()});
     if(listed.ok) {expect(listed.value.items).toEqual([]);expect(Object.values(listed.value.countByCategory)).toEqual([0,0,0,0]);}
     expect(await api.getDocument(worker,{id:docs[3].id})).toMatchObject({ok:false,error:{code:'NOT_FOUND'}});
     expect((await platform.storage.getSignedUrl(worker,{fileId:docs[3].fileId,variant:'original',download:true})).ok).toBe(false);
