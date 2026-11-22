@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { DiaryApiInputSchemas, DocumentAccessSchema, MoneySummarySchema, MonthSummarySchema, ProjectsApiInputSchemas, TasksApiInputSchemas, TransactionFieldsSchema } from '../../src/types/contracts/schemas';
+import { CreateProfileInputSchema, ProfileCreationResultSchema, CompleteProfileCreationInputSchema, UploadCompletionSchema, AuthAdminInputSchemas, DiaryApiInputSchemas, DocumentAccessSchema, MoneySummarySchema, MonthSummarySchema, ProjectsApiInputSchemas, TasksApiInputSchemas, TransactionFieldsSchema, UsersApiInputSchemas } from '../../src/types/contracts/schemas';
 describe('חוזי קלט', () => {
   it('חוסם זיוף מדווח וזמן ושדות שאינם בחוזה', () => {
     const input = { requestId: randomUUID(), projectId: randomUUID(), workDate: '2026-01-01', body: 'דיווח', fileIds: [] };
@@ -40,5 +40,46 @@ describe('חוזי סיכום כספי', () => {
     };
     expect(MoneySummarySchema.safeParse(summary).success).toBe(true);
     expect(MonthSummarySchema.safeParse({ ...summary, year: 2026, month: 1, balance: summary.netProfit }).success).toBe(true);
+  });
+});
+
+
+describe('חוזה יצירת משתמש עם ניסיון חוזר', () => {
+  const input = { requestId: randomUUID(), email: 'retry@example.invalid', fullName: 'משתמש בדוי', password: 'synthetic-password' };
+  it('מקבל שם מלא ומזהה בקשה כדי להעביר את יצירת הפרופיל', () => {
+    expect(AuthAdminInputSchemas.createUser.safeParse(input).success).toBe(true);
+    expect(UsersApiInputSchemas.createUser.safeParse(input).success).toBe(true);
+  });
+  it('דוחה שם חסר או ריק ומזהה בקשה חסר או לא תקין', () => {
+    for (const patch of [{ fullName: undefined }, { fullName: ' ' }, { fullName: 'א'.repeat(121) }, { requestId: undefined }, { requestId: 'invalid' }]) {
+      expect(AuthAdminInputSchemas.createUser.safeParse({ ...input, ...patch }).success).toBe(false);
+      expect(UsersApiInputSchemas.createUser.safeParse({ ...input, ...patch }).success).toBe(false);
+    }
+  });
+});
+
+
+describe('חוזי שחזור RPC', () => {
+  it('מעביר מזהה בקשה ושם למסד ודוחה סיסמה בקלט RPC', () => {
+    const input = { requestId: randomUUID(), email: 'retry@example.invalid', fullName: 'בדיקה' };
+    expect(CreateProfileInputSchema.safeParse(input).success).toBe(true);
+    expect(CreateProfileInputSchema.safeParse({ ...input, password: 'secret-not-for-db' }).success).toBe(false);
+    expect(CompleteProfileCreationInputSchema.safeParse({ requestId: input.requestId, userId: randomUUID() }).success).toBe(true);
+  });
+  it('מחייב מצב השלמת סיסמה מפורש', () => {
+    const saved = { id: randomUUID(), revision: 1 };
+    expect(ProfileCreationResultSchema.safeParse(saved).success).toBe(false);
+    for (const passwordPending of [true, false]) expect(ProfileCreationResultSchema.safeParse({ ...saved, passwordPending }).success).toBe(true);
+  });
+  it('מבדיל בין תוצאה מוכנה לבין העלאה ממתינה או דחויה', () => {
+    const base = { fileId: randomUUID(), projectId: randomUUID(), uploadedBy: randomUUID(), purpose: 'document',
+      bucket: 'originals', path: 'test/test', name: 'בדיקה.png', declaredMime: 'image/png', declaredSize: 8 };
+    const fileRef = { id: base.fileId, name: base.name, mime: base.declaredMime, sizeBytes: 8, displayState: 'none' };
+    for (const state of ['pending', 'rejected']) {
+      expect(UploadCompletionSchema.safeParse({ ...base, state, fileRef: null }).success).toBe(true);
+      expect(UploadCompletionSchema.safeParse({ ...base, state, fileRef }).success).toBe(false);
+    }
+    expect(UploadCompletionSchema.safeParse({ ...base, state: 'ready', fileRef }).success).toBe(true);
+    expect(UploadCompletionSchema.safeParse({ ...base, state: 'ready', fileRef: null }).success).toBe(false);
   });
 });

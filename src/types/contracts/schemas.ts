@@ -95,8 +95,21 @@ export const TransferMonthSchema = z.strictObject({"month": MonthSchema,"transfe
 
 export const ReportPlanSchema = z.strictObject({"scope": ReportScopeSchema,"partCount": z.number().finite(),"entryCount": z.number().finite(),"workDays": z.number().finite()});
 
+export const CreateProfileInputSchema = z.strictObject({ requestId: UuidSchema, email: z.email(), fullName: z.string().trim().min(1).max(120) });
+export const ProfileCreationResultSchema = SavedSchema.safeExtend({ passwordPending: z.boolean() });
+export const CompleteProfileCreationInputSchema = z.strictObject({ requestId: UuidSchema, userId: UuidSchema });
+const UploadCompletionBaseSchema = z.strictObject({
+  fileId: UuidSchema, projectId: UuidSchema, uploadedBy: UuidSchema, purpose: FilePurposeSchema,
+  bucket: z.string(), path: z.string(), name: z.string(), declaredMime: z.string(), declaredSize: z.number().int().positive(),
+});
+export const UploadCompletionSchema = z.discriminatedUnion('state', [
+  UploadCompletionBaseSchema.safeExtend({ state: z.literal('pending'), fileRef: z.null() }),
+  UploadCompletionBaseSchema.safeExtend({ state: z.literal('rejected'), fileRef: z.null() }),
+  UploadCompletionBaseSchema.safeExtend({ state: z.literal('ready'), fileRef: FileRefSchema }),
+]);
+
 export const AuthAdminInputSchemas = {
-createUser: z.strictObject({"email": z.email(),"password": z.string().min(8)}),
+createUser: z.strictObject({"requestId": UuidSchema,"email": z.email(),"fullName": z.string().trim().min(1).max(120),"password": z.string().min(8)}),
 setPassword: z.strictObject({"userId": UuidSchema,"password": z.string().min(8)}),
 setEmail: z.strictObject({"userId": UuidSchema,"email": z.email()}),
 } as const;
@@ -117,7 +130,7 @@ export const UsersApiInputSchemas = {
 listUsers: z.strictObject({"search": z.string().optional()}),
 getUser: z.strictObject({"id": UuidSchema}),
 listProjectMembers: z.strictObject({"projectId": UuidSchema}),
-createUser: z.strictObject({"email": z.email(),"fullName": z.string().trim().min(1).max(120),"password": z.string().min(8)}),
+createUser: z.strictObject({"requestId": UuidSchema,"email": z.email(),"fullName": z.string().trim().min(1).max(120),"password": z.string().min(8)}),
 updateUser: EditSchema.safeExtend(z.strictObject({"fullName": z.string().trim().min(1).max(120),"email": z.email()}).shape),
 setUserActive: EditSchema.safeExtend(z.strictObject({"active": z.boolean()}).shape),
 resetPassword: z.strictObject({"id": UuidSchema,"password": z.string().min(8)}),

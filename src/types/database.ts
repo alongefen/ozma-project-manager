@@ -895,6 +895,7 @@ export type Database = {
       correct_entry: { Args: { input: Json }; Returns: Json }
       create_document: { Args: { input: Json }; Returns: Json }
       create_entry: { Args: { input: Json }; Returns: Json }
+      complete_profile_creation: { Args: { input: Json }; Returns: Json }
       create_profile: { Args: { input: Json }; Returns: Json }
       create_project: { Args: { input: Json }; Returns: Json }
       create_task: { Args: { input: Json }; Returns: Json }

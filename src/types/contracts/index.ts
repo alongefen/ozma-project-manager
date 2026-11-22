@@ -66,8 +66,17 @@ export interface AuthService {
   getContext(): Promise<Result<RequestContext>>
 }
 
+/** Server-only RPC contracts; passwords are never sent to database functions. */
+export type CreateProfileInput = { requestId: Uuid; email: string; fullName: string }
+export type ProfileCreationResult = Saved & { passwordPending: boolean }
+export type CompleteProfileCreationInput = { requestId: Uuid; userId: Uuid }
+export type UploadCompletion = {
+  fileId: Uuid; projectId: Uuid; uploadedBy: Uuid; purpose: FilePurpose
+  bucket: string; path: string; name: string; declaredMime: string; declaredSize: number
+} & ({ state: 'pending' | 'rejected'; fileRef: null } | { state: 'ready'; fileRef: FileRef })
+
 export interface AuthAdmin {
-  createUser: Operation<{ email: string; password: string }, { userId: Uuid }>
+  createUser: Operation<{ requestId: Uuid; email: string; fullName: string; password: string }, { userId: Uuid }>
   setPassword: Operation<{ userId: Uuid; password: string }, null>
   setEmail: Operation<{ userId: Uuid; email: string }, null>
 }
@@ -131,7 +140,7 @@ export interface UsersApi {
   listUsers: Operation<{ search?: string }, UserRow[]>
   getUser: Operation<{ id: Uuid }, UserRow>
   listProjectMembers: Operation<{ projectId: Uuid }, MemberRow[]>
-  createUser: Operation<{ email: string; fullName: string; password: string }, Saved>
+  createUser: Operation<{ requestId: Uuid; email: string; fullName: string; password: string }, Saved>
   updateUser: Operation<Edit & { fullName: string; email: string }, Saved>
   setUserActive: Operation<Edit & { active: boolean }, Saved>
   resetPassword: Operation<{ id: Uuid; password: string }, null>

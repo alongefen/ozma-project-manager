@@ -56,12 +56,14 @@ export async function owner(admin: Client): Promise<TestActor> {
   writeFileSync(ownerFile, JSON.stringify({ email, password }), { mode: 0o600 });
   return login(email, password);
 }
-export async function actor(admin: Client, ownerClient: Client, label: string): Promise<TestActor> {
+export async function actor(admin: Client, ownerClient: Client, label: string, completeCreation = false): Promise<TestActor> {
   const email = `p12-${label}-${randomUUID()}@example.invalid`;
   const password = randomBytes(32).toString('base64url');
   const { error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
   if (error) throw new Error(`יצירת משתמש בדוי נכשלה: ${error.code}`);
-  await value(ownerClient, 'create_profile', { email, fullName: `בדיקה ${label}` });
+  const requestId = randomUUID();
+  const saved = await value<{ id: string }>(ownerClient, 'create_profile', { requestId, email, fullName: `בדיקה ${label}` });
+  if (completeCreation) await value(ownerClient, 'complete_profile_creation', { requestId, userId: saved.id });
   return login(email, password);
 }
 export async function project(client: Client, label: string) {
