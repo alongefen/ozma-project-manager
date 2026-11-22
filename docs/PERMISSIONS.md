@@ -2,7 +2,7 @@
 
 # מפת הרשאות
 
-משימה P0.2, 22.11.2026. **הצעה ל-G1, אינה מיגרציה.** מתרגמת את [מטריצת PRD 5](PRD.md#5-מטריצת-תפקיד--פעולה) לכללים ולבדיקות. המודל ב-[ARCHITECTURE](ARCHITECTURE.md).
+משימה P0.2, 22.11.2026. **לפי הכרעות G1 של אלון. אינה מיגרציה.** מתרגמת את [מטריצת PRD 5](PRD.md#5-מטריצת-תפקיד--פעולה) לכללים ולבדיקות. המודל ב-[ARCHITECTURE](ARCHITECTURE.md).
 
 ## 1. כללי היסוד
 
@@ -31,7 +31,7 @@
 | `manage(p)` | `manager(p)` וגם `writable(p)` |
 | `finance(p)` | `owner()`, או `role_in(p) = manager` וגם `finance_access` באותו שיוך |
 | `finance_write(p)` | `finance(p)` וגם `writable(p)` |
-| `read_document(d)` | `owner()`. אחרת: `member(d.project_id)`, לא בארכיון, וגם אחד: `all`; ‏`selected` ויש לו הרשאה; ‏`pending_owner` והוא המעלה. ב-`owner` איש אחר אינו רואה |
+| `read_document(d)` | `owner()`. אחרת: `member(d.project_id)`, לא בארכיון, וגם אחד: `all`; ‏`selected` ויש לו הרשאה. ב-`owner` איש אחר אינו רואה, גם לא המעלה |
 | `read_entry(e)` | `owner()`, או `member(e.project_id)` והדיווח לא בוטל |
 | `read_version(v)` | `owner()`, או `read_entry` של הדיווח וגם פרויקט הגרסה הוא הפרויקט הנוכחי שלו |
 | `correct_entry_allowed(e)` | לא בוטל, וגם: `owner()`, או שהוא המדווח ו-`work(e.project_id)` |
@@ -91,7 +91,7 @@ P1.2 בונה את כולן, עם הגוף ועם בדיקה חיובית ושל
 | `set_project_archived` | setProjectArchived | `owner()` | `project.archive_changed` |
 | `set_project_cover` | setProjectCover | `owner()`. קובץ cover, ‏ready, שלו, מהפרויקט, שלא נוצל | `project.cover_changed` |
 | `begin_upload` | beginUpload | document: ‏`manage(p)`. ‏diary: ‏`work(p)`. ‏cover: ‏`owner()`. סוג, גודל ועד 20 | אין |
-| `create_document` | createDocument | `manage(p)`. קובץ document, ‏ready, שלו, מהפרויקט, שלא נוצל. בן חייב גישה; מנהל אינו שולח גישה או החלפה | `document.created`, ובהחלפה `document.replaced` |
+| `create_document` | createDocument | `manage(p)`. קובץ document, ‏ready, שלו, מהפרויקט, שלא נוצל. **מי שמעלה חייב לשלוח גישה**, והנבחרים משויכים. החלפה רק `owner()` | `document.created`, ובהחלפה `document.replaced` |
 | `set_document_access` | setDocumentAccess | `owner()`. הנבחרים משויכים | `document.access_changed` |
 | `set_document_archived` | setDocumentArchived | `owner()` | `document.archive_changed` |
 | `create_task` | createTask | `work(p)` | אין |
@@ -113,6 +113,7 @@ P1.2 בונה את כולן, עם הגוף ועם בדיקה חיובית ושל
 |---|---|---|
 | `get_actor` | getContext, signIn | `active()`. אחרת ריק |
 | `project_permissions` | forProject | `member(p)`. מחזירה את דגלי החוזה |
+| `project_access_candidates` | listAccessCandidates | `manage(p)`. מזהה ושם של משויכים פעילים בלבד |
 | `project_cards` | listProjects, getHome | invoker עם RLS. מונים בלי מבוטל או מחוק |
 | `project_manager_names` | getProject | `member(p)`. שמות מנהלים פעילים בלבד |
 | `diary_summary` | getSummary, getBook, planReport | invoker עם RLS, לא מבוטלים |
@@ -134,6 +135,8 @@ P1.2 בונה את כולן, עם הגוף ועם בדיקה חיובית ושל
 הפונקציה `private.reject_auth_email` היא hook, עם EXECUTE ל-`supabase_auth_admin` בלבד, ומחזירה שגיאה תמיד.
 
 ## 5. כלל ובדיקה לכל שורת מטריצה
+
+שורה P14 שונה מ-PRD 5: שם מנהל אינו קובע גישה בהעלאה, וכאן הוא קובע, לפי הכרעת אלון בסעיף 4 של G1. P0.5 מעדכנת את ה-PRD.
 
 איך קוראים:
 - ״מסד״ הוא הכלל המחייב. ״שרת״ הוא הנתיב שקורא לו.
@@ -169,10 +172,10 @@ P1.2 בונה את כולן, עם הגוף ועם בדיקה חיובית ושל
 
 | מזהה | פעולה | מסד | אחסון | שרת | ייצוא | בדיקה חיובית | בדיקה שלילית |
 |---|---|---|---|---|---|---|---|
-| P12 | צפייה והורדה של מסמך | `read_document(d)` | `authorize_file`, ‏60 שניות | `listDocuments`, `getSignedUrl` | אין | `all`, נבחר, ומעלה ב-`pending_owner` פותחים | מ על ״בן בלבד״, לא נבחר, הוסר: אין שם, מונה, חיפוש, תצוגה או חתימה |
-| P13 | העלאת מסמך | `manage(p)` ב-`begin_upload`, `create_document` | אסימון document בלי upsert | `beginUpload`, `createDocument` | אין | בן ומ מעלים. של מ נוצר `pending_owner` | ע; מע ב-ב; מעל המגבלה; סוג מזויף; מ בפרויקט שהסתיים |
-| P14 | קביעת גישה למסמך בהעלאה | שדה `access` רק כש-`owner()` | אין חשיפה לפני השורה | `createDocument` | אין | בן מעלה ל״נבחרים״ ורק הם רואים | מ שולח `all`; בן בלי גישה או ברשימה ריקה |
-| P15 | שינוי גישה אחרי העלאה | `owner()` ב-`set_document_access` | החתימה הבאה לפי החדש | `setDocumentAccess` | אין | בן פותח מסמך ממתין, והסרה חוסמת | המעלה, מ או ע משנים; נבחר שאינו משויך |
+| P12 | צפייה והורדה של מסמך | `read_document(d)` | `authorize_file`, ‏60 שניות | `listDocuments`, `getSignedUrl` | אין | `all` ונבחר פותחים | מ על ״בן בלבד״, גם כשהוא העלה, לא נבחר, הוסר: אין שם, מונה, חיפוש, תצוגה או חתימה |
+| P13 | העלאת מסמך | `manage(p)` ב-`begin_upload`, `create_document` | אסימון document בלי upsert | `beginUpload`, `createDocument` | אין | בן ומ מעלים, כל אחד עם הגישה שהגדיר | ע; מע ב-ב; מעל המגבלה; סוג מזויף; מ בפרויקט שהסתיים |
+| P14 | קביעת גישה למסמך בהעלאה | המעלה, ב-`manage(p)`, שולח `access` חובה ל-`create_document`. ‏`project_access_candidates` ב-`manage(p)` | אין חשיפה לפני השורה | `listAccessCandidates`, `createDocument` | אין | בן מגדיר; מ מגדיר בפרויקט שלו כל אחד משלושת המצבים, ורק המותרים רואים | ע; מע ב-ב; בלי גישה; רשימה ריקה; נבחר לא משויך; מ מבקש שמות בפרויקט אחר או מקבל אימייל וכספים |
+| P15 | שינוי גישה אחרי העלאה | `owner()` ב-`set_document_access` | החתימה הבאה לפי החדש | `setDocumentAccess` | אין | בן עורך גישה שהגדיר מנהל, והסרה חוסמת גם את המעלה | המעלה, מ או ע משנים; נבחר שאינו משויך |
 | P16 | הסרה או החלפה של מסמך | `owner()` ב-`set_document_archived`, ובהחלפה ב-`create_document` | מקור ישן נשאר, בלי DELETE | `setDocumentArchived`, `createDocument` | אין | בן מחליף, מעביר לארכיון ומחזיר | מ מעביר או מחליף; מחיקת אובייקט ישירה |
 
 ### 5.4 משימות
