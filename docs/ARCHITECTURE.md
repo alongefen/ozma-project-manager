@@ -1058,6 +1058,8 @@ export interface FinanceExportApi {
 
 </div>
 
+לפי A-33 אפשר לבנות תחילה מנוע עצמאי אחרי P1.1 ו-P1.2, ב-`src/features/finance-export/logic/rendering/**` ובדיקותיו ב-`tests/logic/finance-export/rendering/**`. הוא מקבל `FinanceBook` מחושב לפי החוזים הממוזגים ומפיק Excel מנתונים בדויים באמצעות ExcelJS הקיים, בלי חישוב כספי נוסף או גישה למסד. חיבור חוזה FinanceExportApi, הרשאות ונתיב הורדה נשארים אחרי P1.4.6 המלאה; המנוע אינו משלים את המשימה.
+
 הנתיב: `GET /api/exports/finance`. הוא משתמש ב-`FinanceApi.getBook` ואינו מחשב. גיליון RTL, סכומים מספריים, שורת אחוז רווח, וטקסט נשמר כמחרוזת ולעולם לא כנוסחה.
 
 ## 6. קבצים
