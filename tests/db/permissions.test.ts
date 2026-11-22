@@ -281,13 +281,13 @@ describe.sequential('חוזי RPC משלימים',()=>{
   await deny(ben.client,'update_profile',{id:person.id,expectedRevision:1,fullName:'בדיקה',email:'different@example.invalid'},'VALIDATION');
   expect(await value(ben.client,'update_profile',{id:person.id,expectedRevision:1,fullName:'שם בדוי מעודכן',email:profile!.email})).toMatchObject({revision:2});
  });
- it('מגבלות העלאה ו-finalize חד-פעמי',async()=>{
+ it('מגבלות העלאה ו-finalize סותר נדחה',async()=>{
   for(const patch of [{sizeBytes:52428801},{mime:'text/html'},{sizeBytes:1.2}]) {
    const result=await rpc(manager.client,'begin_upload',{projectId:a.id,purpose:'document',files:[{clientId:randomUUID(),name:'בדיקה',mime:'image/png',sizeBytes:1,...patch}]});expect(result.error).not.toBeNull();
   }
   const fileId=await readyFile(admin,manager,a.id,'document');
-  await deny(admin,'system_finish_upload',{fileId,actorId:manager.id,sessionId:manager.sessionId,state:'rejected'},'NOT_FOUND');
-  await deny(manager.client,'get_pending_upload',{fileId},'NOT_FOUND');
+  await deny(admin,'system_finish_upload',{fileId,actorId:manager.id,sessionId:manager.sessionId,state:'rejected'},'CONFLICT');
+  expect(await value(manager.client,'get_pending_upload',{fileId})).toMatchObject({fileId,state:'ready',fileRef:{id:fileId}});
  });
  it('project_cards מונה רק נתונים גלויים ומחזירה מבנה משותף',async()=>{
   const p=await project(ben.client,'מונים');await membership(ben.client,worker.id,p.id,'worker');
