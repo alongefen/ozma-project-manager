@@ -1,3 +1,5 @@
+<div dir="rtl">
+
 # PRD: מערכת ניהול הפרויקטים של ״חי עוצמה בבנייה״
 
 גרסה 0.1, 22.11.2026. **טיוטה לאישור אלון.**
@@ -572,3 +574,5 @@
 | 14 כרטיס ליד | LEAD-04, LEAD-05 | LEAD-05, LEAD-09 | LEAD-04, LEAD-05 | LEAD-05, LEAD-06 | LEAD-07, LEAD-08, LEAD-09, LEAD-10 | LEAD-05, LEAD-07, LEAD-08 |
 | 15 משתמשים | ROLE-01, PERM-01 | USER-01, PERM-05 | USER-01, AUTH-04, PERM-06 | USER-02, USER-03 | AUTH-02, PERM-02 | PERM-04 |
 | 16 יומן כללי | DIARY-02 | DIARY-10, DIARY-11 | DIARY-10 | PERM-03 | DIARY-10, DIARY-11, DIARY-14 | DIARY-10, PERM-03 |
+
+</div>
