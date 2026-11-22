@@ -21,15 +21,31 @@ jobs:
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: סיווג השינוי
+        id: scope
+        # כשל בסיווג מפעיל את הבדיקות המלאות; ה-check עצמו תמיד נוצר.
+        continue-on-error: true
+        run: node .github/scripts/change-scope.mjs
       - uses: actions/setup-node@v4
+        if: steps.scope.outcome != 'success' || steps.scope.outputs.docs_only != 'true'
         with:
           node-version: "24"
           cache: npm
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run test:foundation
-      # אין עדיין בדיקות מוצר. Vitest מדווח במפורש כשאין קבצים.
-      # npm test עצמו נכשל כשאין בדיקות, כדי שלא להציג כיסוי שאינו קיים.
-      - run: npm test -- --passWithNoTests
-      - run: npm run build
+      - name: בדיקות סיווג היקף
+        if: steps.scope.outcome != 'success' || steps.scope.outputs.docs_only != 'true'
+        run: node --test .github/scripts/change-scope.test.mjs
+      - if: steps.scope.outcome != 'success' || steps.scope.outputs.docs_only != 'true'
+        run: npm ci
+      - if: steps.scope.outcome != 'success' || steps.scope.outputs.docs_only != 'true'
+        run: npm run lint
+      - if: steps.scope.outcome != 'success' || steps.scope.outputs.docs_only != 'true'
+        run: npm run typecheck
+      - if: steps.scope.outcome != 'success' || steps.scope.outputs.docs_only != 'true'
+        run: npm run test:foundation
+      # בדיקות unit בלבד; בדיקות הענן אינן חלק מה-workflow הזה.
+      - if: steps.scope.outcome != 'success' || steps.scope.outputs.docs_only != 'true'
+        run: npm test -- --passWithNoTests
+      - if: steps.scope.outcome != 'success' || steps.scope.outputs.docs_only != 'true'
+        run: npm run build
