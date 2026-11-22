@@ -98,6 +98,15 @@ describe('finance workbook rendering', () => {
     workbook.eachSheet(s => cells(s).forEach(c => expect(c.type).not.toBe(ExcelJS.ValueType.Formula)));
   });
 
+  it('strips U+FFFE and U+FFFF from text, which XML cannot carry, and reads back', async () => {
+    const book = financeBookFixture();
+    book.projectName = '\uFFFEפרויקט\uFFFF בדוי';
+    book.filter.search = 'חיפוש\uFFFF\uFFFE בדוי';
+    book.months[0].incomeRows[0].details = 'פרטים בדויים\uFFFE\uFFFF';
+    const values = cells((await read(book)).getWorksheet('כספים')!).map(c => c.value);
+    for (const clean of ['פרויקט בדוי', 'חיפוש בדוי', 'פרטים בדויים']) expect(values).toContain(clean);
+  });
+
   it.each(['projectName', 'search', 'details'])('rejects formula objects passed into text field %s', async field => {
     const book = financeBookFixture();
     const malicious = { formula: '1+1', result: 2 } as unknown as string;
