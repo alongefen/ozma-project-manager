@@ -1,20 +1,20 @@
-import Link from 'next/link';
-import { Card, Notice } from '@/components/ui';
+'use client';
+import { Button, Card, Notice } from '@/components/ui';
 import { DiaryList } from '../shared/DiaryList';
 import { FilterBar } from '../shared/FilterBar';
 import { PrintByDate } from '../shared/PrintByDate';
-import { REPORT_PATH } from '@/lib/navigation';
+import { useDiary } from '../shared/DiaryProvider';
 import type { DiaryScreen } from '../shared/types';
 
 /** Desktop (from 1024): the list on the right, filter and print by date in a side column on the left. */
 export function DiaryDesktop({ screen, title }: { screen: DiaryScreen; title: string }) {
   const { fixedProjectId, projects } = screen;
-  const newHref = fixedProjectId ? `${REPORT_PATH}?project=${fixedProjectId}` : REPORT_PATH;
+  const { openNew } = useDiary();
   return (
     <div className="dr dr-desktop d-only">
       <div className="dr-bar">
         <h2 className="dr-bar__title">{title}</h2>
-        {screen.canReport && <Link href={newHref} className="ui-btn">+ דיווח חדש</Link>}
+        {screen.canReport && <Button onClick={openNew}>+ דיווח חדש</Button>}
       </div>
       {!screen.canReport && screen.readOnlyNote && <Notice>{screen.readOnlyNote}</Notice>}
       <div className="dr-desktop__grid">

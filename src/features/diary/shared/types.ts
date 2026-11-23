@@ -16,4 +16,7 @@ export type DiaryScreen = {
   today: string;
   /** Where the filter form submits. */
   basePath: string;
+  /** Projects the form offers (the live `report` permission), and whether the viewer is Ben (may move a report). */
+  formProjects: ProjectOption[];
+  isOwner: boolean;
 };

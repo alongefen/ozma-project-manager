@@ -2,7 +2,8 @@ import 'server-only';
 import type { Platform, RequestContext } from '@/types/contracts';
 import { createProjectsApi } from '@/features/projects/logic';
 import { createDiaryApi } from '../logic';
-import { READ_ONLY_NOTICE } from '@/features/projects/shared/view-model';
+import { loadProject } from '@/features/projects/shared/load';
+import { READ_ONLY_NOTICE, isReadOnlyProject } from '@/features/projects/shared/view-model';
 import type { DiaryScreen } from './types';
 import type { DiaryFilter, ProjectOption } from './model';
 
@@ -32,13 +33,15 @@ export type DiaryLoad =
   | { kind: 'ok'; screen: DiaryScreen }
   | { kind: 'hidden' } | { kind: 'signed-out' } | { kind: 'error' };
 
-/** Reads one page of the diary for the general screen (all visible projects) or one project, plus the viewer's live report permission. */
+/** Reads one page of the diary for the general screen (all visible projects) or one project, plus what the form needs. */
 export async function loadDiaryScreen(platform: Platform, ctx: RequestContext, opts: { projectId?: string; filter: DiaryFilter; basePath: string }): Promise<DiaryLoad> {
   const filter = opts.projectId ? { ...opts.filter, projectId: opts.projectId } : opts.filter;
-  const [page, projects, perm] = await Promise.all([
+  const [page, projects, reportable, project] = await Promise.all([
     createDiaryApi(platform).listEntries(ctx, filter),
     opts.projectId ? Promise.resolve(null) : loadVisibleProjects(platform, ctx),
-    opts.projectId ? platform.permissions.forProject(ctx, { projectId: opts.projectId }) : Promise.resolve(null),
+    opts.projectId ? Promise.resolve(null) : loadReportableProjects(platform, ctx),
+    // Memoised per request: the project tab layout already read it.
+    opts.projectId ? loadProject(opts.projectId) : Promise.resolve(null),
   ]);
   if (!page.ok) {
     const code = page.error.code;
@@ -46,12 +49,13 @@ export async function loadDiaryScreen(platform: Platform, ctx: RequestContext, o
     if (code === 'NOT_FOUND' || code === 'FORBIDDEN' || code === 'VALIDATION') return { kind: 'hidden' };
     return { kind: 'error' };
   }
-  if (perm && !perm.ok) return { kind: 'error' };
-  const reportable = opts.projectId ? (perm?.ok ? perm.value.report : false) : true;
+  if (!opts.projectId && !reportable) return { kind: 'error' };
+  const canReport = project ? project.project.permissions.report && !isReadOnlyProject(project.project) : (reportable?.length ?? 0) > 0;
+  const formProjects = project ? (canReport ? [{ id: project.project.id, name: project.project.name }] : []) : reportable ?? [];
   return { kind: 'ok', screen: {
     rows: page.value.items, nextCursor: page.value.nextCursor, filter, projects,
-    fixedProjectId: opts.projectId, canReport: reportable,
-    readOnlyNote: reportable ? undefined : READ_ONLY_NOTICE,
+    fixedProjectId: opts.projectId, canReport, formProjects, isOwner: ctx.actor.isOwner,
+    readOnlyNote: canReport ? undefined : READ_ONLY_NOTICE,
     today: ctx.today, basePath: opts.basePath,
   } };
 }

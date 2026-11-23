@@ -1,10 +1,10 @@
 'use client';
-import { useId, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { DiaryRow, FileRef, Result } from '@/types/contracts';
 import { Button, FormActions, Notice } from '@/components/ui';
 import { FileUpload } from '@/components/upload/FileUpload';
-import { correctEntry, createEntry, moveEntry } from '../logic/actions';
+import { correctEntry, createEntry, listVersions, moveEntry } from '../logic/actions';
+import { format } from '@/lib/format';
 import { MAX_BODY, fileUrl, parseDraft, type DraftErrors, type ProjectOption } from './model';
 
 type Props = {
@@ -14,7 +14,8 @@ type Props = {
   canMove: boolean;
   today: string;
   initialProjectId?: string;
-  backHref: string;
+  onDone: () => void;
+  onCancel: () => void;
 };
 
 const UNAVAILABLE = 'הפעולה לא הושלמה. יש לנסות שוב';
@@ -23,9 +24,8 @@ async function guarded<T>(run: () => Promise<Result<T>>): Promise<Result<T>> {
 }
 
 /** One short form, full screen on phone and a centred column on desktop: project, date, text, photos or PDFs. */
-export function EntryForm({ entry, projects, canMove, today, initialProjectId, backHref }: Props) {
+export function EntryForm({ entry, projects, canMove, today, initialProjectId, onDone, onCancel }: Props) {
   const id = useId();
-  const router = useRouter();
   const [projectId, setProjectId] = useState(entry?.projectId ?? initialProjectId ?? (projects.length === 1 ? projects[0].id : ''));
   const [workDate, setWorkDate] = useState<string>(entry?.workDate ?? today);
   const [body, setBody] = useState(entry?.body ?? '');
@@ -40,6 +40,14 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, b
   // What the server holds after each successful step, so a retry after a partial save never sends stale data.
   const saved = useRef(entry ? { revision: entry.revision, body: entry.body, fileIds: entry.files.map(f => f.id).join(), projectId: entry.projectId, workDate: entry.workDate as string } : null);
   const [uploaded, setUploaded] = useState(false);
+  const [history, setHistory] = useState<string[]>([]);
+  useEffect(() => {
+    if (!entry) return;
+    const kind = { created: 'נוצר', corrected: 'תוקן', moved: 'הועבר', cancelled: 'בוטל' } as const;
+    let live = true;
+    listVersions({ id: entry.id }).then(r => { if (live && r.ok) setHistory(r.value.map(v => `גרסה ${v.version} · ${kind[v.kind]} · ${v.editorName} · ${format.dateTime(v.createdAt)}`)); }).catch(() => {});
+    return () => { live = false; };
+  }, [entry]);
   const lockedProject = entry ? !canMove : false;
   const projectName = entry?.projectName ?? projects.find(p => p.id === projectId)?.name ?? '';
 
@@ -74,8 +82,7 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, b
     }
     setBusy(false);
     if (failure) { setError(failure); return; }
-    router.push(backHref);
-    router.refresh();
+    onDone();
   }
 
   return (
@@ -123,8 +130,9 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, b
           : <p className="ui-field__hint">יש לבחור פרויקט לפני צירוף קבצים</p>}
         <span className="ui-field__hint">עד 25MB לקובץ. הקובץ נשמר כפי שנשלח.</span>
       </div>
+      {history.length > 0 && <details className="dr-fold"><summary>היסטוריית גרסאות</summary><ul className="dr-versions">{history.map(t => <li key={t}>{t}</li>)}</ul></details>}
       {error && <Notice tone="error">{error}</Notice>}
-      <FormActions submitLabel={busy ? 'שומר…' : entry ? 'שמירת השינויים' : 'שמירת הדיווח'} busy={busy} cancelHref={backHref} />
+      <FormActions submitLabel={busy ? 'שומר…' : entry ? 'שמירת השינויים' : 'שמירת הדיווח'} busy={busy} placement="sheet" onCancel={onCancel} />
     </form>
   );
 }
