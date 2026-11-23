@@ -149,3 +149,22 @@
   .fin-sheet__head { padding: 22px 24px 8px; }
   .fin-sheet__body { padding: 8px 24px 24px; }
 }
+
+/* Row actions, export, cancel confirmation */
+.fin-rowactions { display: inline-flex; gap: 8px; }
+.fin-iconbtn--danger { color: var(--err-ink); }
+.fin-iconbtn--danger:hover { background: var(--err-bg); }
+.fin-danger.ui-btn { background: var(--err-ink); }
+.fin-danger.ui-btn:hover { background: #8c2525; }
+.fin-confirm { display: grid; gap: 14px; }
+.fin-confirm__row { margin: 0; display: grid; border: 1px solid var(--line); border-radius: 10px; }
+.fin-confirm__row > div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; }
+.fin-confirm__row > div + div { border-top: 1px solid var(--line); }
+.fin-confirm__row dt { color: var(--muted); }
+.fin-confirm__row dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
+.fin-confirm__note { color: var(--muted); font-size: 14px; }
+.fin-export { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 6px; color: var(--ink); font-weight: 700; font-size: 14px; text-decoration: none; margin: -8px 0; }
+.fin-footlinks { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.fin-item__bottom { min-height: 44px; }
+.fin-desktop .fin-backlink { margin: 0; }
+.fin-mobile .fin-mtitle { margin: 0; }

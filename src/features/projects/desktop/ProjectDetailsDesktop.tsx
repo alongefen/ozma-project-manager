@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Badge, Card, Notice } from '@/components/ui';
 import type { ProjectDetails } from '@/types/contracts';
 import { EditProjectSheet } from '../shared/EditProjectSheet';
+import { ProjectInnerNav } from '../shared/ProjectInnerNav';
 import { ProjectActions } from '../shared/ProjectActions';
 import { valuesFromDetails } from '../shared/form-model';
 import { actionsFor, coverSrc, dateText, isReadOnlyProject, managersText, orNotEntered, READ_ONLY_NOTICE, sectionsFor, statusLabel, telHref } from '../shared/view-model';
@@ -25,10 +26,7 @@ export function ProjectDetailsDesktop({ d, isOwner }: { d: ProjectDetails; isOwn
         </div>
         {act.manage && <Link href={`/projects/${d.id}/edit/access`} className="ui-btn ui-btn--secondary">הרשאות</Link>}
       </header>
-      <nav className={css.inner} aria-label="חלקי התיק">
-        <span className={css.current} aria-current="page">פרטים</span>
-        {sectionsFor(d).map(s => <Link key={s.key} href={s.href}>{s.label}</Link>)}
-      </nav>
+      <ProjectInnerNav projectId={d.id} sections={sectionsFor(d)} current="details" />
       {isReadOnlyProject(d) && !act.manage && <Notice>{READ_ONLY_NOTICE}</Notice>}
       <div className={css.cols}>
         <div className={css.main}>
