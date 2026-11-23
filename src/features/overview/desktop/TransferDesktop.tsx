@@ -1,0 +1,35 @@
+import type { TransferMonth } from '@/types/contracts';
+import { Card } from '@/components/ui';
+import { NO_TRANSFERS, transferViews } from '../shared/view-model';
+import css from '../shared/Overview.module.css';
+import d from './Desktop.module.css';
+
+/** Desktop transfer overview: one table, months newest first, each month's amount then its projects. */
+export function TransferDesktop({ months }: { months: TransferMonth[] }) {
+  const views = transferViews(months);
+  if (views.length === 0) return <Card panel className="d-only"><p className={css.empty}>{NO_TRANSFERS}</p></Card>;
+  return (
+    <Card panel className={`${d.tableCard} d-only`}>
+      <table className={d.table}>
+        <thead>
+          <tr><th scope="col">חודש / פרויקט</th><th scope="col">הכנסות</th><th scope="col">הוצאות</th><th scope="col">מס להעברה</th><th scope="col">רווח נקי</th></tr>
+        </thead>
+        {views.map(v => (
+          <tbody key={v.key}>
+            <tr className={d.monthRow}>
+              <th scope="rowgroup">{v.label}</th><td colSpan={2} />
+              <td className={css.num}><strong>{v.amount}</strong></td><td />
+            </tr>
+            {v.lines.map(l => (
+              <tr key={l.projectId}>
+                <th scope="row" className={d.projectCell}>{l.name}</th>
+                <td className={css.num}>{l.income}</td><td className={css.num}>{l.expense}</td>
+                <td className={css.num}>{l.tax}</td><td className={css.num}>{l.net}</td>
+              </tr>
+            ))}
+          </tbody>
+        ))}
+      </table>
+    </Card>
+  );
+}

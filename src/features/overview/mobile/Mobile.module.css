@@ -1,0 +1,11 @@
+.page { display: grid; gap: 16px; }
+.month { padding: 0; }
+.month details { padding: 0; }
+.summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px; min-height: 56px; cursor: pointer; }
+.summary::-webkit-details-marker { display: none; }
+.monthName { font-weight: 800; font-size: 17px; }
+.amountBox { display: grid; justify-items: end; gap: 2px; }
+.amountBox small { color: var(--muted); font-size: 12px; }
+.amountBox strong { font-size: 20px; }
+.lines { list-style: none; margin: 0; padding: 0 16px 16px; display: grid; gap: 14px; }
+.line { display: grid; gap: 8px; padding-top: 12px; border-top: 1px solid var(--line); }

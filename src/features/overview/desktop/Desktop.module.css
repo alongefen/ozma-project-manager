@@ -1,0 +1,13 @@
+.page { display: grid; gap: 20px; }
+.counters > div { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.cols { display: grid; gap: 20px; grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr); align-items: start; }
+.main { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.projects > ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.side { position: sticky; top: 16px; }
+.tableCard { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.table th, .table td { text-align: start; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.table thead th { font-size: 13px; color: var(--muted); font-weight: 700; }
+.monthRow { background: var(--nav-active-bg); }
+.monthRow th { font-weight: 800; }
+.projectCell { font-weight: 400; padding-inline-start: 28px; }
