@@ -1,0 +1,41 @@
+/* Diary screens. Tokens come from app.css. Phone and desktop share these classes. */
+.dr { display: grid; gap: 16px; min-width: 0; }
+.dr-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.dr-bar__title { font-size: 22px; font-weight: 800; margin: 0; }
+.dr-list { display: grid; gap: 16px; min-width: 0; }
+.dr-day { display: grid; gap: 10px; min-width: 0; }
+.dr-day__title { font-size: 16px; font-weight: 800; margin: 0; color: var(--muted); }
+.dr-empty { color: var(--muted); margin: 0; padding: 12px 0; }
+.dr-card { display: grid; gap: 8px; min-width: 0; }
+.dr-card__head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 14px; }
+.dr-card__who { font-weight: 800; }
+.dr-card__time { color: var(--muted); unicode-bidi: plaintext; }
+.dr-card__project { margin: 0; font-weight: 700; color: var(--nav-active-ink); }
+.dr-card__body { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 16px; line-height: 1.5; }
+.dr-card__edited { margin: 0; font-size: 13px; color: var(--muted); }
+.dr-card__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.dr-card__actions .ui-btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+.dr-files { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; min-width: 0; }
+.dr-file { display: inline-flex; gap: 6px; align-items: center; min-height: 44px; max-width: 100%; overflow-wrap: anywhere; color: var(--nav-active-ink); }
+.dr-file-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.dr-filter { display: grid; gap: 12px; min-width: 0; }
+.dr-filter__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.dr-filter__actions .ui-btn { min-height: 44px; display: inline-flex; align-items: center; }
+.dr-print, .dr-form { display: grid; gap: 14px; min-width: 0; }
+.dr-parts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.dr-parts li { display: flex; gap: 8px; flex-wrap: wrap; }
+.dr-parts .ui-btn { min-height: 44px; display: inline-flex; align-items: center; }
+.dr-textarea { min-height: 150px; resize: vertical; font: inherit; }
+.dr-count { text-align: end; }
+.dr-fixed { margin: 0; font-weight: 700; }
+.dr-fold { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 0 14px; }
+.dr-fold > summary { min-height: 48px; display: flex; align-items: center; font-weight: 700; cursor: pointer; }
+.dr-fold[open] > summary { margin-bottom: 8px; }
+.dr-fold > div { padding-bottom: 14px; }
+.dr-side { display: grid; gap: 16px; align-content: start; }
+.dr-section-title { font-size: 17px; font-weight: 800; margin: 0 0 10px; }
+.dr-versions { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.dr-versions li { font-size: 14px; color: var(--muted); }
+@media (min-width: 1024px) {
+  .dr-desktop__grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+}
