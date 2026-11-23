@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
-import { createPlatform } from '@/lib/auth/platform';
+import { getContext, getPlatform } from '@/components/shell/request';
 import { SIGN_IN_PATH } from '@/lib/navigation';
-import { Notice } from '@/components/ui';
+import { StateMessage } from '@/components/ui';
 import { loadFinanceScreen } from '@/features/finance/shared/load';
 import { parseFilter, type FinanceQuery } from '@/features/finance/shared/query';
 import { PrintView } from '@/features/finance/shared/PrintView';
@@ -18,14 +18,13 @@ export const metadata = { title: 'כספי פרויקט' };
  */
 export default async function ProjectFinancePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<FinanceQuery> }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  const platform = await createPlatform();
-  const context = await platform.auth.getContext();
+  const [platform, context] = await Promise.all([getPlatform(), getContext()]);
   if (!context.ok) redirect(SIGN_IN_PATH);
   const filter = parseFilter(query);
   const data = await loadFinanceScreen(platform, context.value, id, filter);
   if (data.kind === 'hidden') notFound();
   if (data.kind === 'signed-out') redirect(SIGN_IN_PATH);
-  if (data.kind === 'error') return <Notice tone="error">{data.message}</Notice>;
+  if (data.kind === 'error') return <StateMessage tone="error" backHref={`/projects/${id}`} backLabel="חזרה לתיק הפרויקט">הכספים אינם זמינים כרגע. נסו שוב בעוד רגע.</StateMessage>;
   const props = { book: data.book, filteredRows: data.filteredRows, today: context.value.today };
   return (
     <FinanceNavProvider projectId={id} filter={filter}>

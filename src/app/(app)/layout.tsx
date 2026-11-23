@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type { Metadata, Viewport } from 'next';
 import { redirect } from 'next/navigation';
 import '@/styles/app.css';
-import { createPlatform } from '@/lib/auth/platform';
+import { getContext } from '@/components/shell/request';
 import { desktopNav, phoneNav, SIGN_IN_PATH } from '@/lib/navigation';
 import { BottomNav } from '@/components/shell/mobile/BottomNav';
 import { MobileHeader } from '@/components/shell/mobile/MobileHeader';
@@ -22,7 +22,7 @@ export const dynamic = 'force-dynamic';
 export default async function AppLayout({ children }: { children: ReactNode }) {
   let context;
   try {
-    context = await (await createPlatform()).auth.getContext();
+    context = await getContext();
   } catch {
     context = null;
   }

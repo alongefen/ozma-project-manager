@@ -1,9 +1,8 @@
 'use client';
 import { useState } from 'react';
-import { Button } from '@/components/ui';
+import { Button, Sheet } from '@/components/ui';
 import { CoverControl } from './CoverControl';
 import { ProjectForm } from './ProjectForm';
-import { Sheet } from './Sheet';
 import type { FormValues } from './form-model';
 import css from './EditProjectSheet.module.css';
 

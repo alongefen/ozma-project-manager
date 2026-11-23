@@ -1,0 +1,25 @@
+import Link from 'next/link';
+import type { ReactNode } from 'react';
+
+/**
+ * The one header of every inner page (DESIGN 3.5), phone and desktop: an arrow-only back link on the right,
+ * the title, an optional badge, and actions at the far left. The shell header is hidden on inner routes,
+ * so this is the only title on the screen. One height, so the header never jumps between pages.
+ */
+export function PageHeader({ title, backHref, backLabel, badge, actions, sub }: {
+  title: string; backHref: string; backLabel: string; badge?: ReactNode; actions?: ReactNode; sub?: string;
+}) {
+  return (
+    <div className="ui-ph">
+      <div className="ui-ph__row">
+        <Link href={backHref} className="ui-ph__back" aria-label={backLabel}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        </Link>
+        <h1 className="ui-ph__title">{title}</h1>
+        {badge}
+        {actions && <div className="ui-ph__actions">{actions}</div>}
+      </div>
+      {sub && <p className="ui-sub ui-ph__sub">{sub}</p>}
+    </div>
+  );
+}

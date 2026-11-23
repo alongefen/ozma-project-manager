@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Notice } from '@/components/ui';
+import { Button, ConfirmDialog } from '@/components/ui';
 import { setProjectArchived, setProjectStatus } from '../logic/actions';
 import { errorText } from './view-model';
 import css from './ProjectActions.module.css';
@@ -32,22 +32,14 @@ export function ProjectActions({ id, revision, status, archived }: { id: string;
     router.refresh();
   }
 
-  if (pending) {
-    return (
-      <div className={css.box} role="group" aria-label="אישור פעולה">
-        <p>{copy.text}</p>
-        <div className={css.row}>
-          <Button disabled={busy} onClick={confirm}>{busy ? 'מבצע…' : copy.go}</Button>
-          <Button variant="secondary" disabled={busy} onClick={() => { setPending(null); setError(null); }}>ביטול</Button>
-        </div>
-        {error && <Notice tone="error">{error}</Notice>}
-      </div>
-    );
-  }
   return (
     <div className={css.row}>
-      {!archived && <Button variant="secondary" className={css.danger} onClick={() => setPending('status')}>{finishing ? 'סיום פרויקט' : 'פתיחה מחדש'}</Button>}
-      <Button variant="secondary" className={css.danger} onClick={() => setPending('archive')}>{archived ? 'החזרה מהארכיון' : 'העברה לארכיון'}</Button>
+      <ConfirmDialog open={pending !== null} title={copy.go} confirmLabel={copy.go} busy={busy} error={error} danger={pending === 'archive' && !archived}
+        onConfirm={confirm} onCancel={() => { setPending(null); setError(null); }}>
+        <p>{copy.text}</p>
+      </ConfirmDialog>
+      {!archived && <Button variant="secondary" onClick={() => setPending('status')}>{finishing ? 'סיום פרויקט' : 'פתיחה מחדש'}</Button>}
+      <Button variant="secondary" onClick={() => setPending('archive')}>{archived ? 'החזרה מהארכיון' : 'העברה לארכיון'}</Button>
     </div>
   );
 }

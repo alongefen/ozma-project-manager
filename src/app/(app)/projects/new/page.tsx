@@ -1,5 +1,4 @@
-import Link from 'next/link';
-import { Notice } from '@/components/ui';
+import { Page, PageHeader, StateMessage } from '@/components/ui';
 import { pageContext } from '@/features/projects/shared/load';
 import { ProjectForm } from '@/features/projects/shared/ProjectForm';
 
@@ -9,17 +8,12 @@ export const metadata = { title: 'פרויקט חדש' };
 export default async function NewProjectPage() {
   const { ctx } = await pageContext();
   if (!ctx.actor.isOwner) {
-    return (
-      <div>
-        <Notice tone="error">רק מנהל המערכת יכול ליצור פרויקט.</Notice>
-        <p><Link href="/projects">חזרה לפרויקטים</Link></p>
-      </div>
-    );
+    return <StateMessage tone="error" backHref="/projects" backLabel="חזרה לפרויקטים">רק מנהל המערכת יכול ליצור פרויקט.</StateMessage>;
   }
   return (
-    <>
-      <h1 className="ui-page-title d-only">פרויקט חדש</h1>
+    <Page narrow>
+      <PageHeader title="פרויקט חדש" backHref="/projects" backLabel="חזרה לרשימת הפרויקטים" />
       <ProjectForm mode="create" isOwner />
-    </>
+    </Page>
   );
 }
