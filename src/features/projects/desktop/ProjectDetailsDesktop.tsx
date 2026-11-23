@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Card, Notice } from '@/components/ui';
 import type { ProjectDetails } from '@/types/contracts';
 import { EditProjectSheet } from '../shared/EditProjectSheet';
@@ -13,6 +14,11 @@ export function ProjectDetailsDesktop({ d, isOwner }: { d: ProjectDetails; isOwn
   const tel = telHref(d.contact.phone);
   return (
     <div className={`${css.page} d-only`}>
+      {act.manage && (
+        <div className={css.permRow}>
+          <Link href={`/projects/${d.id}/edit/access`} className="ui-btn ui-btn--secondary">הרשאות</Link>
+        </div>
+      )}
       {isReadOnlyProject(d) && !act.manage && <Notice>{READ_ONLY_NOTICE}</Notice>}
       <div className={css.cols}>
         <div className={css.main}>

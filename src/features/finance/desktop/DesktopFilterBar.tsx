@@ -8,7 +8,7 @@ import { MONTH_NAMES, monthLabel } from '../shared/present';
 import { currentMonth, yearOptions } from '../shared/query';
 
 /** Desktop filter bar: live search always visible, a popover under the button for period and day, chips for what is active. */
-export function DesktopFilterBar({ today }: { today: string }) {
+export function DesktopFilterBar({ today, onAdd }: { today: string; onAdd?: () => void }) {
   const { filter, go } = useFinanceNav();
   const uid = useId();
   const [open, setOpen] = useState(false);
@@ -32,6 +32,7 @@ export function DesktopFilterBar({ today }: { today: string }) {
 
   return (
     <div className="fin-fbar">
+      {onAdd && <Button onClick={onAdd}>הוספת תנועה</Button>}
       <div className="fin-field fin-fbar__search">
         <label htmlFor={`${uid}-s`}>חיפוש ספק / פרטים</label>
         <input id={`${uid}-s`} type="search" value={filter.search ?? ''} onChange={e => go({ ...filter, search: e.target.value || undefined })} placeholder="הקלידו לחיפוש" />

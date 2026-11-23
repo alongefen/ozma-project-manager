@@ -206,3 +206,6 @@
 /* Active-filter chips sit on the centre line of the search box and the filter button */
 .fin-fbar .fin-chips { min-height: 46px; align-items: center; }
 .fin-chips__clear { display: inline-flex; align-items: center; line-height: 1; }
+
+/* Export, print and link sit at the left end of the page; the add button leads the filter row */
+.fin-desktop .fin-head, .fin-desktop .fin-head__actions { justify-content: flex-end; }
