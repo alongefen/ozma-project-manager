@@ -69,6 +69,8 @@ export interface AuthService {
 /** Server-only RPC contracts; passwords are never sent to database functions. */
 export type CreateProfileInput = { requestId: Uuid; email: string; fullName: string }
 export type ProfileCreationResult = Saved & { passwordPending: boolean }
+export type PrepareProfileUpdateInput = Edit & { fullName: string; email: string }
+export type ProfileUpdateResult = Saved & { emailPending: boolean }
 export type CompleteProfileCreationInput = { requestId: Uuid; userId: Uuid }
 export type UploadCompletion = {
   fileId: Uuid; projectId: Uuid; uploadedBy: Uuid; purpose: FilePurpose
@@ -78,7 +80,7 @@ export type UploadCompletion = {
 export interface AuthAdmin {
   createUser: Operation<{ requestId: Uuid; email: string; fullName: string; password: string }, { userId: Uuid }>
   setPassword: Operation<{ userId: Uuid; password: string }, null>
-  setEmail: Operation<{ userId: Uuid; email: string }, null>
+  setEmail: Operation<{ userId: Uuid; expectedRevision: number; fullName: string; email: string }, Saved>
 }
 
 export interface StorageService {
