@@ -97,6 +97,8 @@ export const ReportPlanSchema = z.strictObject({"scope": ReportScopeSchema,"part
 
 export const CreateProfileInputSchema = z.strictObject({ requestId: UuidSchema, email: z.email(), fullName: z.string().trim().min(1).max(120) });
 export const ProfileCreationResultSchema = SavedSchema.safeExtend({ passwordPending: z.boolean() });
+export const PrepareProfileUpdateInputSchema = EditSchema.safeExtend({ fullName: z.string().trim().min(1).max(120), email: z.email() });
+export const ProfileUpdateResultSchema = SavedSchema.safeExtend({ emailPending: z.boolean() });
 export const CompleteProfileCreationInputSchema = z.strictObject({ requestId: UuidSchema, userId: UuidSchema });
 const UploadCompletionBaseSchema = z.strictObject({
   fileId: UuidSchema, projectId: UuidSchema, uploadedBy: UuidSchema, purpose: FilePurposeSchema,
@@ -111,7 +113,7 @@ export const UploadCompletionSchema = z.discriminatedUnion('state', [
 export const AuthAdminInputSchemas = {
 createUser: z.strictObject({"requestId": UuidSchema,"email": z.email(),"fullName": z.string().trim().min(1).max(120),"password": z.string().min(8)}),
 setPassword: z.strictObject({"userId": UuidSchema,"password": z.string().min(8)}),
-setEmail: z.strictObject({"userId": UuidSchema,"email": z.email()}),
+setEmail: z.strictObject({"userId": UuidSchema,"expectedRevision": z.number().int().positive(),"fullName": z.string().trim().min(1).max(120),"email": z.email()}),
 } as const;
 export const StorageServiceInputSchemas = {
 beginUpload: UploadRequestSchema,
