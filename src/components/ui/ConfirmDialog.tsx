@@ -13,7 +13,7 @@ export function ConfirmDialog({ open, title, confirmLabel, busyLabel, busy, erro
   onConfirm: () => void; onCancel: () => void; children: ReactNode;
 }) {
   return (
-    <Sheet open={open} onClose={onCancel} title={title}>
+    <Sheet open={open} onClose={onCancel} title={title} dismissible={!busy}>
       <div className="ui-confirm">
         {children}
         {error && <Notice tone="error">{error}</Notice>}

@@ -103,6 +103,9 @@ button, a { touch-action: manipulation; }
 .ui-ph__actions { margin-inline-start: auto; display: flex; align-items: center; gap: 10px; flex: none; }
 .ui-ph__sub { margin: 0; margin-inline-start: 34px; }
 
+/* Room under a page whose save bar is fixed above the bottom nav (phone). */
+@media (max-width: 1023.98px) { .app-content:has(.ui-actions--page) { padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 96px); } }
+
 /* Page stack: header then sections, one gap. */
 .ui-page { display: grid; gap: 16px; align-content: start; min-width: 0; }
 .ui-page--narrow { max-width: 820px; }
@@ -117,7 +120,6 @@ button, a { touch-action: manipulation; }
 .ui-actions--sheet { position: sticky; bottom: -20px; padding: 12px 0 4px; background: var(--surface); border-top: 1px solid var(--line); }
 .ui-confirm { display: grid; gap: 14px; }
 .ui-confirm p { margin: 0; }
-@media (max-width: 1023.98px) { .ui-actions--sheet.ui-actions--stack > * { flex: 1 1 100%; } }
 
 /* Loading skeletons: same shapes as the real cards. */
 .ui-skel { display: inline-block; max-width: 100%; border-radius: 6px; background: linear-gradient(90deg, #eceff1 25%, #f6f8f9 50%, #eceff1 75%); background-size: 200% 100%; animation: ui-shimmer 1.2s linear infinite; }
