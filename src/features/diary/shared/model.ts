@@ -67,6 +67,8 @@ export function reportUrl(scope: { kind: 'entry'; entryId: string } | { kind: 'd
 }
 
 export const fileUrl = (id: string, download = false) => `/api/storage/files/${id}${download ? '?download=1' : ''}`;
+/** A small rendition for previews; only when the server made one. Otherwise the file is shown as a name. */
+export const previewUrl = (f: { id: string; mime: string; displayState: string }) => (f.mime.startsWith('image/') && f.displayState === 'ready' ? `/api/storage/files/${f.id}?variant=display` : null);
 export const isImage = (mime: string) => mime.startsWith('image/');
 
 export function editedText(row: Pick<DiaryRow, 'editedAt' | 'editedByName'>): string | null {
