@@ -6,10 +6,10 @@ import { MONTH_NAMES } from './present';
 import { currentMonth, yearOptions } from './query';
 import { useFinanceNav } from './nav';
 
-type Props = { today: string; showMonth?: boolean };
+type Props = { today: string; showMonth?: boolean; onDone?: () => void };
 
 /** Period, day and text filters. Changes show instantly; the server recomputes the book. */
-export function Filters({ today, showMonth = true }: Props) {
+export function Filters({ today, showMonth = true, onDone }: Props) {
   const { filter, go } = useFinanceNav();
   const uid = useId();
   const [search, setSearch] = useState(filter.search ?? '');
@@ -31,6 +31,7 @@ export function Filters({ today, showMonth = true }: Props) {
     if (day.trim() && Number.isInteger(d) && d >= 1 && d <= 31) next.day = d;
     if (search.trim()) next.search = search.trim();
     go(next);
+    onDone?.();
   }
 
   return (
@@ -63,7 +64,7 @@ export function Filters({ today, showMonth = true }: Props) {
       </div>
       <div className="fin-filters__actions">
         <Button type="submit" size="small">סינון</Button>
-        <Button variant="secondary" size="small" onClick={() => { setSearch(''); setDay(''); go({ period: filter.period }); }}>איפוס</Button>
+        <Button variant="secondary" size="small" onClick={() => { setSearch(''); setDay(''); go({ period: filter.period }); onDone?.(); }}>איפוס</Button>
       </div>
     </form>
   );

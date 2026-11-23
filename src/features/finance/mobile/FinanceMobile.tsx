@@ -15,7 +15,7 @@ import { KIND_LABELS, bookRows, isReduction, monthLabel, monthsNewestFirst, rowA
 import { currentMonth, exportHref, financeHref } from '../shared/query';
 import { EntrySheet } from '../shared/EntrySheet';
 import { CancelConfirm } from '../shared/CancelConfirm';
-import { ExcelIcon, PencilIcon, TrashIcon } from '../shared/FinIcons';
+import { ExcelIcon, FilterIcon, LinkIcon, PencilIcon, PrintIcon, TrashIcon } from '../shared/FinIcons';
 
 type Props = { book: FinanceBook; today: string };
 
@@ -29,12 +29,13 @@ export function FinanceMobile({ book, today }: Props) {
   const { filter, go } = useFinanceNav();
   const [sheet, setSheet] = useState<{ row: TransactionRow | null } | null>(null);
   const [cancelRow, setCancelRow] = useState<TransactionRow | null>(null);
-  const [panel, setPanel] = useState<'filter' | null>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [panel, setPanel] = useState<'link' | null>(null);
   const period = filter.period;
   const entryMonth = period === 'all' ? currentMonth(today) : period;
   const rows = bookRows(book.months);
   const filtered = filter.day !== undefined || !!filter.search;
-  const toggle = (p: 'filter') => setPanel(v => (v === p ? null : p));
+  const toggle = (p: 'link') => setPanel(v => (v === p ? null : p));
 
   return (
     <div className="fin fin-mobile m-only">
@@ -60,7 +61,11 @@ export function FinanceMobile({ book, today }: Props) {
       <Card className="fin-msum">
         <div className="fin-msum__head">
           <h2>{period === 'all' ? 'כל התקופה' : monthLabel(period)}</h2>
-          <a className="fin-export no-print" href={exportHref(book.projectId, filter)}><span>ייצוא ל-Excel</span><ExcelIcon /></a>
+          <div className="fin-msum__icons no-print">
+            <a className="fin-iconbtn fin-iconbtn--plain" href={exportHref(book.projectId, filter)} aria-label="ייצוא ל-Excel"><ExcelIcon /></a>
+            <button type="button" className="fin-iconbtn fin-iconbtn--plain" onClick={() => window.print()} aria-label="הדפסה"><PrintIcon /></button>
+            <button type="button" className="fin-iconbtn fin-iconbtn--plain" aria-expanded={panel === 'link'} onClick={() => toggle('link')} aria-label="קישור לקובץ Excel"><LinkIcon /></button>
+          </div>
         </div>
         <div className="fin-msum__row"><span>הכנסות</span><strong className="fin-num">{shekels(book.period.income)}</strong></div>
         <div className="fin-msum__row"><span>סה״כ הוצאה כולל מס 3%</span><strong className="fin-num">{shekels(book.period.totalExpense)}</strong></div>
@@ -70,10 +75,17 @@ export function FinanceMobile({ book, today }: Props) {
 
       <div className="fin-mactions no-print">
         {book.canWrite && <Button block onClick={() => setSheet({ row: null })}>הוספת תנועה</Button>}
-        <Button variant="secondary" block aria-expanded={panel === 'filter'} onClick={() => toggle('filter')}>סינון</Button>
+        <Button variant="secondary" block onClick={() => setFilterOpen(true)}><FilterIcon /> סינון{filtered && <span className="fin-count">{(filter.day !== undefined ? 1 : 0) + (filter.search ? 1 : 0)}</span>}</Button>
       </div>
       {!book.canWrite && <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}
-      {panel === 'filter' && <Card><Filters today={today} showMonth={false} /></Card>}
+      {panel === 'link' && <Card><ExcelLink projectId={book.projectId} link={book.excelLink} canWrite={book.canWrite} /></Card>}
+      {filtered && (
+        <div className="fin-chips" aria-label="סינון פעיל">
+          {filter.day !== undefined && <span className="fin-chip">יום {filter.day}<button type="button" aria-label="הסרת סינון יום" onClick={() => go({ ...filter, day: undefined })}>×</button></span>}
+          {filter.search && <span className="fin-chip">{filter.search}<button type="button" aria-label="הסרת חיפוש" onClick={() => go({ ...filter, search: undefined })}>×</button></span>}
+          <button type="button" className="fin-chips__clear" onClick={() => go({ period: filter.period })}>איפוס הכול</button>
+        </div>
+      )}
       {period === 'all' ? (
         <ul className="fin-list" aria-label="חודשים">
           {monthsNewestFirst(book).map(({ summary: s }) => (
@@ -120,12 +132,13 @@ export function FinanceMobile({ book, today }: Props) {
         </>
       )}
 
-      <div className="fin-footlinks no-print">
-        <ExcelLink projectId={book.projectId} link={book.excelLink} canWrite={book.canWrite} />
-        <Button variant="secondary" size="small" onClick={() => window.print()}>הדפסה</Button>
-      </div>
-
       {cancelRow && <CancelConfirm projectId={book.projectId} row={cancelRow} onClose={() => setCancelRow(null)} />}
+
+      {filterOpen && (
+        <EntrySheet title="סינון תנועות" onClose={() => setFilterOpen(false)}>
+          <Filters today={today} showMonth={false} onDone={() => setFilterOpen(false)} />
+        </EntrySheet>
+      )}
 
       {sheet && (
         <EntrySheet title={sheet.row ? 'עריכת תנועה' : 'תנועה חדשה'} onClose={() => setSheet(null)}>
