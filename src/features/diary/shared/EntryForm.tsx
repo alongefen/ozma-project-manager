@@ -5,7 +5,7 @@ import { Button, FormActions, Notice } from '@/components/ui';
 import { FileUpload } from '@/components/upload/FileUpload';
 import { correctEntry, createEntry, listVersions, moveEntry } from '../logic/actions';
 import { format } from '@/lib/format';
-import { MAX_BODY, fileUrl, parseDraft, type DraftErrors, type ProjectOption } from './model';
+import { MAX_BODY, parseDraft, previewUrl, type DraftErrors, type ProjectOption } from './model';
 
 type Props = {
   /** Present when editing. Only the owner may change project and date (A-16); everyone else sees them fixed. */
@@ -116,10 +116,13 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, o
       <div className="ui-field">
         <span className="ui-field__label">תמונות או PDF</span>
         {files.length > 0 && (
-          <ul className="dr-files">
+          <ul className="dr-file-edit">
             {files.map(f => (
               <li key={f.id} className="dr-file-row">
-                <a href={fileUrl(f.id)} target="_blank" rel="noopener noreferrer" className="dr-file"><span className="ltr">{f.name}</span></a>
+                {previewUrl(f)
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={previewUrl(f)!} alt={f.name} className="dr-thumb dr-thumb--small" />
+                  : <span className="dr-file ltr">{f.name}</span>}
                 <Button variant="secondary" size="small" aria-label={`הסרת ${f.name} מהדיווח`} onClick={() => setFiles(list => list.filter(x => x.id !== f.id))}>הסרה</Button>
               </li>
             ))}

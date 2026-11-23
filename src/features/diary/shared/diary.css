@@ -39,3 +39,19 @@
 @media (min-width: 1024px) {
   .dr-desktop__grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
 }
+
+/* Sticky filter and print bar (top of the log). On the phone the general diary sits under the shell header. */
+.dr-toolbar { position: sticky; top: 0; z-index: 10; display: flex; gap: 8px; padding: 8px 0; background: var(--bg, var(--surface)); }
+.dr-toolbar--under { top: var(--header-h); }
+.dr-toolbar .ui-btn { flex: 1; min-height: 44px; }
+.dr-toolbar__count { margin-inline-start: 6px; min-width: 22px; padding: 0 6px; border-radius: 11px; background: var(--blue); color: var(--surface); font-size: 13px; }
+.dr-att { display: grid; gap: 8px; min-width: 0; }
+.dr-thumbs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.dr-thumbs li { min-width: 0; }
+.dr-thumb { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); background: var(--gray-bg); }
+.dr-thumb--small { width: 72px; height: 72px; }
+.dr-file-edit { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+@media (min-width: 1024px) {
+  .dr-thumbs { grid-template-columns: repeat(auto-fill, 120px); }
+  .dr-toolbar .ui-btn { flex: 0 0 auto; }
+}

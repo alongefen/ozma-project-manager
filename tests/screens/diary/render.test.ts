@@ -32,12 +32,32 @@ describe('טופס הדיווח הוא חלון, לא עמוד', () => {
   });
 });
 
+describe('טלפון ותצוגה מקדימה', () => {
+  it('בטלפון אין כפתור דיווח חדש בראש היומן (יש בשורה התחתונה); בדסקטופ יש', () => {
+    const mobile = renderToStaticMarkup(h(DiaryProvider, { screen: screen(), children: h(DiaryMobile, { screen: screen() }) }));
+    expect(mobile).not.toContain('דיווח חדש');
+    const desktop = renderToStaticMarkup(h(DiaryProvider, { screen: screen(), children: h(DiaryDesktop, { screen: screen(), title: 'יומן' }) }));
+    expect(desktop).toContain('דיווח חדש');
+  });
+  it('תמונה מוצגת בתצוגה מקדימה קטנה; PDF כשם קובץ; בלי מזהה פרויקט', () => {
+    const files = [
+      { id: '33333333-3333-4333-8333-333333333333', name: 'crack.png', mime: 'image/png', sizeBytes: 5, displayState: 'ready' as const },
+      { id: '44444444-4444-4444-8444-444444444444', name: 'plan.pdf', mime: 'application/pdf', sizeBytes: 5, displayState: 'none' as const },
+    ];
+    const out = html(screen({ rows: [row({ files })] }));
+    expect(out).toContain('/api/storage/files/33333333-3333-4333-8333-333333333333?variant=display');
+    expect(out).toContain('plan.pdf');
+    expect(out).not.toContain(P);
+  });
+});
+
 describe('מסכי היומן', () => {
   it('מי שרשאי לדווח רואה כפתור דיווח חדש; הדפסה לכל אחד', () => {
     const out = html(screen());
     expect(out).toContain('דיווח חדש');
     expect(out).toContain('/api/reports/diary?kind=entry');
-    expect(out).toContain('הדפסה או PDF לפי תאריך');
+    expect(out).toContain('הדפסה / PDF לפי תאריך');
+    expect(out).toContain('dr-toolbar');
   });
   it('פרויקט שהסתיים: אין דיווח חדש, אין עריכה וביטול, ההדפסה נשארת', () => {
     const out = html(screen({ canReport: false, readOnlyNote: 'הפרויקט הסתיים או בארכיון. אפשר לצפות ולהדפיס בלבד.' }));

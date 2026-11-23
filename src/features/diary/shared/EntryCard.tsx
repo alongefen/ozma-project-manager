@@ -2,7 +2,8 @@
 import type { DiaryRow } from '@/types/contracts';
 import { Button, Card } from '@/components/ui';
 import { format } from '@/lib/format';
-import { editedText, fileUrl, isImage, reportUrl } from './model';
+import { Attachments } from './Attachments';
+import { editedText, reportUrl } from './model';
 
 /** One report: who wrote it and when (server time), the text, attachments, and only the actions the server allows. */
 export function EntryCard({ row, showProject, onEdit, onCancel }: { row: DiaryRow; showProject: boolean; onEdit?: (row: DiaryRow) => void; onCancel?: (row: DiaryRow) => void }) {
@@ -16,17 +17,7 @@ export function EntryCard({ row, showProject, onEdit, onCancel }: { row: DiaryRo
       {showProject && <p className="dr-card__project">{row.projectName}</p>}
       <p className="dr-card__body">{row.body}</p>
       {edited && <p className="dr-card__edited">{edited}</p>}
-      {row.files.length > 0 && (
-        <ul className="dr-files">
-          {row.files.map(f => (
-            <li key={f.id}>
-              <a href={fileUrl(f.id)} target="_blank" rel="noopener noreferrer" className="dr-file">
-                {isImage(f.mime) ? '🖼' : '📄'} <span className="ltr">{f.name}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
+      <Attachments files={row.files} />
       <div className="dr-card__actions">
         <a className="ui-btn ui-btn--secondary ui-btn--small" href={reportUrl({ kind: 'entry', entryId: row.id })} target="_blank" rel="noopener noreferrer">הדפסה / PDF</a>
         {row.canCorrect && onEdit && <Button variant="secondary" size="small" onClick={() => onEdit(row)}>עריכה</Button>}
