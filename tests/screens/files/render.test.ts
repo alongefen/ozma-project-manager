@@ -35,10 +35,10 @@ describe('הרשאות במסך', () => {
     expect(html).toContain('>גישה<');
     expect(html).toContain('לארכיון');
   });
-  it('פרויקט שהסתיים או עובד: צפייה בלבד, בלי העלאה', () => {
+  it('פרויקט שהסתיים או עובד: בלי העלאה, בלי העלאה', () => {
     const html = page({ canUpload: false, isOwner: false });
     expect(html).not.toContain('העלאת מסמך');
-    expect(html).toContain('לצפייה והדפסה בלבד');
+    expect(html).toContain('אין הרשאה להעלות');
     expect(html).toContain('פתיחה');
   });
   it('בטלפון מוצגים מסך קטגוריות בלי שורת לשוניות', () => {

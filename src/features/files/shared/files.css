@@ -30,5 +30,4 @@
 .fl-split { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 20px; align-items: start; }
 @media (min-width: 1024px) {
   .fl-list { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
-  .fl-card__actions { flex-wrap: wrap; }
 }

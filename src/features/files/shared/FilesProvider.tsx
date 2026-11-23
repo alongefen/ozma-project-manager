@@ -60,7 +60,7 @@ export function FilesProvider({ projectId, active, archived, candidates, canUplo
     canUpload, isOwner, candidates, showArchived, category, search, archivedCount: archived.length,
     counts: countsOf(source), shown: visibleDocuments(source, category, search),
     setCategory, setSearch, setShowArchived,
-    openUpload: () => { setUploadError(null); setPending(null); setUpload({ category }); },
+    openUpload: () => { setUploadError(null); setUpload({ category: pending?.category ?? category }); },
     openAccess: d => { setAccessError(null); setAccessDoc(d); },
     askArchive: d => { setArchiveError(null); setArchiveDoc(d); },
   };
@@ -121,7 +121,7 @@ export function FilesProvider({ projectId, active, archived, candidates, canUplo
             pending={pending?.files ?? []} busy={uploadBusy} error={uploadError}
             onUploaded={(files, cat, access) => { void save(files, cat, access); }}
             onSave={() => { if (pending) void save(pending.files, pending.category, pending.access); }}
-            onClose={() => { setUpload(null); setPending(null); }} />
+            onClose={() => setUpload(null)} />
         )}
       </Sheet>
       <Sheet open={accessDoc !== null} onClose={() => setAccessDoc(null)} dismissible={!accessBusy} title="הרשאות צפייה במסמך">

@@ -16,7 +16,7 @@ export function FilesDesktop() {
         <h2 className="fl-bar__title">מסמכים</h2>
         {canUpload && <Button onClick={openUpload}>+ העלאת מסמך</Button>}
       </div>
-      {!canUpload && <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}
+      {!canUpload && <Notice>אין הרשאה להעלות מסמכים כאן. אפשר לפתוח ולהוריד.</Notice>}
       <div className="fl-split">
         <Card panel>
           <ul className="fl-catlist" aria-label="קטגוריות">
