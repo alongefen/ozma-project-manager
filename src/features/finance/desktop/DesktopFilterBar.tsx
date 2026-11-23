@@ -11,18 +11,8 @@ import { currentMonth, yearOptions } from '../shared/query';
 export function DesktopFilterBar({ today }: { today: string }) {
   const { filter, go } = useFinanceNav();
   const uid = useId();
-  const [search, setSearch] = useState(filter.search ?? '');
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
-  const base = currentMonth(today);
-
-  // Live search: wait for a pause in typing, then ask the server.
-  useEffect(() => {
-    const text = search.trim();
-    if (text === (filter.search ?? '')) return;
-    const timer = setTimeout(() => go({ ...filter, search: text || undefined }), 400);
-    return () => clearTimeout(timer);
-  }, [search, filter, go]);
 
   useEffect(() => {
     if (!open) return;
@@ -34,9 +24,9 @@ export function DesktopFilterBar({ today }: { today: string }) {
   }, [open]);
 
   const period = filter.period;
-  const nonDefaultPeriod = period === 'all' || period.year !== base.year || period.month !== base.month;
+  const nonDefaultPeriod = period !== 'all';
   const chips: { key: string; label: string; remove: () => void }[] = [];
-  if (nonDefaultPeriod) chips.push({ key: 'period', label: period === 'all' ? 'כל התקופה' : monthLabel(period), remove: () => go({ ...filter, period: base }) });
+  if (nonDefaultPeriod) chips.push({ key: 'period', label: monthLabel(period as { year: number; month: number }), remove: () => go({ ...filter, period: 'all' }) });
   if (filter.day !== undefined) chips.push({ key: 'day', label: `יום ${filter.day}`, remove: () => go({ ...filter, day: undefined }) });
   const activeCount = chips.length + (filter.search ? 1 : 0);
 
@@ -44,7 +34,7 @@ export function DesktopFilterBar({ today }: { today: string }) {
     <div className="fin-fbar">
       <div className="fin-field fin-fbar__search">
         <label htmlFor={`${uid}-s`}>חיפוש ספק / פרטים</label>
-        <input id={`${uid}-s`} type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="הקלידו לחיפוש" />
+        <input id={`${uid}-s`} type="search" value={filter.search ?? ''} onChange={e => go({ ...filter, search: e.target.value || undefined })} placeholder="הקלידו לחיפוש" />
       </div>
       <div className="fin-pop" ref={wrap}>
         <Button variant="secondary" aria-expanded={open} aria-haspopup="dialog" onClick={() => setOpen(v => !v)}>
@@ -57,7 +47,7 @@ export function DesktopFilterBar({ today }: { today: string }) {
           <span key={c.key} className="fin-chip">{c.label}<button type="button" aria-label={`הסרת סינון: ${c.label}`} onClick={c.remove}>×</button></span>
         ))}
         {(chips.length > 0 || filter.search) && (
-          <button type="button" className="fin-chips__clear" onClick={() => { setSearch(''); go({ period: base }); }}>איפוס הכול</button>
+          <button type="button" className="fin-chips__clear" onClick={() => go({ period: 'all' })}>איפוס הכול</button>
         )}
       </div>
     </div>
@@ -67,16 +57,14 @@ export function DesktopFilterBar({ today }: { today: string }) {
 function FilterPanel({ today, filter, onApply, onClose }: { today: string; filter: FinanceFilter; onApply: (f: FinanceFilter) => void; onClose: () => void }) {
   const uid = useId();
   const base = currentMonth(today);
-  const start = filter.period === 'all' ? base : filter.period;
-  const [all, setAll] = useState(filter.period === 'all');
-  const [month, setMonth] = useState(String(start.month));
-  const [year, setYear] = useState(String(start.year));
+  const [month, setMonth] = useState(filter.period === 'all' ? '' : String(filter.period.month));
+  const [year, setYear] = useState(filter.period === 'all' ? '' : String(filter.period.year));
   const [day, setDay] = useState(filter.day === undefined ? '' : String(filter.day));
   const d = Number(day);
   const dayOk = !day.trim() || (Number.isInteger(d) && d >= 1 && d <= 31);
   const apply = () => {
     if (!dayOk) return;
-    const next: FinanceFilter = { period: all ? 'all' : { year: Number(year), month: Number(month) } };
+    const next: FinanceFilter = { period: month ? { year: Number(year || base.year), month: Number(month) } : 'all' };
     if (day.trim()) next.day = d;
     if (filter.search) next.search = filter.search;
     onApply(next);
@@ -85,17 +73,16 @@ function FilterPanel({ today, filter, onApply, onClose }: { today: string; filte
     <div className="fin-pop__panel" role="dialog" aria-label="סינון תנועות">
       <div className="fin-pop__head">
         <strong>סינון</strong>
-        <button type="button" className="fin-chips__clear" onClick={() => onApply({ period: base, ...(filter.search ? { search: filter.search } : {}) })}>ניקוי הכול</button>
+        <button type="button" className="fin-chips__clear" onClick={() => onApply({ period: 'all', ...(filter.search ? { search: filter.search } : {}) })}>ניקוי הכול</button>
       </div>
-      <label className="fin-check"><input type="checkbox" checked={all} onChange={e => setAll(e.target.checked)} /> כל התקופה</label>
       <div className="fin-pop__grid">
         <div className="fin-field">
           <label htmlFor={`${uid}-m`}>חודש</label>
-          <select id={`${uid}-m`} disabled={all} value={month} onChange={e => setMonth(e.target.value)}>{MONTH_NAMES.map((n, i) => <option key={n} value={i + 1}>{n}</option>)}</select>
+          <select id={`${uid}-m`} value={month} onChange={e => setMonth(e.target.value)}><option value="">הכול</option>{MONTH_NAMES.map((n, i) => <option key={n} value={i + 1}>{n}</option>)}</select>
         </div>
         <div className="fin-field">
           <label htmlFor={`${uid}-y`}>שנה</label>
-          <select id={`${uid}-y`} disabled={all} value={year} onChange={e => setYear(e.target.value)}>{yearOptions(today, Number(year)).map(y => <option key={y} value={y}>{y}</option>)}</select>
+          <select id={`${uid}-y`} value={year} onChange={e => setYear(e.target.value)}><option value="">{month ? String(base.year) : 'הכול'}</option>{yearOptions(today, Number(year) || undefined).map(y => <option key={y} value={y}>{y}</option>)}</select>
         </div>
         <div className="fin-field">
           <label htmlFor={`${uid}-d`}>יום בחודש</label>

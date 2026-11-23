@@ -11,19 +11,19 @@ import { CancelConfirm } from '../shared/CancelConfirm';
 import { ExcelIcon, PencilIcon, TrashIcon } from '../shared/FinIcons';
 import { SummaryDetails } from '../shared/Summary';
 import { useFinanceNav } from '../shared/nav';
-import { KIND_LABELS, bookRows, isIncomeKind, monthLabel, monthsNewestFirst, rowAmount, rowDate, shekels } from '../shared/present';
+import { KIND_LABELS, bookRows, visibleRows, isIncomeKind, monthLabel, monthsNewestFirst, rowAmount, rowDate, shekels } from '../shared/present';
 import { ProjectInnerNav } from '@/features/projects/shared/ProjectInnerNav';
 import { sectionsFor } from '@/features/projects/shared/view-model';
 import { currentMonth, exportHref, financeHref } from '../shared/query';
 
-type Props = { book: FinanceBook; today: string };
+type Props = { book: FinanceBook; filteredRows: FinanceBook['filteredRows']; today: string };
 
 /** Desktop (from 1024): the demo's content in one panel: summary on top, filters, quick entry, table. */
-export function FinanceDesktop({ book, today }: Props) {
-  const { filter } = useFinanceNav();
+export function FinanceDesktop({ book, filteredRows, today }: Props) {
+  const { filter, totalsReady } = useFinanceNav();
   const [dialog, setDialog] = useState<{ row: TransactionRow | null } | null>(null);
   const [cancelRow, setCancelRow] = useState<TransactionRow | null>(null);
-  const rows = bookRows(book.months);
+  const rows = visibleRows(bookRows(book.months), filter);
   const period = filter.period;
   const entryMonth = period === 'all' ? currentMonth(today) : period;
   const filtered = filter.day !== undefined || !!filter.search;
@@ -87,7 +87,7 @@ export function FinanceDesktop({ book, today }: Props) {
               ))}
             </tbody>
             <tfoot>
-              <tr><th scope="row" colSpan={2}>סיכום התנועות המוצגות</th><td className="fin-num">{shekels(book.filteredRows.income)}</td><td className="fin-num">{shekels(book.filteredRows.expense)}</td><td className="no-print" /></tr>
+              <tr><th scope="row" colSpan={2}>סיכום התנועות המוצגות</th><td className="fin-num" aria-busy={!totalsReady}>{totalsReady ? shekels(filteredRows.income) : '…'}</td><td className="fin-num">{totalsReady ? shekels(filteredRows.expense) : '…'}</td><td className="no-print" /></tr>
             </tfoot>
           </table>
         </div>

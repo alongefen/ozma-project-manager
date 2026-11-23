@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { MonthBlock, TransactionRow } from '@/types/contracts';
 import { parseFilter, exportHref, financeHref, yearOptions } from '@/features/finance/shared/query';
 import { parseDraft } from '@/features/finance/shared/draft';
-import { agorotToInput, bookRows, draftFromRow, monthLabel, percent, rowAmount, rowDate } from '@/features/finance/shared/present';
+import { agorotToInput, bookRows, draftFromRow, monthLabel, percent, rowAmount, rowDate, visibleRows } from '@/features/finance/shared/present';
 
 const today = '2026-11-23';
 const id = '11111111-1111-4111-8111-111111111111';
@@ -11,18 +11,18 @@ const row = (over: Partial<TransactionRow>): TransactionRow => ({
 });
 
 describe('סינון מהכתובת', () => {
-  it('ברירת מחדל: החודש הנוכחי לפי תאריך השרת', () => {
-    expect(parseFilter({}, today)).toEqual({ period: { year: 2026, month: 11 } });
+  it('ברירת מחדל: כל התקופה, בלי סינון', () => {
+    expect(parseFilter({})).toEqual({ period: 'all' });
   });
   it('כל התקופה, יום וחיפוש', () => {
-    expect(parseFilter({ period: 'all', day: '5', search: ' ספק ' }, today)).toEqual({ period: 'all', day: 5, search: 'ספק' });
+    expect(parseFilter({ period: 'all', day: '5', search: ' ספק ' })).toEqual({ period: 'all', day: 5, search: 'ספק' });
   });
   it('ערכים שגויים נופלים לברירת מחדל', () => {
-    expect(parseFilter({ period: '2026-13', day: '40' }, today)).toEqual({ period: { year: 2026, month: 11 } });
-    expect(parseFilter({ period: 'x', day: 'a' }, today)).toEqual({ period: { year: 2026, month: 11 } });
+    expect(parseFilter({ period: '2026-13', day: '40' })).toEqual({ period: 'all' });
+    expect(parseFilter({ period: 'x', day: 'a' })).toEqual({ period: 'all' });
   });
   it('קישורים: ייצוא נושא מזהה, תקופה ומסננים', () => {
-    const filter = parseFilter({ period: '2026-03', day: '2', search: 'חול' }, today);
+    const filter = parseFilter({ period: '2026-03', day: '2', search: 'חול' });
     expect(financeHref(id, filter)).toBe(`/projects/${id}/finance?period=2026-03&day=2&search=${encodeURIComponent('חול')}`);
     const url = new URL(exportHref(id, filter), 'http://x');
     expect(url.pathname).toBe('/api/exports/finance');
@@ -79,5 +79,18 @@ describe('הצגה', () => {
       { summary: {} as never, incomeRows: [row({ id: 'c', month: 11, position: 1 })], expenseRows: [] },
     ] as MonthBlock[];
     expect(bookRows(blocks).map(r => r.id)).toEqual(['c', 'b', 'a']);
+  });
+});
+
+describe('סינון מקומי של שורות טעונות', () => {
+  const rows = [row({ id: 'a', day: 3, details: 'חומרי בניין' }), row({ id: 'b', day: 5, details: 'שכר קבלן' }), row({ id: 'c', day: null, details: 'חומרי גמר' })];
+  it('בלי סינון: הכול', () => { expect(visibleRows(rows, {}).length).toBe(3); });
+  it('חיפוש בפרטים, בלי תלות ברווחים וגודל אותיות', () => {
+    expect(visibleRows(rows, { search: '  חומרי ' }).map(r => r.id)).toEqual(['a', 'c']);
+  });
+  it('יום ושילוב עם חיפוש', () => {
+    expect(visibleRows(rows, { day: 5 }).map(r => r.id)).toEqual(['b']);
+    expect(visibleRows(rows, { day: 3, search: 'חומרי' }).map(r => r.id)).toEqual(['a']);
+    expect(visibleRows(rows, { day: 3, search: 'קבלן' })).toEqual([]);
   });
 });

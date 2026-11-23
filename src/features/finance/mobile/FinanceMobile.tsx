@@ -11,13 +11,13 @@ import { ExcelLink } from '../shared/ExcelLink';
 import { Filters } from '../shared/Filters';
 import { SummaryDetails } from '../shared/Summary';
 import { useFinanceNav } from '../shared/nav';
-import { KIND_LABELS, bookRows, isReduction, monthLabel, monthsNewestFirst, rowAmount, rowDate, shekels } from '../shared/present';
+import { KIND_LABELS, bookRows, visibleRows, isReduction, monthLabel, monthsNewestFirst, rowAmount, rowDate, shekels } from '../shared/present';
 import { currentMonth, exportHref, financeHref } from '../shared/query';
 import { EntrySheet } from '../shared/EntrySheet';
 import { CancelConfirm } from '../shared/CancelConfirm';
 import { ExcelIcon, FilterIcon, LinkIcon, PencilIcon, PrintIcon, TrashIcon } from '../shared/FinIcons';
 
-type Props = { book: FinanceBook; today: string };
+type Props = { book: FinanceBook; filteredRows: FinanceBook['filteredRows']; today: string };
 
 const step = (m: { year: number; month: number }, delta: number) => {
   const index = m.year * 12 + (m.month - 1) + delta;
@@ -25,15 +25,15 @@ const step = (m: { year: number; month: number }, delta: number) => {
 };
 
 /** Phone (up to 1023): back arrow, period switch, one summary, a grouped list, an entry sheet. No table, no tab bar. */
-export function FinanceMobile({ book, today }: Props) {
-  const { filter, go } = useFinanceNav();
+export function FinanceMobile({ book, filteredRows, today }: Props) {
+  const { filter, go, totalsReady } = useFinanceNav();
   const [sheet, setSheet] = useState<{ row: TransactionRow | null } | null>(null);
   const [cancelRow, setCancelRow] = useState<TransactionRow | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const [panel, setPanel] = useState<'link' | null>(null);
   const period = filter.period;
   const entryMonth = period === 'all' ? currentMonth(today) : period;
-  const rows = bookRows(book.months);
+  const rows = visibleRows(bookRows(book.months), filter);
   const filtered = filter.day !== undefined || !!filter.search;
   const toggle = (p: 'link') => setPanel(v => (v === p ? null : p));
 
@@ -127,7 +127,7 @@ export function FinanceMobile({ book, today }: Props) {
             )}
           </ul>
           {filtered && (
-            <p className="fin-filteredsum">סיכום התנועות המוצגות: הכנסה <b className="fin-num">{shekels(book.filteredRows.income)}</b> · הוצאה <b className="fin-num">{shekels(book.filteredRows.expense)}</b></p>
+            <p className="fin-filteredsum">סיכום התנועות המוצגות: הכנסה <b className="fin-num">{totalsReady ? shekels(filteredRows.income) : '…'}</b> · הוצאה <b className="fin-num">{totalsReady ? shekels(filteredRows.expense) : '…'}</b></p>
           )}
         </>
       )}

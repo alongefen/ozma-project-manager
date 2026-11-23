@@ -14,12 +14,13 @@ export function currentMonth(today: IsoDate): Month {
   return { year: Number(today.slice(0, 4)), month: Number(today.slice(5, 7)) };
 }
 
-export function parseFilter(query: FinanceQuery, today: IsoDate): FinanceFilter {
+/** Default is the whole period: no filter at all. */
+export function parseFilter(query: FinanceQuery): FinanceFilter {
   const period = first(query.period);
   const match = period ? /^(\d{4})-(\d{2})$/.exec(period) : null;
   const month = match ? { year: Number(match[1]), month: Number(match[2]) } : null;
   const valid = month && month.year >= 2000 && month.year <= 2100 && month.month >= 1 && month.month <= 12;
-  const filter: FinanceFilter = { period: period === 'all' ? 'all' : valid ? month : currentMonth(today) };
+  const filter: FinanceFilter = { period: valid ? month : 'all' };
   const day = first(query.day);
   if (day && /^\d{1,2}$/.test(day) && Number(day) >= 1 && Number(day) <= 31) filter.day = Number(day);
   const search = first(query.search)?.trim();

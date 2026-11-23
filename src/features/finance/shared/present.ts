@@ -1,5 +1,6 @@
 import type { FinanceBook, MonthBlock, TransactionFields, TransactionKind, TransactionRow } from '@/types/contracts';
 import { format } from '@/lib/format';
+import type { FinanceFilter } from '@/types/contracts';
 
 /** Presentation helpers only. Every amount arrives already calculated by the finance logic. */
 export const MONTH_NAMES = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
@@ -60,3 +61,9 @@ export function draftFromRow(row: TransactionRow): EntryDraft {
 export type DraftResult =
   | { ok: true; fields: TransactionFields }
   | { ok: false; errors: Partial<Record<'month' | 'year' | 'day' | 'amount' | 'details', string>> };
+
+/** Narrows already loaded rows by day and text, the same way the server does (same search key), so typing answers at once. */
+export function visibleRows(rows: TransactionRow[], filter: Pick<FinanceFilter, 'day' | 'search'>): TransactionRow[] {
+  const key = format.searchKey(filter.search ?? '');
+  return rows.filter(r => (filter.day === undefined || r.day === filter.day) && (!key || format.searchKey(r.details).includes(key)));
+}

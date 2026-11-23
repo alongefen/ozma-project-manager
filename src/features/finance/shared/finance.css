@@ -11,7 +11,7 @@
 .fin h2, .fin-h2 { font-size: 18px; font-weight: 800; margin: 0; }
 .fin-field { display: grid; gap: 6px; min-width: 0; align-content: start; }
 .fin-field label, .fin-field__legend { font-size: 14px; font-weight: 600; }
-.fin select, .fin input:not([type]), .fin input[type='text'] {
+.fin select, .fin input:not([type]), .fin input[type='text'], .fin input[type='search'] {
   width: 100%; min-height: 44px; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--field-line);
   border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 16px; min-width: 0; text-align: start;
 }
@@ -187,3 +187,4 @@
 .fin-msum__icons { display: flex; align-items: center; gap: 2px; margin: -6px; }
 .fin-iconbtn--plain { border-color: transparent; background: transparent; color: var(--ink); }
 .fin-mobile .ui-btn .fin-icon { margin-inline-end: 2px; }
+.fin-fbar .ui-btn, .fin-fbar input { min-height: 46px; box-sizing: border-box; }

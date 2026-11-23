@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 import type { Platform, RequestContext } from '@/types/contracts';
-import { loadFinance } from '@/features/finance/shared/load';
+import { loadFinance, loadFinanceScreen } from '@/features/finance/shared/load';
 import { format } from '@/lib/format';
 
 const projectId = '11111111-1111-4111-8111-111111111111';
@@ -43,5 +43,13 @@ describe('מנהל בלי גישה לכספים', () => {
   it('כשל תשתית אינו hidden ואינו מציג אפסים', async () => {
     const p = { permissions: { forProject: async () => ({ ok: false, error: { code: 'UNAVAILABLE', message: 'הפעולה לא הושלמה' } }) } } as unknown as Platform;
     expect(await loadFinance(p, ctx, projectId, { period: 'all' })).toEqual({ kind: 'error', message: 'הפעולה לא הושלמה' });
+  });
+});
+
+describe('טעינת המסך', () => {
+  it('מנהל בלי גישה מקבל hidden גם דרך טעינת המסך, ללא שליפת נתונים', async () => {
+    const { p, touched } = platform({ view: true, viewFinance: false, writeFinance: false, cancelTransaction: false });
+    expect(await loadFinanceScreen(p, ctx, projectId, { period: 'all', day: 3, search: 'בדוי' })).toEqual({ kind: 'hidden' });
+    expect(touched).toEqual([]);
   });
 });
