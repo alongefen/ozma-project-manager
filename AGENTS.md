@@ -1,143 +1,89 @@
-<div dir="rtl">
+# Agent instructions
 
-# הנחיות לסוכנים
+A project management system for the construction company "חי עוצמה בבנייה": a webapp that is Hebrew and RTL from the ground up, for phone and desktop. The full decisions are in [DECISIONS](docs/DECISIONS.md). This file holds only what every session needs.
 
-מערכת ניהול פרויקטים ל״חי עוצמה בבנייה״: webapp בעברית ו-RTL מלידה, לטלפון ולמחשב.
+## What to read
 
-## סדר קריאה
+- **Task session:** this file, the brief, `docs/tasks/<ID>.md` and the task's section in WORK_PLAN. For the other docs (PRD, ARCHITECTURE, PERMISSIONS, DESIGN, DECISIONS), read only the sections the brief points to, with `rg` and `sed -n`. Never read a whole doc.
+- **Project manager:** also [NEXT_SESSION](docs/NEXT_SESSION.md) and `git log`.
+- Don't read other sessions' transcripts (`.jsonl`). The state lives in the task files and in Git.
 
-1. הקובץ הזה, `AGENTS.md`
-2. [docs/NEXT_SESSION.md](docs/NEXT_SESSION.md)
-3. [docs/WORK_PLAN.md](docs/WORK_PLAN.md)
-4. [docs/DECISIONS.md](docs/DECISIONS.md)
+## How we work (A-39)
 
-אחר כך קוראים את הסעיפים הרלוונטיים ב-[PRD](docs/PRD.md), את [השאלות הפתוחות](docs/OPEN_QUESTIONS.md) ואת קובץ המשימה.
+- **Two layers.** The project manager opens a task session with a brief that follows the [template](docs/handoffs/TEMPLATE.md). The task session builds the code itself and runs one `reviewer` subagent for review and tests. Use the `builder` subagent only for a large, isolated piece in separate files.
+- **Models.** Subagents run on Sonnet. Use Opus only for an especially hard design or debugging task.
+- **Parallel work (A-33, A-37).** On its own initiative, the project manager finds isolated work within the approved scope and opens sessions for it, without asking for approval of the order. Before that, it checks the existing sessions and worktrees to avoid duplicates. At most two task sessions run at once.
+- **The project manager stays short-lived.** It opens a task, updates NEXT_SESSION and closes. It doesn't watch sessions in a loop, write code or run tests. A new manager session starts from NEXT_SESSION and Git.
+- **Docs-only changes** are made directly in the session, with no subagents and no code checks (A-36). Read the diff once before committing.
+- **Keep output short.** Run tests with a quiet reporter and `| tail -40`. Screenshots stay inside the reviewer.
+- **One review per change.** Go back to it only for a concrete finding or a part that changed since. After a rebase that doesn't change content, check the diff; no second review is needed.
+- **No approval from Alon is needed to merge (A-26).** The task session merges after the review. The product gates and D31 still apply. Ask Alon only for a missing decision or something outside an approval. Never ask again for an approval already given, and don't reopen G0, G1 or GU (A-18, A-21, A-24).
 
-## עבודה מעשית וממוקדת תוצאה
+## Sources of truth
 
-החלטת אלון, 22.11.2026: שומרים על מעקב מסודר ב-docs, אבל מצמצמים מורכבות ותהליכים מיותרים. מודדים התקדמות לפי יכולות שנבנו ועובדות.
+- An Alon decision is not the same as something derived from one, said in a meeting, or recommended. Only a real Alon decision goes into DECISIONS, with a date.
+- When sources conflict, the order is: Alon's message, the transcript, the guide, then the demo. Record the conflict.
+- Maor relays what Ben wants. His words are not a direct approval from Ben.
+- The desktop design matches the demo exactly (A-23), without bringing back scope that was cut. The Excel file is a source for data and calculations only.
+- Don't claim something was read or checked unless it was. Don't widen the scope. A task is a note with a due date, with no assignee and no reminders.
+- Leads, Make and GREEN API belong to the next phase (A-01). They get no navigation, screen, table or permission.
 
-- מתכננים ומתעדים רק את מה שנחוץ לביצוע, לבדיקה ולהמשך העבודה. לא פותחים סבב תכנון או משימת ניקיון נפרדת בלי צורך ממשי. מאחדים עדכוני ניהול קרובים כשאפשר, בלי לעכב הסרת חסם.
-- WORK_PLAN מציגה בקצרה מה בונים, תלות, מצב ומה נחשב גמור. לא מעתיקים אליה את כל הדרישות וההחלטות.
-- DECISIONS מרכזת החלטות אמיתיות של אלון. במסמכים אחרים מפנים אליה במקום לשכפל אותן, ולא מבקשים שוב אישור שכבר ניתן.
-- קובץ משימה מתעד בקצרה מה השתנה, מה נבדק ומה נשאר. נקודת המשך כוללת מצב עדכני, הפעולה הבאה והפניות; אין צורך לשחזר את כל השיחה.
-- מסירים כפילויות והוראות מיושנות במהלך עדכון רלוונטי ובמסגרת בעלות הקבצים. לא משנים הנחיות לשיחות שכבר עובדות רק כדי לארגן מחדש את התהליך.
-- לפי A-36, בשינוי קוד מריצים רק בדיקות שהושפעו או נדרשות לפי סיכון מוגדר. ראיות קודמות נשארות תקפות; אין ריצה מחדש בגלל SHA, rebase או תיעוד בלבד. בסקירה אחת ממוקדת קוראים את ה-diff ואת הראיות; אין שער בדיקה נוסף אצל מנהל הפרויקט.
-- שומרים על שערי המיזוג ואישורי D31 שנקבעו. לא מוסיפים שערים או בקשות אישור לפעולות שכבר אושרו.
+## Product
 
-### קידום עבודה מקבילה (A-33)
+- **Depth first (A-03):** schema, permissions and logic functions with tests, including the finance calculations. Screens come only after P1.4.10 and G2.
+- **Roles (A-06, A-09, A-13, A-14):** owner, project manager and worker.
+  - Manager and worker are roles on the project membership, not on the user. Every permission check is against the project.
+  - Only Ben adds or removes access.
+  - A manager sees finance only if Ben opened it to them on that project.
+  - On a finished project, managers and workers can only view and print.
+- **Sign-in (A-09, A-34, A-35):** the email is the username, and there is no two-factor authentication. Don't set up an email or SMTP service, and don't wire up a blocking hook. Email confirmation is off on purpose.
+- **Work diary (A-08, A-12, A-16, A-19, A-20):**
+  - Only Ben changes a report's date or project.
+  - Each person edits only their own reports; Ben can edit all of them.
+  - Every version is kept, and nothing is physically deleted.
+  - A PDF for a given date is required. It shows the reporter, creation, edits and attached PDFs.
+  - The entry time is server time.
+  - No legal requirements. Hebrew PDF generation is proven, so there is no spike.
+- **Phone as an app (A-02, A-10):**
+  - The phone gets its own app-like design: buttons at the bottom, no sidebar, no horizontal scroll and no tab bar (UX-19). "דיווח חדש" (new report) is the prominent middle button.
+  - There are two shells, phone and desktop, and every feature delivers both together on top of shared logic.
+  - It's a webapp, not React Native.
 
-- מנהל הפרויקט מחפש ביוזמתו עבודה שאפשר לבצע במקביל בתוך היקף המוצר המאושר. כשאפשר לבודד קבצים ותלויות, הוא מעדכן סדר ובעלות, מכין פתיח ופותח בעצמו שיחת משימה לפי הצורך, אחרי שווידא שהוא מבין את המצב הנוכחי (A-37); אין להמתין לשאלה או לבקש שוב אישור לסדר הביצוע הזה.
-- בודקים שיחות ו-worktrees קיימים לפני הכנת המשך כדי למנוע כפילות. שלב עצמאי אינו משלים את האינטגרציה או פותח תלות שעדיין לא הושלמה. אין הרחבת מוצר, דילוג על שערי מוצר או הרחבת אישורי D31.
+## Technical (A-21)
 
-### שיחות משימה ותתי־סוכנים (A-30)
+- Next.js, cloud Supabase and Vercel. No local Supabase, no Docker.
+- Reads go through RLS; writes happen only in database functions. Only `actions.ts` is marked `'use server'`; `queries.ts` and `commands.ts` are `server-only`. Identity and context come from the server.
+- 50MB per project document; 25MB per report attachment and cover image. Keep the original file the phone sent. Whoever uploads a document sets its access, and after that only Ben edits it.
+- Backups are deferred; go back to Alon before there is real data.
 
-- כל שיחת משימה היא מנהל המשימה: היא מחלקת את העבודה לתת־סוכן פיתוח ולתת־סוכן נפרד לבדיקות ולסקירה. אלה subagents בתוך השיחה, לא שיחות חדשות שאלון צריך לפתוח. במשימת תיעוד מפעילים תת־סוכן לעריכה ותת־סוכן לסקירת ההפרש והעקביות, בלי בדיקות קוד מיותרות.
-- מנהל המשימה מגדיר לכל תת־סוכן היקף, קבצים שבבעלותו וקריטריוני מסירה. אין הרחבת בעלות או אישורים, ואין עריכה מקבילה באותם קבצים. הפיתוח והבדיקה נעשים במקביל רק כשהם עצמאיים; אחרת עובדים בסדר הנדרש.
-- מנהל המשימה אחראי לתוצאה: קורא את ממצאי הסקירה ואת ראיות הבדיקות, מחזיר תיקונים ממוקדים, מוודא שאין ממצא חוסם פתוח ומנהל PR ומיזוג. דיווח המסירה כולל מה נבנה, מה נבדק ותוצאות, מגבלות, קישור PR ו-SHA שמוזג.
-- מנהל הפרויקט מנהל את התמונה הכוללת: סדר עבודה, תלויות, בעלות, מצב התוצרים, שערי מוצר וחריגות. הוא מסתמך על מסירת מנהל המשימה ואינו מריץ בדיקות או משמש שער נוסף לסקירת קוד מפורטת. חוסר בראיות או ממצא קונקרטי מוחזר למנהל המשימה.
-- אם כלי subagents אינם זמינים, מדווחים על המגבלה ולא מציגים עבודה עצמית כהאצלה או סקירה עצמאית. מנהל המשימה מבהיר מה אפשר לקדם ומה נשאר לבדיקה.
-- חלוקה זו גוברת על הוראות ישנות בפתיחים ובמסמכי משימות שמפנות פיתוח או בדיקות למנהל השיחה או סקירה טכנית למנהל הפרויקט. משימות פעילות ממשיכות מהמצב הקיים; אין התחלה מחדש, שכתוב קוד או חזרה על בדיקות שעברו רק בגלל שינוי התפקידים. שערי המוצר ואישורי D31 נשארים בתוקף.
+## D31: migrations, costs and services
 
-### בדיקות ואישורים בלי סבבים מיותרים
+The existing development project is `izjmvyguzbampoasvnru` in Ireland (A-31). A new migration, new service, cost, paid AI, production or deployment needs explicit approval in advance, stating what, why, the cost and how to roll back. No resets, and no re-running existing migrations. An earlier approval never stretches to cover more.
 
-עדכון אלון, 22.11.2026: הכללים הבאים גוברים על הוראות תהליך ישנות במסמכי המשימות והתוכנית.
+## Git
 
-- סקירה אחת לשינוי: תת־סוכן הבדיקות והסקירה קורא את ההפרש ואת תוצאות הבדיקות, ומנהל המשימה מוודא טיפול בממצאים. חוזרים רק לממצא קונקרטי או לחלק ששונה מאז; אין בדיקה מלאה מחדש בגלל קומיט נוסף.
-- אין צורך באישור אלון למיזוג, גם לא במיזוג ראשון (A-26). אחרי הסקירה והבדיקות בתוך המשימה לפי A-30, שיחת המשימה ממזגת ומתעדת את ה-SHA. אחרי rebase ללא שינוי בתוכן מאמתים diff או range-diff והשפעת הבסיס, בלי סקירה חוזרת רק בגלל SHA חדש. שינוי מהותי חוזר לסקירה ממוקדת.
-- אישור GU או בדיקת משתמש שכבר ניתנו אינם נפתחים מחדש כשהתצוגה וההתנהגות לא השתנו.
-- לפני בקשת אישור בודקים אם כבר ניתן לאותה פעולה ובאותו היקף. פונים לאלון רק להחלטה חסרה או לחריגה מהאישור, לא להחלטות ביצוע שגרתיות בתוך המשימה.
-- שערי המוצר נשארים; אישור מיזוג נפרד בוטל. החלטה זו גוברת גם על דרישות אישור מיזוג ישנות במסמכים ובפתיחי שיחות משימה. מיגרציות, שירותים חדשים, עלויות, AI בתשלום ופריסה נשארים באישור מפורש לפי ההיקף שאושר; אין הרחבת אישור אוטומטית.
+- One branch per task, from an up-to-date `origin/main`. Work only in the files the task owns in WORK_PLAN; needing any other file means stopping and opening a serial shared change. Parallel tasks don't edit shared docs.
+- Docs go in the same commit as the change. Stage files by name, never `git add .`.
+- Before merging: fetch, rebase onto `origin/main`, and verify whatever came in.
+- After merging, update local `main` by fast-forward only and verify it matches `origin/main` (A-32). No reset, force or direct push to main, and never overwrite local work.
 
-## אמת ומקורות
+## Never in git
 
-- החלטת אלון, נגזר מהחלטה, נאמר בפגישה, אושר ב-G0 והצעה לתכנון אינם אותו דבר. המלצה וברירת מחדל אינן החלטה עד שאלון אישר. מה שאושר ב-G0 נמצא ב-DECISIONS, A-06 עד A-20. הכרעות G1 ב-A-21 ו-D31-1 ב-A-22 כבר אושרו; GU אושר ב-A-24.
-- כשיש סתירה: הודעת אלון, אחריה התמלול, אחריו המדריך, ולבסוף הדמו. את הסתירה רושמים.
-- מאור מתווך את רצון בן. דברים שאמר אינם אישור ישיר של בן.
-- רק החלטה אמיתית של אלון נכנסת ל-DECISIONS, עם תאריך.
-- המדריך והדמו הם חומר מקור. לפי הוראת אלון A-23, עיצוב המחשב חייב להיות זהה לדמו שנמסר; אין בכך החזרת התנהגות או היקף שבוטלו. האקסל הוא מקור לנתונים ולחישובים בלבד, לא לעיצוב. האפיון המתוקן של P0.3 אושר ב-GU (A-24).
-- לא טוענים שקראנו או בדקנו מה שלא קראנו או בדקנו.
-- לא מרחיבים היקף. משימה היא פתק עם תאריך יעד, בלי אחראי או תזכורות.
-- לידים, Make ו-GREEN API בשלב הבא (A-01). לא בונים להם ניווט, מסך, טבלה או הרשאה.
+- Secrets, tokens, and env files with values.
+- Client data: contact details, finances, the Excel file, files, backups and raw transcripts. From a transcript, keep only minute references.
+- `.claude/settings.local.json`, the source package and the guide's screenshots.
 
-## קודם עומק (A-03)
+Tests and examples use fake data only.
 
-סכמה עם טבלה לכל ישות, הרשאות ופונקציות לוגיקה עם בדיקות, כולל חישובי הכספים. רק אחרי שער העומק (P1.4.10) בונים מסך. אין שער סקיצה מול הלקוח.
+## Before calling something done
 
-## תפקידים וכניסה (A-06, A-09)
+- Run the tests the change affects and read their output. Earlier evidence stays valid as long as what it tested hasn't changed (A-36).
+- For a change to logic, data or permissions, also check on the server that forbidden actions are refused.
+- Check a new screen or layout change at 360, 375, 390, 768, 1024 and 1280, in Hebrew and RTL, with no horizontal scroll. For a spot fix, check only what was affected.
+- In the task file, record what was checked, the result, and what wasn't checked.
 
-- שלושה תפקידים: בעלים, מנהל פרויקט, עובד. **מנהל ועובד יושבים על השיוך לפרויקט, לא על המשתמש.** כל בדיקת הרשאה היא מול הפרויקט.
-- רק בן מוסיף ומסיר גישה לפרויקט.
-- סמכויות מנהל הפרויקט לפי A-13. כספים רק אם בן פתח לו בפרויקט הזה.
-- בפרויקט שהסתיים מנהל ועובד צופים ומדפיסים בלבד (A-14).
-- האימייל הוא שם המשתמש. אין אימות דו-שלבי. לפי A-34 אין להקים שירות מיילים או SMTP חדש; אין דרישת אפס מיילים ואין לחבר hook לחסימתם. ניהול החשבונות בידי בן נשאר, ואין בכך אישור לפיצ׳ר מיילים חדש.
+## Language
 
-## יומן העבודה (A-08, A-12, A-16)
-
-- רק בן משנה תאריך או פרויקט של דיווח. כל אחד מתקן תוכן וקבצים רק בדיווח שלו, ורק בן את כולם. כל גרסה נשמרת ואין מחיקה פיזית (A-08).
-- הדפסה או PDF של תאריך מסוים היא חובה. הדוח מציין מדווח, יצירה ועריכה.
-- לפי A-16: המקור נשמר, PDF מצורף נכנס לדוח, משתמשים, כולל בן, אינם משנים את היסטוריית התיקונים, ומועד ההזנה מוצג. נגזר: זמן שרת.
-- אין עיסוק בדרישות משפטיות (A-19). לא מוסיפים דרישות, בדיקות או הקשחות מסוג זה.
-- יצירת PDF בעברית ב-Next.js מוכחת אצל אלון (A-20). אין ספייק, ויש בדיקות קבלה רגילות. אישור הסטאק ניתן בנפרד ב-G1 (A-21).
-
-## טלפון כאפליקציה (A-02, A-10)
-
-**החלטת אלון:**
-- עיצוב שונה לטלפון, כמו אפליקציה, ולא ממשק המחשב מצומצם.
-- כפתורים בתחתית המסך, בלי סרגל צד ובלי גלילה לרוחב.
-- ״דיווח חדש״ הוא הכפתור האמצעי והבולט לכל המשתמשים.
-
-**איך עובדים לפיה, לפי התוכנית שאושרה ב-G0:**
-- כל מסך מאופיין פעמיים ב-DESIGN, ויש שתי מעטפות: טלפון ומחשב. נקודת המעבר נקבעת ב-P0.3, ואין מעטפת שלישית.
-- **כל משימת פיצ׳ר מוסרת את שתי התצוגות יחד**, מעל לוגיקה משותפת. לא דוחים את הטלפון למשימת בדיקות.
-- כלל עיצוב שהצענו ואושר ב-G0, שאינו מילים של אלון: בטלפון אין שורת לשוניות (UX-19).
-- זה webapp, לא React Native.
-
-## תכנון מאושר ב-G1 (A-21)
-
-- Next.js, Supabase בענן ו-Vercel. פיתוח ובדיקות מול הענן בלבד, בלי Supabase מקומי ובלי Docker.
-- קריאות עם RLS; כתיבה רק בפונקציות מסד. P1.2 בונה את כל הפונקציות עם גופן, החוזים, הטיפוסים ועזרי בדיקות המסד לפני עבודת הלוגיקה המקבילה.
-- רק `actions.ts` מסומן `'use server'`; ‏`queries.ts` ו-`commands.ts` הם `server-only`. זהות והקשר באים מהשרת.
-- זמנית: 50MB למסמך פרויקט; 25MB לצירוף דיווח ולתמונת שער. המקור הוא הקובץ שהטלפון מסר.
-- המעלה מגדיר גישה למסמך, ורק בן עורך אותה אחר כך. אפשר כמה מנהלים בפרויקט.
-- גיבוי נדחה בשלב הבנייה הראשוני; חוזרים לאלון לפני נתונים אמיתיים.
-
-## החלטה D31
-
-**מיגרציות, AI בתשלום ושירותים חדשים לפי אישורי אלון והיקפם.** אין לבקש שוב אישור שכבר ניתן. לפעולה שאינה מורשית מבקשים אישור מראש, עם מה, למה, עלות ודרך חזרה.
-
-D31-1 כבר אושרה, רק בחשבון הלקוח. P1.2 מוזגה והפעילה שלוש מיגרציות בפרויקט הקיים `izjmvyguzbampoasvnru`; לפי מסירתה אלון אישר את אירלנד במקום פרנקפורט (A-31). המיגרציה הראשונה הופעלה מכוח A-27 ושני התיקונים באישור מפורש בשיחת המשימה. אין להפעילם מחדש או להסיק אישור למיגרציה נוספת. אין בכך אישור איפוס, עלות חדשה, הקמת ייצור או פריסה. תקציב G1 אינו אישור הקמה.
-
-## עבודה עם Git
-
-- ענף לכל משימה, מתוך `origin/main` עדכני.
-- שומרים את `main` מעודכן גם במחשב וגם ב-GitHub (A-32). אחרי כל מיזוג מנהל המשימה מבצע fetch, מעדכן את `main` המקומי ב-worktree הראשי ב-fast-forward בלבד, ומאמת ש-`main`, ‏`origin/main` וראש `main` בשרת מצביעים לאותו קומיט. אם מנהל הפרויקט מרכז את הסנכרון, מוסרים לו את ה-SHA והוא משלים ומאמת.
-- לפני סנכרון בודקים status ושומרים עבודה מקומית שלא נשמרה בקומיט. אין לדרוס שינויים, לבצע reset/force או לדחוף קוד שלא עבר את תהליך המשימה ישירות ל-main. אם אין fast-forward או שיש שינוי מקומי חוסם, מדווחים על החסם ומסדירים שמירה ושילוב בלי לאבד עבודה; לא משאירים פער בלי מעקב.
-- עובדים רק בקבצים שבבעלות המשימה ב-WORK_PLAN. צריך קובץ אחר? עוצרים ופותחים משימת שינוי משותף סדרתית.
-- משימות מקבילות מתעדות ב-`docs/tasks/<ID>.md` ואינן עורכות מסמכים משותפים.
-- התיעוד נכנס באותו קומיט כמו השינוי.
-- עושים stage לקבצים בשמם, לא `git add .`.
-- לפני מיזוג: fetch, rebase על `origin/main` ואימות בהתאם לשינויים שנכנסו; אין חזרה אוטומטית על בדיקות שלא הושפעו.
-- לא ממזגים לפני השער הרשום במשימה. אין צורך באישור מיזוג נפרד מאלון; אישור G0 אינו אישור G1 או D31.
-
-## מה לא נכנס ל-git
-
-- סודות, סיסמאות, טוקנים וקובצי env עם ערכים.
-- נתוני לקוח רגישים: פרטי קשר, כספים, קבצים כולל האקסל, גיבויים ותמלולים גולמיים. מתמלול שומרים הפניות לדקות בלבד.
-- הקובץ `.claude/settings.local.json`, חבילת המקור וצילומי המדריך.
-
-בבדיקות ובדוגמאות משתמשים בנתונים בדויים בלבד.
-
-## לפני שאומרים ״גמור״
-
-- מריצים את הבדיקות הרלוונטיות להגדרת הגמור ולשינוי וקוראים את הפלט. בדיקות שכבר עברו נשארות ראיה תקפה כל עוד הקוד, התלויות או הסביבה שהן בודקות לא השתנו באופן שמשפיע עליהן.
-- בשינוי לוגיקה, נתונים או הרשאות בודקים בשרת גם מה שאסור, לא רק מה שמותר.
-- במסך חדש או בשינוי פריסה/ניווט בודקים ב-360, 375, 390, 768, 1024 ו-1280, בעברית ו-RTL, בלי גלילת דף לרוחב. בטלפון: ניווט תחתון ואפס גלילה לרוחב. בתיקון נקודתי בודקים את המסך, המצב והרוחבים שהושפעו, לא את כל המערכת מחדש.
-- שינוי תיעוד בלבד דורש סקירת diff ועקביות קצרה בלבד: בלי npm install/ci, ‏lint, ‏typecheck, ‏build, בדיקות יחידה, ענן או UI (A-36). זה חל גם על CI. שינוי מעורב, קוד, תצורה, תלויות או workflow מקבל בדיקות בהתאם לחלק שהושפע ולסיכון, ואינו מסווג אוטומטית כתיעוד. אין ספירת סעיפים, צילומים או דוחות בדיקה לשם התהליך בלבד.
-- רושמים בקובץ המשימה מה נבדק, מה התוצאה ומה לא נבדק.
-
-## שפה
-
-מסמכים וממשק בעברית פשוטה. שמות קבצים וקוד באנגלית.
-
-</div>
+- Agent-facing docs are written in English: AGENTS, briefs, task files, WORK_PLAN and NEXT_SESSION. An existing Hebrew doc switches to English when it's substantially rewritten; a small edit keeps the doc's current language.
+- Client-facing docs (PRD, DESIGN and DECISIONS, which quotes Alon) and all UI text stay in plain Hebrew.
+- File names and code are in English.
