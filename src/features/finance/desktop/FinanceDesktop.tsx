@@ -1,11 +1,13 @@
 'use client';
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import type { FinanceBook, TransactionRow } from '@/types/contracts';
 import { Button, Card, Notice } from '@/components/ui';
 import { EntryForm } from '../shared/EntryForm';
 import { ExcelLink } from '../shared/ExcelLink';
 import { Filters } from '../shared/Filters';
+import { EntrySheet } from '../shared/EntrySheet';
+import { PencilIcon } from '../shared/FinIcons';
 import { SummaryDetails } from '../shared/Summary';
 import { useFinanceNav } from '../shared/nav';
 import { KIND_LABELS, bookRows, isIncomeKind, monthLabel, monthsNewestFirst, rowAmount, rowDate, shekels } from '../shared/present';
@@ -16,7 +18,7 @@ type Props = { book: FinanceBook; today: string };
 /** Desktop (from 1024): the demo's content in one panel: summary on top, filters, quick entry, table. */
 export function FinanceDesktop({ book, today }: Props) {
   const { filter } = useFinanceNav();
-  const [editing, setEditing] = useState<string | null>(null);
+  const [dialog, setDialog] = useState<{ row: TransactionRow | null } | null>(null);
   const rows = bookRows(book.months);
   const period = filter.period;
   const entryMonth = period === 'all' ? currentMonth(today) : period;
@@ -31,6 +33,7 @@ export function FinanceDesktop({ book, today }: Props) {
           <h1 className="ui-page-title">כספים: {book.projectName}</h1>
         </div>
         <div className="fin-head__actions">
+          {book.canWrite && <Button size="small" onClick={() => setDialog({ row: null })}>הוספת תנועה</Button>}
           <a className="ui-btn ui-btn--secondary ui-btn--small" href={exportHref(book.projectId, filter)}>ייצוא ל-Excel</a>
           <Button variant="secondary" size="small" onClick={() => window.print()}>הדפסה</Button>
           <ExcelLink projectId={book.projectId} link={book.excelLink} canWrite={book.canWrite} />
@@ -50,14 +53,7 @@ export function FinanceDesktop({ book, today }: Props) {
 
         <div className="fin-bar"><Filters today={today} /></div>
 
-        {book.canWrite ? (
-          <div className="fin-quick no-print">
-            <h2>הזנה מהירה</h2>
-            <EntryForm projectId={book.projectId} today={today} row={null} defaultMonth={entryMonth} variant="inline" canCancel={false} onDone={() => undefined} />
-          </div>
-        ) : (
-          <div className="fin-bar"><Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice></div>
-        )}
+        {!book.canWrite && <div className="fin-bar"><Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice></div>}
 
         <div className="fin-tablewrap">
           <table className="fin-table">
@@ -73,20 +69,15 @@ export function FinanceDesktop({ book, today }: Props) {
                 </td></tr>
               )}
               {rows.map((row: TransactionRow) => (
-                <Fragment key={row.id}>
-                  <tr>
-                    <td className="fin-num">{rowDate(row)}</td>
-                    <td className="fin-details">{row.details}{row.kind !== 'income' && row.kind !== 'expense' && <span className="fin-kind">{KIND_LABELS[row.kind]}</span>}</td>
-                    <td className="fin-num">{isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
-                    <td className="fin-num">{!isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
-                    <td className="no-print">{book.canWrite && <Button variant="secondary" size="small" onClick={() => setEditing(editing === row.id ? null : row.id)}>{editing === row.id ? 'סגירה' : 'עריכה'}</Button>}</td>
-                  </tr>
-                  {editing === row.id && (
-                    <tr className="fin-editrow"><td colSpan={5}>
-                      <EntryForm projectId={book.projectId} today={today} row={row} defaultMonth={entryMonth} variant="inline" canCancel={book.canCancel} onDone={() => setEditing(null)} />
-                    </td></tr>
-                  )}
-                </Fragment>
+                <tr key={row.id}>
+                  <td className="fin-num">{rowDate(row)}</td>
+                  <td className="fin-details">{row.details}{row.kind !== 'income' && row.kind !== 'expense' && <span className="fin-kind">{KIND_LABELS[row.kind]}</span>}</td>
+                  <td className="fin-num">{isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
+                  <td className="fin-num">{!isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
+                  <td className="no-print">{book.canWrite && (
+                    <button type="button" className="fin-iconbtn" onClick={() => setDialog({ row })} aria-label={`עריכת תנועה: ${row.details}`}><PencilIcon /></button>
+                  )}</td>
+                </tr>
               ))}
             </tbody>
             <tfoot>
@@ -95,6 +86,12 @@ export function FinanceDesktop({ book, today }: Props) {
           </table>
         </div>
       </Card>
+
+      {dialog && (
+        <EntrySheet title={dialog.row ? 'עריכת תנועה' : 'תנועה חדשה'} onClose={() => setDialog(null)}>
+          <EntryForm projectId={book.projectId} today={today} row={dialog.row} defaultMonth={entryMonth} variant="screen" canCancel={book.canCancel} onDone={() => setDialog(null)} />
+        </EntrySheet>
+      )}
 
       {period === 'all' && (
         <Card className="fin-main fin-monthsbox">

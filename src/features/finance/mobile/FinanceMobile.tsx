@@ -11,7 +11,8 @@ import { SummaryDetails } from '../shared/Summary';
 import { useFinanceNav } from '../shared/nav';
 import { KIND_LABELS, bookRows, isReduction, monthLabel, monthsNewestFirst, rowAmount, rowDate, shekels } from '../shared/present';
 import { currentMonth, exportHref, financeHref } from '../shared/query';
-import { EntrySheet } from './EntrySheet';
+import { EntrySheet } from '../shared/EntrySheet';
+import { ExcelIcon, PencilIcon } from '../shared/FinIcons';
 
 type Props = { book: FinanceBook; today: string };
 
@@ -51,6 +52,10 @@ export function FinanceMobile({ book, today }: Props) {
       )}
 
       <Card className="fin-msum">
+        <div className="fin-msum__head">
+          <h2>{period === 'all' ? 'כל התקופה' : monthLabel(period)}</h2>
+          <button type="button" className="fin-iconbtn fin-iconbtn--excel no-print" aria-label="ייצוא וקישור ל-Excel" aria-expanded={panel === 'actions'} onClick={() => toggle('actions')}><ExcelIcon /></button>
+        </div>
         <div className="fin-msum__row"><span>הכנסות</span><strong className="fin-num">{shekels(book.period.income)}</strong></div>
         <div className="fin-msum__row"><span>סה״כ הוצאה כולל מס 3%</span><strong className="fin-num">{shekels(book.period.totalExpense)}</strong></div>
         <div className="fin-msum__row fin-msum__row--net"><span>רווח נקי</span><strong className="fin-num">{shekels(book.period.netProfit)}</strong></div>
@@ -59,10 +64,7 @@ export function FinanceMobile({ book, today }: Props) {
 
       <div className="fin-mactions no-print">
         {book.canWrite && <Button block onClick={() => setSheet({ row: null })}>הוספת תנועה</Button>}
-        <div className="fin-mactions__pair">
-          <Button variant="secondary" block aria-expanded={panel === 'filter'} onClick={() => toggle('filter')}>סינון</Button>
-          <Button variant="secondary" block aria-expanded={panel === 'actions'} onClick={() => toggle('actions')}>ייצוא וקישור</Button>
-        </div>
+        <Button variant="secondary" block aria-expanded={panel === 'filter'} onClick={() => toggle('filter')}>סינון</Button>
       </div>
       {!book.canWrite && <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}
       {panel === 'filter' && <Card><Filters today={today} showMonth={false} /></Card>}
@@ -97,7 +99,10 @@ export function FinanceMobile({ book, today }: Props) {
                     <strong className={`fin-num${isReduction(row.kind) ? ' fin-neg' : ''}`}>{rowAmount(row)}</strong>
                   </span>
                   <span className="fin-item__details">{row.details}</span>
-                  <span className="fin-item__sub fin-num">{rowDate(row)}</span>
+                  <span className="fin-item__bottom">
+                    <span className="fin-item__sub fin-num">{rowDate(row)}</span>
+                    {book.canWrite && <span className="fin-item__edit"><PencilIcon /><span className="sr-only">עריכה</span></span>}
+                  </span>
                 </button>
               </li>
             ))}
