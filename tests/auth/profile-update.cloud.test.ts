@@ -73,11 +73,14 @@ describe.sequential('עדכון אימייל אטומי מול ענן הפיתו
     const link=await admin.auth.admin.generateLink({type:'recovery',email:p.email});
     if(link.error)throw new Error('יצירת אסימון בדוי נכשלה');
     const renamed={...p.edit,fullName:'עריכה באמצע',email:p.email};
+    let seen:Awaited<ReturnType<Update>>|undefined;
     const e=editor(async(...args)=>{
       const changed=await prepare(ben,renamed);if(changed.error)throw new Error('עריכת ביניים נכשלה');
-      const response=await realUpdate(...args);expect(response.error).not.toBeNull();return response;
+      seen=await realUpdate(...args);return seen;
     });
     expect(await e.service.setEmail(ben,p.edit)).toMatchObject({ok:false,error:{code:'CONFLICT'}});
+    // Asserted outside the mock: errors thrown inside it are swallowed by the service.
+    expect(e.update).toHaveBeenCalledTimes(1);expect(seen?.error).toBeTruthy();
     await committed(p.id,renamed);
     const verified=await cloudClients().publicClient().auth.verifyOtp({type:'recovery',token_hash:link.data.properties.hashed_token});
     expect(verified.error).toBeNull();
@@ -140,12 +143,14 @@ describe.sequential('עדכון אימייל אטומי מול ענן הפיתו
   });
   it('actor session revoked after prepare cannot complete the edit',async()=>{
     const p=await person(),session=await cloudOwner();
+    let seen:Awaited<ReturnType<Update>>|undefined;
     const e=editor(async(...args)=>{
       // Local scope only: the shared owner session must survive.
       const out=await session.db.auth.signOut({scope:'local'});if(out.error)throw new Error('ביטול סשן בדוי נכשל');
-      const response=await realUpdate(...args);expect(response.error).not.toBeNull();return response;
+      seen=await realUpdate(...args);return seen;
     });
     expect(await e.service.setEmail(session,p.edit)).toMatchObject({ok:false,error:{code:'UNAVAILABLE'}});
+    expect(seen?.error).toBeTruthy();
     expect(e.update).toHaveBeenCalledTimes(1);expect(await snapshot(p.id)).toEqual(p.start);
   });
   it('non-owner, forged and anonymous callers are refused',async()=>{

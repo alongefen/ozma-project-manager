@@ -1,4 +1,4 @@
--- P1.3-PROFILE-UPDATE: preparation only. Requires explicit D31 approval before cloud application.
+-- P1.3-PROFILE-UPDATE: applied to the dev project after D31 approval (23.11.2026).
 begin;
 -- One row per target: the pending intent of an email edit, or the receipt of the last completed edit. No backfill.
 create table private.profile_updates (
