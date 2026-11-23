@@ -44,3 +44,9 @@ export interface RenderOptions {
   /** Optional locally installed Chromium for development; production uses the packaged Linux binary. */
   executablePath?: string;
 }
+
+/** An attachment known only by its declared size; used to plan parts before any file is read. */
+export interface ReportManifestAttachment { name: string; mediaType: string; byteLength: number }
+export interface ReportManifestEntry extends Omit<ReportEntry, "attachments"> { attachments?: ReportManifestAttachment[] }
+export interface ReportManifestInput { projectName: string; scope: ReportScope; entries: ReportManifestEntry[] }
+export interface ReportManifestPart extends ReportManifestInput { number: number; total: number; inputBytes: number; workDays: number }
