@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Badge, Card, Icon, Notice } from '@/components/ui';
+import { Badge, Card, Notice } from '@/components/ui';
 import type { ProjectDetails } from '@/types/contracts';
 import { ProjectActions } from '../shared/ProjectActions';
 import { actionsFor, coverSrc, dateText, isReadOnlyProject, managersText, orNotEntered, READ_ONLY_NOTICE, sectionsFor, statusLabel, telHref } from '../shared/view-model';
@@ -46,7 +46,7 @@ export function ProjectDetailsMobile({ d }: { d: ProjectDetails }) {
       <Card className={css.rows}>
         <ul>
           {sectionsFor(d).map(s => (
-            <li key={s.key}><Link href={s.href} className={css.row}>{s.label}<Icon name="more" className={css.chev} /></Link></li>
+            <li key={s.key}><Link href={s.href} className={css.row}>{s.label}<span className={css.chev} aria-hidden="true">‹</span></Link></li>
           ))}
         </ul>
       </Card>
