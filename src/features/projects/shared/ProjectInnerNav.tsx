@@ -1,14 +1,18 @@
+'use client';
 import Link from 'next/link';
 import type { Section } from './view-model';
+import { useActiveTab } from './ProjectTabs';
+import { tabItems } from './tab-motion';
 import css from './ProjectInnerNav.module.css';
 
-/** Desktop project sections as tabs under the project name. One component for every project screen (DESIGN 3.4). */
-export function ProjectInnerNav({ projectId, sections, current }: { projectId: string; sections: Section[]; current: 'details' | Section['key'] }) {
-  const items = [{ key: 'details', label: 'פרטים', href: `/projects/${projectId}` }, ...sections];
+/** Desktop project sections as tabs under the project name. Same tabs and same highlight rule as the phone. */
+export function ProjectInnerNav({ projectId, sections }: { projectId: string; sections: Section[] }) {
+  const items = tabItems(projectId, sections);
+  const { active, pick } = useActiveTab(items);
   return (
     <nav className={css.inner} aria-label="חלקי התיק">
       {items.map(i => (
-        <Link key={i.key} href={i.href} aria-current={i.key === current ? 'page' : undefined}>{i.label}</Link>
+        <Link key={i.key} href={i.href} aria-current={i.href === active ? 'page' : undefined} onClick={() => pick(i.href)}>{i.label}</Link>
       ))}
     </nav>
   );

@@ -1,0 +1,6 @@
+.clip { overflow-x: clip; }
+@keyframes inFromLeft { from { transform: translateX(-40px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes inFromRight { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.fromLeft { animation: inFromLeft .26s ease-out; }
+.fromRight { animation: inFromRight .26s ease-out; }
+@media (prefers-reduced-motion: reduce) { .fromLeft, .fromRight { animation: none; } }

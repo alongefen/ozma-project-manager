@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import type { FinanceBook, ProjectDetails, TransactionRow } from '@/types/contracts';
+import type { FinanceBook, TransactionRow } from '@/types/contracts';
 import { Button, Card, Notice } from '@/components/ui';
 import { EntryForm } from '../shared/EntryForm';
 import { ExcelLink } from '../shared/ExcelLink';
@@ -12,8 +12,6 @@ import { ExcelIcon, PencilIcon, TrashIcon } from '../shared/FinIcons';
 import { SummaryDetails } from '../shared/Summary';
 import { useFinanceNav } from '../shared/nav';
 import { KIND_LABELS, bookRows, visibleRows, isIncomeKind, monthLabel, monthsNewestFirst, rowAmount, rowDate, shekels } from '../shared/present';
-import { ProjectInnerNav } from '@/features/projects/shared/ProjectInnerNav';
-import { sectionsFor } from '@/features/projects/shared/view-model';
 import { currentMonth, exportHref, financeHref } from '../shared/query';
 
 type Props = { book: FinanceBook; filteredRows: FinanceBook['filteredRows']; today: string };
@@ -31,9 +29,7 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
 
   return (
     <div className="fin fin-desktop d-only">
-      <Link href="/projects" className="fin-backlink">‹ חזרה לפרויקטים</Link>
       <div className="fin-head">
-        <h1 className="ui-page-title">{book.projectName}</h1>
         <div className="fin-head__actions">
           {book.canWrite && <Button size="small" onClick={() => setDialog({ row: null })}>הוספת תנועה</Button>}
           <a className="ui-btn ui-btn--secondary ui-btn--small" href={exportHref(book.projectId, filter)}><ExcelIcon size={20} /> ייצוא ל-Excel</a>
@@ -41,7 +37,6 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
           <ExcelLink projectId={book.projectId} link={book.excelLink} canWrite={book.canWrite} />
         </div>
       </div>
-      <ProjectInnerNav projectId={book.projectId} sections={sectionsFor({ id: book.projectId, permissions: { viewFinance: true } as ProjectDetails['permissions'] })} current="finance" />
 
       <Card className="fin-main">
         <section className="fin-summary" aria-label={`סיכום ${label}`}>
