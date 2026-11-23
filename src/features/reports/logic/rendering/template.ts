@@ -48,8 +48,14 @@ export async function prepareReport(part: ReportPart): Promise<PreparedReport> {
         }
       } else if (["image/jpeg", "image/png", "image/webp"].includes(attachment.mediaType)) {
         try {
-          const image = await sharp(attachment.bytes, { limitInputPixels: 40_000_000, failOn: "warning", animated: false }).rotate().png().toBuffer();
-          attachments.push(`<figure><img src="data:image/png;base64,${image.toString("base64")}" alt="${escapeHtml(attachment.name)}"><figcaption>${isolated(attachment.name)}</figcaption></figure>`);
+          const source = Buffer.from(attachment.bytes.buffer, attachment.bytes.byteOffset, attachment.bytes.byteLength);
+          const options = { limitInputPixels: 40_000_000, failOn: "warning", animated: false } as const;
+          const meta = await sharp(source, options).metadata();
+          // A plain JPEG is embedded as it is: PNG re-encoding made it several times larger and broke Chrome's ~100MiB limit.
+          const asIs = meta.format === "jpeg" && (meta.orientation ?? 1) === 1 && (meta.space === "srgb" || meta.space === "b-w");
+          if (asIs) await sharp(source, options).stats(); // decodes every pixel, so a truncated file is refused
+          const [type, image] = asIs ? ["jpeg", source] as const : ["png", await sharp(source, options).rotate().png().toBuffer()] as const;
+          attachments.push(`<figure><img src="data:image/${type};base64,${image.toString("base64")}" alt="${escapeHtml(attachment.name)}"><figcaption>${isolated(attachment.name)}</figcaption></figure>`);
         } catch {
           message = "התמונה פגומה או לא ניתנת להצגה — לא נכללה בדוח";
         }
