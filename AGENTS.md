@@ -19,33 +19,7 @@ A project management system for the construction company "חי עוצמה בבנ
 - **One review per change.** Go back to it only for a concrete finding or a part that changed since. After a rebase that doesn't change content, check the diff; no second review is needed.
 - **No approval from Alon is needed to merge (A-26).** The task session merges after the review. The product gates and D31 still apply. Ask Alon only for a missing decision or something outside an approval. Never ask again for an approval already given, and don't reopen G0, G1 or GU (A-18, A-21, A-24).
 
-<<<<<<< Updated upstream
 ## Sources of truth
-=======
-## עבודה מעשית וממוקדת תוצאה
-
-החלטת אלון, 22.11.2026: שומרים על מעקב מסודר ב-docs, אבל מצמצמים מורכבות ותהליכים מיותרים. מודדים התקדמות לפי יכולות שנבנו ועובדות.
-
-- מתכננים ומתעדים רק את מה שנחוץ לביצוע, לבדיקה ולהמשך העבודה. לא פותחים סבב תכנון או משימת ניקיון נפרדת בלי צורך ממשי.
-- WORK_PLAN מציגה בקצרה מה בונים, תלות, מצב ומה נחשב גמור. לא מעתיקים אליה את כל הדרישות וההחלטות.
-- DECISIONS מרכזת החלטות אמיתיות של אלון. במסמכים אחרים מפנים אליה במקום לשכפל אותן, ולא מבקשים שוב אישור שכבר ניתן.
-- קובץ משימה מתעד בקצרה מה השתנה, מה נבדק ומה נשאר. נקודת המשך כוללת מצב עדכני, הפעולה הבאה והפניות; אין צורך לשחזר את כל השיחה.
-- מסירים כפילויות והוראות מיושנות במהלך עדכון רלוונטי ובמסגרת בעלות הקבצים. לא משנים הנחיות לשיחות שכבר עובדות רק כדי לארגן מחדש את התהליך.
-- מריצים בדיקות בהתאם לשינוי ולסיכון. לא חוזרים על בדיקה שעברה בלי שינוי שמשפיע עליה, כשל או חשש מוגדר. בסקירה קוראים את ה-diff ואת תוצאות הבדיקות; לא משחזרים אוטומטית את כל הבדיקות.
-- שומרים על שערי המיזוג ואישורי D31 שנקבעו. לא מוסיפים שערים או בקשות אישור לפעולות שכבר אושרו.
-
-### בדיקות ואישורים בלי סבבים מיותרים
-
-עדכון אלון, 22.11.2026: הכללים הבאים גוברים על הוראות תהליך ישנות במסמכי המשימות והתוכנית.
-
-- סקירה אחת לשינוי: מנהל הפרויקט קורא את ההפרש ואת תוצאות הבדיקות. חוזרים רק לממצא קונקרטי או לחלק ששונה מאז; אין בדיקה מלאה מחדש בגלל קומיט נוסף.
-- אישור מיזוג שכבר ניתן נשאר בתוקף אחרי rebase ללא שינוי בתוכן המשימה. שיחת המשימה מאמתת זאת באמצעות diff או range-diff, בודקת השפעה של שינויי הבסיס וממזגת בלי להעביר שוב דרך אלון או מנהל הפרויקט רק בגלל SHA חדש. מתעדים את ה-SHA שמוזג. שינוי מהותי בתוכן, בהיקף או פתרון התנגשות שמשנה התנהגות חוזר לסקירה ממוקדת לפני מיזוג.
-- אישור GU או בדיקת משתמש שכבר ניתנו אינם נפתחים מחדש כשהתצוגה וההתנהגות לא השתנו. אישור עיצוב אינו כשלעצמו אישור מיזוג.
-- לפני בקשת אישור בודקים אם כבר ניתן לאותה פעולה ובאותו היקף. פונים לאלון רק להחלטה חסרה או לחריגה מהאישור, לא להחלטות ביצוע שגרתיות בתוך המשימה.
-- אישור ראשון למיזוג ושערי המוצר נשארים. מיגרציות, שירותים חדשים, עלויות, AI בתשלום ופריסה נשארים באישור מפורש לפי ההיקף שאושר; אין הרחבת אישור אוטומטית.
-
-## אמת ומקורות
->>>>>>> Stashed changes
 
 - An Alon decision is not the same as something derived from one, said in a meeting, or recommended. Only a real Alon decision goes into DECISIONS, with a date.
 - When sources conflict, the order is: Alon's message, the transcript, the guide, then the demo. Record the conflict.
@@ -84,7 +58,7 @@ A project management system for the construction company "חי עוצמה בבנ
 
 ## D31: migrations, costs and services
 
-The existing development project is `izjmvyguzbampoasvnru` in Ireland (A-31). A new migration, new service, cost, paid AI, production or deployment needs explicit approval in advance, stating what, why, the cost and how to roll back. No resets, and no re-running existing migrations. An earlier approval never stretches to cover more.
+The existing Supabase project `izjmvyguzbampoasvnru` in Ireland (A-31) is not development-only: Alon confirmed on 23.11.2026 that it will also be the production database. Treat it as production-bound: fake test data only for now, tests clean up only their own rows, and the backup question returns to Alon before real data. A new migration, new service, cost, paid AI, production or deployment needs explicit approval in advance, stating what, why, the cost and how to roll back. No resets, and no re-running existing migrations. An earlier approval never stretches to cover more.
 
 ## Git
 
@@ -103,45 +77,13 @@ Tests and examples use fake data only.
 
 ## Before calling something done
 
-<<<<<<< Updated upstream
 - Run the tests the change affects and read their output. Earlier evidence stays valid as long as what it tested hasn't changed (A-36).
 - For a change to logic, data or permissions, also check on the server that forbidden actions are refused.
 - Check a new screen or layout change at 360, 375, 390, 768, 1024 and 1280, in Hebrew and RTL, with no horizontal scroll. For a spot fix, check only what was affected.
 - In the task file, record what was checked, the result, and what wasn't checked.
-=======
-- ענף לכל משימה, מתוך `origin/main` עדכני.
-- עובדים רק בקבצים שבבעלות המשימה ב-WORK_PLAN. צריך קובץ אחר? עוצרים ופותחים משימת שינוי משותף סדרתית.
-- משימות מקבילות מתעדות ב-`docs/tasks/<ID>.md` ואינן עורכות מסמכים משותפים.
-- התיעוד נכנס באותו קומיט כמו השינוי.
-- עושים stage לקבצים בשמם, לא `git add .`.
-- לפני מיזוג: fetch, rebase על `origin/main` ואימות בהתאם לשינויים שנכנסו; אין חזרה אוטומטית על בדיקות שלא הושפעו.
-- לא ממזגים לפני השער הרשום במשימה. אישור חלקי אינו אישור מיזוג, ואישור G0 אינו אישור G1 או D31.
->>>>>>> Stashed changes
 
 ## Language
 
-<<<<<<< Updated upstream
 - Agent-facing docs are written in English: AGENTS, briefs, task files, WORK_PLAN and NEXT_SESSION. An existing Hebrew doc switches to English when it's substantially rewritten; a small edit keeps the doc's current language.
 - Client-facing docs (PRD, DESIGN and DECISIONS, which quotes Alon) and all UI text stay in plain Hebrew.
 - File names and code are in English.
-=======
-- סודות, סיסמאות, טוקנים וקובצי env עם ערכים.
-- נתוני לקוח רגישים: פרטי קשר, כספים, קבצים כולל האקסל, גיבויים ותמלולים גולמיים. מתמלול שומרים הפניות לדקות בלבד.
-- הקובץ `.claude/settings.local.json`, חבילת המקור וצילומי המדריך.
-
-בבדיקות ובדוגמאות משתמשים בנתונים בדויים בלבד.
-
-## לפני שאומרים ״גמור״
-
-- מריצים את הבדיקות הרלוונטיות להגדרת הגמור ולשינוי וקוראים את הפלט. בדיקות שכבר עברו נשארות ראיה תקפה כל עוד הקוד, התלויות או הסביבה שהן בודקות לא השתנו באופן שמשפיע עליהן.
-- בשינוי לוגיקה, נתונים או הרשאות בודקים בשרת גם מה שאסור, לא רק מה שמותר.
-- במסך חדש או בשינוי פריסה/ניווט בודקים ב-360, 375, 390, 768, 1024 ו-1280, בעברית ו-RTL, בלי גלילת דף לרוחב. בטלפון: ניווט תחתון ואפס גלילה לרוחב. בתיקון נקודתי בודקים את המסך, המצב והרוחבים שהושפעו, לא את כל המערכת מחדש.
-- שינוי תיעוד בלבד דורש סקירת ההפרש והעקביות הרלוונטית, לא build, בדיקות מסכים או שרת. אין ספירת סעיפים, צילומים או דוחות בדיקה לשם התהליך בלבד.
-- רושמים בקובץ המשימה מה נבדק, מה התוצאה ומה לא נבדק.
-
-## שפה
-
-מסמכים וממשק בעברית פשוטה. שמות קבצים וקוד באנגלית.
-
-</div>
->>>>>>> Stashed changes
