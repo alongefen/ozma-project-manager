@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 import { notFound, redirect } from 'next/navigation';
 import { getContext, getPlatform } from '@/components/shell/request';
 import { SIGN_IN_PATH } from '@/lib/navigation';
@@ -16,7 +17,8 @@ export async function pageContext(): Promise<{ platform: Platform; ctx: RequestC
 }
 
 /** The project the viewer may see, or 404 without saying whether it exists (DESIGN 5). */
-export async function loadProject(id: string) {
+/** Memoised per request (React `cache`): the tabs layout and the page share one read of the project. */
+export const loadProject = cache(async (id: string) => {
   const { platform, ctx } = await pageContext();
   const result = await createProjectsApi(platform).getProject(ctx, { id });
   if (!result.ok) {
@@ -25,4 +27,4 @@ export async function loadProject(id: string) {
     throw new Error('project unavailable');
   }
   return { platform, ctx, project: result.value };
-}
+});

@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
-import { Badge } from '@/components/ui';
+import { Badge, PageHeader } from '@/components/ui';
 import type { ProjectDetails } from '@/types/contracts';
-import { BackTitle } from './BackTitle';
 import { ProjectInnerNav } from './ProjectInnerNav';
 import { ProjectTabs } from './ProjectTabs';
 import { tabItems } from './tab-motion';
@@ -18,7 +17,7 @@ export function ProjectFrame({ d, children }: { d: ProjectDetails; children: Rea
   return (
     <div className={css.frame}>
       <div>
-        <BackTitle
+        <PageHeader
           title={d.name} backHref="/projects" backLabel="חזרה לרשימת הפרויקטים"
           badge={<Badge tone={d.status === 'completed' || d.archived ? 'gray' : 'active'}>{statusLabel(d)}</Badge>}
         />

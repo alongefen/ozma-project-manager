@@ -4,12 +4,13 @@ export function Skeleton({ height = 16, width, block }: { height?: number; width
 }
 
 /** Page-shaped loading state: header row, optional tabs row, then card placeholders. */
-export function PageSkeleton({ tabs, cards = 2 }: { tabs?: boolean; cards?: number }) {
+/** `bare`: content only, for routes inside a fixed frame (project tabs) whose header and tabs are already on screen. */
+export function PageSkeleton({ tabs, cards = 2, bare }: { tabs?: boolean; cards?: number; bare?: boolean }) {
   return (
     <div className="ui-page" role="status" aria-busy="true">
       <span className="sr-only">טוען…</span>
-      <div className="ui-ph__row"><Skeleton height={32} width={44} /><Skeleton height={28} width="50%" /></div>
-      {tabs && <Skeleton block height={48} />}
+      {!bare && <div className="ui-ph__row"><Skeleton height={32} width={44} /><Skeleton height={28} width="50%" /></div>}
+      {tabs && !bare && <Skeleton block height={48} />}
       {Array.from({ length: cards }, (_, i) => <div key={i} className="ui-card ui-skel-card"><Skeleton height={20} width="40%" /><Skeleton height={14} /><Skeleton height={14} width="80%" /><Skeleton height={14} width="60%" /></div>)}
     </div>
   );
