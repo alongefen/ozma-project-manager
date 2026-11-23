@@ -68,8 +68,9 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
     if (!files) return;
     setNotice(null);
     const next = [...items];
+    const counted = () => next.filter(i => i.mime).length;
     for (const file of Array.from(files)) {
-      if (next.length >= limit) { setNotice(limit === 1 ? 'אפשר לבחור קובץ אחד בלבד' : `אפשר לבחור עד ${limit} קבצים בכל פעם`); break; }
+      if (counted() >= limit) { setNotice(limit === 1 ? 'אפשר לבחור קובץ אחד בלבד' : `אפשר לבחור עד ${limit} קבצים בכל פעם`); break; }
       const check = checkFile(file, purpose);
       next.push({ key: newId(), file, mime: check.ok ? check.mime : null, status: check.ok ? 'ready' : 'error', progress: 0, error: check.ok ? undefined : check.reason });
     }
@@ -77,7 +78,7 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
   }
 
   async function start() {
-    const queue = items.filter(i => i.status === 'ready' && i.mime);
+    const queue = items.filter(i => (i.status === 'ready' || i.status === 'error') && i.mime);
     if (queue.length === 0) return;
     setBusy(true);
     setNotice(null);
@@ -107,7 +108,7 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
     if (finished.length > 0) onUploaded(finished);
   }
 
-  const readyCount = items.filter(i => i.status === 'ready').length;
+  const readyCount = items.filter(i => (i.status === 'ready' || i.status === 'error') && i.mime).length;
   const accept = ACCEPTED_MIME.join(',') + ',.heic,.heif';
   return (
     <div className="upload">

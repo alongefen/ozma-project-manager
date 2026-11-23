@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'ניהול פרויקטים, יומן עבודה ומסמכים',
     lang: 'he',
     dir: 'rtl',
-    start_url: '/',
+    start_url: '/sign-in',
     scope: '/',
     display: 'standalone',
     background_color: '#f4f6f8',

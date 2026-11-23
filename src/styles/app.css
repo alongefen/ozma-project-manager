@@ -70,10 +70,10 @@ button, a { touch-action: manipulation; }
 .ui-field__input[dir='ltr'] { text-align: left; }
 .ui-field__input[aria-invalid='true'] { border-color: var(--err-ink); }
 .ui-field__toggle {
-  position: absolute; inset-block: 0; inset-inline-end: 0; min-width: 44px; padding: 0 12px;
+  position: absolute; inset-block: 0; right: 0; min-width: 44px; padding: 0 12px;
   border: 0; background: transparent; color: var(--nav-active-ink); font-size: 14px; font-weight: 700; cursor: pointer;
 }
-.ui-field__control--toggle .ui-field__input { padding-inline-end: 64px; }
+.ui-field__control--toggle .ui-field__input { padding-right: 64px; } /* the password input is LTR, so the toggle sits on its physical right */
 .ui-field__hint { font-size: 14px; color: var(--muted); }
 .ui-field__error { font-size: 14px; color: var(--err-ink); font-weight: 600; }
 
