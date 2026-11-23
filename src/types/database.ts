@@ -907,6 +907,7 @@ export type Database = {
       get_actor: { Args: { input: Json }; Returns: Json }
       get_pending_upload: { Args: { input: Json }; Returns: Json }
       move_entry: { Args: { input: Json }; Returns: Json }
+      prepare_profile_update: { Args: { input: Json }; Returns: Json }
       project_access_candidates: { Args: { input: Json }; Returns: Json }
       project_cards: { Args: { input: Json }; Returns: Json }
       project_manager_names: { Args: { input: Json }; Returns: Json }

@@ -12,7 +12,8 @@ const kindLabels: Record<TransactionKind, string> = {
 // Never pass caller-supplied objects to ExcelJS, which accepts formula objects.
 function text(value: string): string {
   if (typeof value !== 'string') throw new TypeError('טקסט חייב להיות מחרוזת');
-  return value;
+  // שני תווים שאסורים ב-XML ו-ExcelJS אינו מסיר; בלי זה הקובץ אינו נפתח.
+  return value.replace(/[\uFFFE\uFFFF]/g, '');
 }
 
 function integer(value: number): number {

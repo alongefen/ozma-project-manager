@@ -31,7 +31,8 @@ describe.sequential('Auth ו-Platform בפועל מול ענן הפיתוח',()=
     expect(await auth.signIn({email:email.toUpperCase(),password:pass})).toMatchObject({ok:true,value:{userId:created.value.userId,fullName:'חשבון בדוי מנוהל'}});
     const manager=createAuthAdmin({admin:()=>admin});
     const nextEmail=`p13-changed-${randomUUID()}@example.invalid`;
-    expect(await manager.setEmail(ben,{userId:created.value.userId,email:nextEmail})).toEqual({ok:true,value:null});
+    const current=await ben.db.from('profiles').select('full_name,revision').eq('id',created.value.userId).single();if(!current.data)throw new Error('פרופיל בדוי חסר');
+    expect(await manager.setEmail(ben,{userId:created.value.userId,expectedRevision:current.data.revision,fullName:current.data.full_name,email:nextEmail})).toEqual({ok:true,value:{id:created.value.userId,revision:current.data.revision+1}});
     const profile=await ben.db.from('profiles').select('email').eq('id',created.value.userId).single();expect(profile.data?.email).toBe(nextEmail);
     const nextPassword=pass+'-changed';
     expect(await manager.setPassword(ben,{userId:created.value.userId,password:nextPassword})).toEqual({ok:true,value:null});
@@ -55,7 +56,7 @@ describe.sequential('Auth ו-Platform בפועל מול ענן הפיתוח',()=
     const {admin}=cloudClients();const provider=vi.fn(()=>admin);
     const service=createAuthAdmin({admin:provider});
     const forged={...worker.ctx,actor:{...worker.ctx.actor,isOwner:true}};
-    for(const result of [await service.createUser(forged,{requestId:randomUUID(),fullName:'בדוי אסור',email:`forbidden-${randomUUID()}@example.invalid`,password:pass}),await service.setPassword(forged,{userId:ben.actor.userId,password:pass}),await service.setEmail(forged,{userId:ben.actor.userId,email:'forbidden@example.invalid'})]) expect(result).toMatchObject({ok:false,error:{code:'FORBIDDEN'}});
+    for(const result of [await service.createUser(forged,{requestId:randomUUID(),fullName:'בדוי אסור',email:`forbidden-${randomUUID()}@example.invalid`,password:pass}),await service.setPassword(forged,{userId:ben.actor.userId,password:pass}),await service.setEmail(forged,{userId:ben.actor.userId,expectedRevision:1,fullName:'בדוי אסור',email:'forbidden@example.invalid'})]) expect(result).toMatchObject({ok:false,error:{code:'FORBIDDEN'}});
     expect(provider).not.toHaveBeenCalled();
   });
   it('actual provider logout blocks the JWT on the next application request',async()=>{
@@ -68,9 +69,9 @@ describe.sequential('Auth ו-Platform בפועל מול ענן הפיתוח',()=
   it('disabled then reenabled account cannot reuse its previous session',async()=>{
     const person=await cloudActor(ben,'disabled');const {admin}=cloudClients();
     const service=createAuthService({db:person.ctx.db,authClient:admin});
-    await ben.db.rpc('set_user_active',{input:{id:person.ctx.actor.userId,active:false,expectedRevision:1}});
+    expect((await ben.db.rpc('set_user_active',{input:{id:person.ctx.actor.userId,active:false,expectedRevision:2}})).error).toBeNull();
     expect(await service.getContext()).toMatchObject({ok:false,error:{code:'UNAUTHENTICATED'}});
-    await ben.db.rpc('set_user_active',{input:{id:person.ctx.actor.userId,active:true,expectedRevision:2}});
+    expect((await ben.db.rpc('set_user_active',{input:{id:person.ctx.actor.userId,active:true,expectedRevision:3}})).error).toBeNull();
     expect(await service.getContext()).toMatchObject({ok:false,error:{code:'UNAUTHENTICATED'}});
   });
 });

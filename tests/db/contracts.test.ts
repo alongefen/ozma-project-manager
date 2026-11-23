@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { CreateProfileInputSchema, ProfileCreationResultSchema, CompleteProfileCreationInputSchema, UploadCompletionSchema, AuthAdminInputSchemas, DiaryApiInputSchemas, DocumentAccessSchema, MoneySummarySchema, MonthSummarySchema, ProjectsApiInputSchemas, TasksApiInputSchemas, TransactionFieldsSchema, UsersApiInputSchemas } from '../../src/types/contracts/schemas';
+import { CreateProfileInputSchema, ProfileCreationResultSchema, CompleteProfileCreationInputSchema, PrepareProfileUpdateInputSchema, ProfileUpdateResultSchema, UploadCompletionSchema, AuthAdminInputSchemas, DiaryApiInputSchemas, DocumentAccessSchema, MoneySummarySchema, MonthSummarySchema, ProjectsApiInputSchemas, TasksApiInputSchemas, TransactionFieldsSchema, UsersApiInputSchemas } from '../../src/types/contracts/schemas';
 describe('חוזי קלט', () => {
   it('חוסם זיוף מדווח וזמן ושדות שאינם בחוזה', () => {
     const input = { requestId: randomUUID(), projectId: randomUUID(), workDate: '2026-01-01', body: 'דיווח', fileIds: [] };
@@ -81,5 +81,29 @@ describe('חוזי שחזור RPC', () => {
     }
     expect(UploadCompletionSchema.safeParse({ ...base, state: 'ready', fileRef }).success).toBe(true);
     expect(UploadCompletionSchema.safeParse({ ...base, state: 'ready', fileRef: null }).success).toBe(false);
+  });
+});
+
+
+describe('חוזה עדכון פרופיל', () => {
+  const id = randomUUID();
+  const fields = { expectedRevision: 3, fullName: 'משתמש בדוי', email: 'update@example.invalid' };
+  it('דורש גרסה, שם ואימייל באותו אופן בשירות, בצרכן ובמסד', () => {
+    const targets = [
+      [AuthAdminInputSchemas.setEmail, { userId: id, ...fields }],
+      [UsersApiInputSchemas.updateUser, { id, ...fields }],
+      [PrepareProfileUpdateInputSchema, { id, ...fields }],
+    ] as const;
+    for (const [schema, input] of targets) {
+      expect(schema.safeParse(input).success).toBe(true);
+      for (const patch of [{ expectedRevision: undefined }, { expectedRevision: 0 }, { expectedRevision: 1.5 }, { expectedRevision: null }, { fullName: undefined }, { fullName: ' ' }, { fullName: 'א'.repeat(121) }, { email: 'לא אימייל' }, { password: 'secret-not-for-db' }]) {
+        expect(schema.safeParse({ ...input, ...patch }).success).toBe(false);
+      }
+    }
+  });
+  it('מחייב מצב אימייל מפורש בתוצאת ההכנה', () => {
+    const saved = { id, revision: 3 };
+    expect(ProfileUpdateResultSchema.safeParse(saved).success).toBe(false);
+    for (const emailPending of [true, false]) expect(ProfileUpdateResultSchema.safeParse({ ...saved, emailPending }).success).toBe(true);
   });
 });

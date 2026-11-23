@@ -1,0 +1,13 @@
+import {beforeEach,it,expect,vi} from 'vitest';
+vi.mock('server-only',()=>({}));
+const mocks=vi.hoisted(()=>({platform:vi.fn(),context:vi.fn(),rpc:vi.fn()}));
+vi.mock('../../../src/lib/auth/platform',()=>({createPlatform:mocks.platform}));
+import * as actions from '../../../src/features/tasks/logic/actions';
+const id='27f5161e-b0d8-47e2-8383-2bf19087b718';
+const ctx={actor:{userId:id},db:{},today:'2026-11-22'};
+const input={requestId:id,projectId:id,body:'פתק',dueDate:null,completed:false};
+beforeEach(()=>{vi.resetAllMocks();mocks.platform.mockResolvedValue({auth:{getContext:mocks.context},rpc:mocks.rpc});mocks.context.mockResolvedValue({ok:true,value:ctx});mocks.rpc.mockResolvedValue({ok:true,value:{id,revision:1}});});
+it('derives context on server and passes validated input',async()=>{expect(await actions.createTask(input)).toMatchObject({ok:true});expect(mocks.context).toHaveBeenCalledOnce();expect(mocks.rpc).toHaveBeenCalledWith(ctx,'create_task',input);});
+it('rejects client supplied identity',async()=>{expect(await actions.createTask({...input,actor:{isOwner:true}} as typeof input)).toMatchObject({ok:false,error:{code:'VALIDATION'}});expect(mocks.rpc).not.toHaveBeenCalled();});
+it.each(['listTasks','createTask','updateTask','setTaskCompleted','deleteTask'] as const)('%s stops on unauthenticated context',async method=>{mocks.context.mockResolvedValue({ok:false,error:{code:'UNAUTHENTICATED',message:'יש להתחבר מחדש'}});expect(await (actions[method] as (input: unknown) => Promise<unknown>)(input)).toMatchObject({ok:false,error:{code:'UNAUTHENTICATED'}});expect(mocks.rpc).not.toHaveBeenCalled();});
+it('sanitizes platform failures',async()=>{mocks.platform.mockRejectedValue(new Error('secret'));const r=await actions.createTask(input);expect(r).toMatchObject({ok:false,error:{code:'UNAVAILABLE'}});expect(JSON.stringify(r)).not.toContain('secret');});
