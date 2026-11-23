@@ -181,10 +181,14 @@
 .fin-check input { width: 20px; height: 20px; min-height: 0; }
 .fin-count { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; margin-inline-start: 6px; border-radius: 11px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 800; }
 .fin-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.fin-chip { display: inline-flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 4px 0 12px; border-radius: 18px; background: var(--nav-active-bg); color: var(--nav-active-ink); font-weight: 700; font-size: 14px; }
+.fin-chip { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding-block: 0; padding-inline: 14px 4px; line-height: 1; border-radius: 18px; background: var(--nav-active-bg); color: var(--nav-active-ink); font-weight: 700; font-size: 14px; }
 .fin-chip button { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 50%; background: transparent; color: inherit; font-size: 20px; cursor: pointer; }
 .fin-chips__clear { min-height: 36px; border: 0; background: transparent; color: var(--nav-active-ink); font-weight: 700; cursor: pointer; text-decoration: underline; }
 .fin-msum__icons { display: flex; align-items: center; gap: 2px; margin: -6px; }
 .fin-iconbtn--plain { border-color: transparent; background: transparent; color: var(--ink); }
 .fin-mobile .ui-btn .fin-icon { margin-inline-end: 2px; }
 .fin-fbar .ui-btn, .fin-fbar input { min-height: 46px; box-sizing: border-box; }
+
+/* Active-filter chips sit on the centre line of the search box and the filter button */
+.fin-fbar .fin-chips { min-height: 46px; align-items: center; }
+.fin-chips__clear { display: inline-flex; align-items: center; line-height: 1; }
