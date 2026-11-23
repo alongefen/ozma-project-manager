@@ -9,7 +9,9 @@
 .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .row { display: flex; flex-wrap: wrap; gap: 10px; }
 .confirm { display: grid; gap: 10px; }
-.check { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
+.check { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; min-width: 150px; }
+.checkOff { opacity: .4; cursor: not-allowed; }
+.checkOff input { cursor: not-allowed; }
 .check input { width: 22px; height: 22px; }
 .select { min-height: 44px; padding: 8px 12px; border: 1px solid var(--field-line); border-radius: 8px; background: var(--surface); color: var(--ink); max-width: 100%; }
 .add { display: grid; gap: 12px; }

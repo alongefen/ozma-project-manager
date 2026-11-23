@@ -134,12 +134,11 @@ export function AccessManager({ projectId, members: initial, candidates: initial
                         options={[{ value: 'manager', label: ROLE_LABEL.manager }, { value: 'worker', label: ROLE_LABEL.worker }]}
                         onChange={v => v !== m.role && changeRole(m, v as ProjectRole)} />
                     </div>
-                    {m.role === 'manager' && (
-                      <label className={css.check}>
-                        <input type="checkbox" checked={m.financeAccess} disabled={busy} onChange={e => finance(m, e.target.checked)} />
-                        גישה לכספים
-                      </label>
-                    )}
+                    <label className={`${css.check}${m.role !== 'manager' ? ` ${css.checkOff}` : ''}`} title={m.role !== 'manager' ? 'גישה לכספים זמינה למנהל בלבד' : undefined}>
+                      <input type="checkbox" checked={m.role === 'manager' && m.financeAccess} disabled={busy || m.role !== 'manager'} onChange={e => finance(m, e.target.checked)} />
+                      <span>גישה לכספים</span>
+                      {m.role !== 'manager' && <span className="sr-only"> (זמינה למנהל בלבד)</span>}
+                    </label>
                     <Button variant="secondary" size="small" disabled={busy} onClick={() => setRemoving(m.userId)}>הסרת גישה</Button>
                   </div>
                 )}
