@@ -16,3 +16,5 @@
 .danger { background: #fff6f6; border-color: var(--err-line); }
 .dangerTitle { font-size: 19px; font-weight: 800; color: var(--err-ink); }
 .dangerText { font-size: 14px; color: var(--err-ink); }
+
+.permRow { display: flex; justify-content: flex-end; }

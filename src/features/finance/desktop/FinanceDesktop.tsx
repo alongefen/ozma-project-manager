@@ -31,7 +31,6 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
     <div className="fin fin-desktop d-only">
       <div className="fin-head">
         <div className="fin-head__actions">
-          {book.canWrite && <Button size="small" onClick={() => setDialog({ row: null })}>הוספת תנועה</Button>}
           <a className="ui-btn ui-btn--secondary ui-btn--small" href={exportHref(book.projectId, filter)}><ExcelIcon size={20} /> ייצוא ל-Excel</a>
           <Button variant="secondary" size="small" onClick={() => window.print()}>הדפסה</Button>
           <ExcelLink projectId={book.projectId} link={book.excelLink} canWrite={book.canWrite} />
@@ -49,7 +48,7 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
           <SummaryDetails book={book} balanceLabel={period === 'all' ? 'שארית בסוף התקופה' : 'שארית חודש'} />
         </section>
 
-        <div className="fin-bar"><DesktopFilterBar today={today} /></div>
+        <div className="fin-bar"><DesktopFilterBar today={today} onAdd={book.canWrite ? () => setDialog({ row: null }) : undefined} /></div>
 
         {!book.canWrite && <div className="fin-bar"><Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice></div>}
 
