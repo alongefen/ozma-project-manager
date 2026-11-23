@@ -11,3 +11,5 @@
 .monthRow { background: var(--nav-active-bg); }
 .monthRow th { font-weight: 800; }
 .projectCell { font-weight: 400; padding-inline-start: 28px; }
+.table td { text-align: end; }
+.table thead th:not(:first-child) { text-align: end; }
