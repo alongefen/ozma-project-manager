@@ -11,6 +11,12 @@ describe('טאבים בפרויקט: אנימציית החלקה', () => {
     expect(tabIndex('/projects/p/edit', hrefs)).toBe(0);
     expect(tabIndex('/more', hrefs)).toBe(-1);
   });
+  it('מזהה בכתובת שונה מהמזהה בקישורים (אותיות גדולות): נופל לפי שם החלק', () => {
+    expect(tabIndex('/projects/P', hrefs)).toBe(0);
+    expect(tabIndex('/projects/P/finance', hrefs)).toBe(4);
+    expect(tabIndex('/projects/P/files/9', hrefs)).toBe(1);
+    expect(tabIndex('/projects/P/edit', hrefs)).toBe(-1);
+  });
   it('טאב מאוחר יותר (משמאל) נכנס משמאל, מוקדם יותר נכנס מימין', () => {
     expect(slideFrom(0, 4)).toBe('left');
     expect(slideFrom(4, 1)).toBe('right');

@@ -12,7 +12,12 @@ export function tabIndex(pathname: string, hrefs: string[]): number {
   hrefs.forEach((href, i) => {
     if ((pathname === href || pathname.startsWith(`${href}/`)) && (best === -1 || href.length > hrefs[best].length)) best = i;
   });
-  return best;
+  if (best !== -1) return best;
+  // The id in the address may differ from the id in the links (case, encoding): fall back to the section name.
+  const parts = pathname.split('/').filter(Boolean);
+  if (parts[0] !== 'projects' || parts.length < 2) return -1;
+  if (parts.length === 2) return 0;
+  return hrefs.findIndex(href => href.split('/').filter(Boolean)[2] === parts[2]);
 }
 
 /**
