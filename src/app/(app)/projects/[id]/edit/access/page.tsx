@@ -27,7 +27,7 @@ export default async function AccessPage({ params }: { params: Promise<{ id: str
   return (
     <div style={{ display: 'grid', gap: 16, maxWidth: 820 }}>
       <BackTitle title="הרשאות" backHref={`/projects/${id}`} backLabel="חזרה לתיק הפרויקט" />
-      <p className="ui-sub" style={{ marginTop: -8 }}>{project.name}</p>
+      <p className="ui-sub" style={{ marginTop: -12 }}>{project.name}</p>
       <AccessManager projectId={id} members={members.value} candidates={candidates} />
     </div>
   );

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Badge, Card, Notice } from '@/components/ui';
 import type { ProjectDetails } from '@/types/contracts';
+import { BackTitle } from '../shared/BackTitle';
 import { EditProjectSheet } from '../shared/EditProjectSheet';
 import { ProjectActions } from '../shared/ProjectActions';
 import { ProjectTabs } from '../shared/ProjectTabs';
@@ -18,13 +19,11 @@ export function ProjectDetailsMobile({ d, isOwner }: { d: ProjectDetails; isOwne
   const tel = telHref(d.contact.phone);
   return (
     <div className={`${css.page} m-only`}>
-      <header className={css.head}>
-        <div className={css.nameRow}>
-          <h2 className={css.name}>{d.name}</h2>
-          <Badge tone={d.status === 'completed' || d.archived ? 'gray' : 'active'}>{statusLabel(d)}</Badge>
-        </div>
-        {act.manage && <Link href={`/projects/${d.id}/edit/access`} className={css.perm}>הרשאות</Link>}
-      </header>
+      <BackTitle
+        title={d.name} backHref="/projects" backLabel="חזרה לרשימת הפרויקטים"
+        badge={<Badge tone={d.status === 'completed' || d.archived ? 'gray' : 'active'}>{statusLabel(d)}</Badge>}
+        actions={act.manage ? <Link href={`/projects/${d.id}/edit/access`} className={css.perm}>הרשאות</Link> : undefined}
+      />
       <ProjectTabs projectId={d.id} sections={sectionsFor(d)} current="details" />
       {isReadOnlyProject(d) && !act.manage && <Notice>{READ_ONLY_NOTICE}</Notice>}
       {cover
