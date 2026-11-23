@@ -3,7 +3,7 @@ import { useEffect, useId, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, FormActions, Notice, TextField } from '@/components/ui';
 import { createProject, updateProject } from '../logic/actions';
-import { emptyValues, firstErrorField, mapServerErrors, toFields, validateValues, type FieldErrors, type FieldKey, type FormValues } from './form-model';
+import { FIELD_LABELS, emptyValues, firstErrorField, mapServerErrors, toFields, validateValues, type FieldErrors, type FieldKey, type FormValues } from './form-model';
 import { errorText } from './view-model';
 import css from './ProjectForm.module.css';
 
@@ -11,10 +11,7 @@ export type ProjectFormProps =
   | { mode: 'create'; isOwner: boolean; onDone?: undefined; onCancel?: undefined }
   | { mode: 'edit'; isOwner: boolean; projectId: string; revision: number; initial: FormValues; /** Inside a pop-up: close it after saving instead of navigating. */ onDone?: () => void; onCancel?: () => void; /** Show only these parts of the form (the rest is kept and saved unchanged). */ parts?: ('details' | 'contact' | 'notes')[] };
 
-const LABELS: Record<FieldKey, string> = {
-  name: 'שם הפרויקט', businessName: 'שם העסק', siteAddress: 'כתובת האתר', contactName: 'שם איש קשר', contactPhone: 'טלפון איש קשר',
-  contactEmail: 'מייל איש קשר', contactRole: 'תפקיד איש קשר', businessNumber: 'מספר חברה', startDate: 'תחילה בפועל', endDate: 'סיום בפועל', accessNotes: 'הערות',
-};
+const LABELS = FIELD_LABELS;
 
 function Section({ sheet, title, children }: { sheet: boolean; title: string; children: React.ReactNode }) {
   return sheet

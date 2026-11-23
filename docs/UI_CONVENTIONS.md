@@ -19,6 +19,7 @@ Every screen uses the shared pieces below. Don't build a local copy; extend the 
 | Text inputs | `TextField` (label, hint, error under the field) |
 | Form save bar | `FormActions`: save first, cancel second. `placement="page"` (fixed above the bottom nav on phone, inline on desktop) or `"sheet"` |
 | Pop-up | `Sheet` (bottom sheet on phone, centred window on desktop). Never a custom overlay |
+| Multi-step creation | `NewProjectWizard` is the pattern: one window (`Sheet`), numbered steps that slide sideways, no scrolling inside a step, back and next in the footer, the record is saved when its last form step is confirmed and later steps apply to the saved record and can be skipped |
 | Confirm | `ConfirmDialog` for every cancel, remove, finish or archive. Say what is kept ("שום דבר לא נמחק") |
 | Empty, forbidden, error page | `StateMessage` (message plus one way back). A forbidden page shows no data |
 | Inline message | `Notice` (`error` for failures; shown with text, not colour alone) |
