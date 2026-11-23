@@ -75,6 +75,8 @@ describe.sequential('depth gate: role x function sweep', () => {
         expect(r.error, `${name} as ${role}`).not.toBeNull();
         if (role !== 'anonymous') expect(r.error?.message, `${name} as ${role}`).toBe('FORBIDDEN');
       }
+      // create_project and create_profile would really write for the owner; their owner path is covered in tests/db.
+      if (name === 'create_project' || name === 'create_profile') return;
       const r = await call('owner', name, input());
       expect(r.error?.message ?? '').not.toBe('FORBIDDEN');
       expect(r.error?.message ?? '').not.toMatch(/permission denied/i);
@@ -85,6 +87,7 @@ describe.sequential('depth gate: role x function sweep', () => {
     for (const name of all) {
       const r = await call('anonymous', name, {});
       expect(r.error, `${name} as anonymous`).not.toBeNull();
+      expect(r.error?.message ?? '', `${name} as anonymous`).toMatch(/permission denied|FORBIDDEN|JWT|not authorized/i);
     }
   });
 
@@ -92,6 +95,7 @@ describe.sequential('depth gate: role x function sweep', () => {
     for (const name of serviceOnly) for (const role of ['owner', 'financeManager', 'manager', 'worker', 'outsider'] as Role[]) {
       const r = await call(role, name, {});
       expect(r.error, `${name} as ${role}`).not.toBeNull();
+      expect(r.error?.message ?? '', `${name} as ${role}`).toMatch(/permission denied|FORBIDDEN/i);
     }
   });
 
@@ -125,13 +129,13 @@ describe.sequential('depth gate: role x function sweep', () => {
     expect((await task('outsider')).error?.message).toBe('NOT_FOUND');
     const tx = (role: Role) => call(role, 'create_transaction', { requestId: ID(), projectId: a.id, fields: { year: 2026, month: 1, day: null, kind: 'income', amount: 12345, details: 'מטריצה' } });
     for (const role of ['owner', 'financeManager'] as Role[]) expect((await tx(role)).error, `create_transaction as ${role}`).toBeNull();
-    for (const role of ['manager', 'worker'] as Role[]) expect((await tx(role)).error, `create_transaction as ${role}`).not.toBeNull();
+    for (const role of ['manager', 'worker'] as Role[]) expect((await tx(role)).error?.message, `create_transaction as ${role}`).toMatch(/FORBIDDEN|NOT_FOUND/); // finance is hidden from members without access
     expect((await tx('outsider')).error?.message).toBe('NOT_FOUND');
     for (const role of ['owner', 'financeManager'] as Role[]) {
       const r = await call(role, 'finance_month_totals', { projectId: a.id });
       expect(r.error, `finance_month_totals as ${role}`).toBeNull();
     }
-    for (const role of ['manager', 'worker'] as Role[]) expect((await call(role, 'finance_month_totals', { projectId: a.id })).error, `finance_month_totals as ${role}`).not.toBeNull();
+    for (const role of ['manager', 'worker'] as Role[]) expect((await call(role, 'finance_month_totals', { projectId: a.id })).error?.message, `finance_month_totals as ${role}`).toMatch(/FORBIDDEN|NOT_FOUND/);
     // diary_summary does not error for a stranger; it must reveal nothing.
     const stranger = await call('outsider', 'diary_summary', { projectId: a.id });
     expect(stranger.error === null ? (stranger.data as { reportCount?: number }).reportCount ?? 0 : 0).toBe(0);
@@ -139,5 +143,7 @@ describe.sequential('depth gate: role x function sweep', () => {
     expect((await call('worker', 'update_project', base)).error?.message).toBe('FORBIDDEN');
     expect((await call('outsider', 'update_project', base)).error?.message).toBe('NOT_FOUND');
     expect((await call('manager', 'update_project', base)).error).toBeNull();
+    const withNumber = { ...base, expectedRevision: a.revision + 1, fields: { ...base.fields, businessNumber: 'FAKE' } };
+    expect((await call('manager', 'update_project', withNumber)).error?.message).toBe('FORBIDDEN');
   });
 });
