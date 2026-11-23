@@ -16,5 +16,5 @@ function pick(override:string|undefined,relative:string,cwd:string):string {
   if(existsSync(main)) return main;
   return join(cwd,relative);
 }
-export function cloudEnvPath(env:NodeJS.ProcessEnv=process.env,cwd=process.cwd()) { return pick(env.P13_ENV_FILE,'.env.local',cwd); }
-export function cloudOwnerPath(env:NodeJS.ProcessEnv=process.env,cwd=process.cwd()) { return pick(env.P13_OWNER_FIXTURE,'supabase/.temp/p12-owner.json',cwd); }
+export function cloudEnvPath(env:Record<string,string|undefined>=process.env,cwd=process.cwd()) { return pick(env.P13_ENV_FILE,'.env.local',cwd); }
+export function cloudOwnerPath(env:Record<string,string|undefined>=process.env,cwd=process.cwd()) { return pick(env.P13_OWNER_FIXTURE,'supabase/.temp/p12-owner.json',cwd); }
