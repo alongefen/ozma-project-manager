@@ -13,17 +13,8 @@ export function createUserCommands(platform: Platform) {
       if (error) throw error;
       return data ? { ok: true as const, value: { id: data.id, revision: data.revision } } : failure('UNAVAILABLE');
     }),
-    updateUser: ownerOperation(platform, UsersApiInputSchemas.updateUser, async (ctx, input) => {
-      const { data, error } = await ctx.db.from('profiles').select('id,email,revision').eq('id', input.id).maybeSingle();
-      if (error) throw error;
-      if (!data) return failure('NOT_FOUND');
-      if (data.revision !== input.expectedRevision) return failure('CONFLICT');
-      const email = input.email.toLowerCase();
-      // Shared AuthAdmin.setEmail cannot honor the edit revision atomically.
-      // Keep email changes unavailable until the coordinated shared fix lands.
-      if (email !== data.email.toLowerCase()) return failure('UNAVAILABLE');
-      return platform.rpc(ctx, 'update_profile', { ...input, email });
-    }),
+    // AuthAdmin.setEmail updates name and email atomically against expectedRevision (P1.3-PROFILE-UPDATE).
+    updateUser: ownerOperation(platform, UsersApiInputSchemas.updateUser, (ctx, input) => platform.authAdmin.setEmail(ctx, { userId: input.id, expectedRevision: input.expectedRevision, fullName: input.fullName, email: input.email })),
     setUserActive: ownerOperation(platform, UsersApiInputSchemas.setUserActive, (ctx, input) => platform.rpc(ctx, 'set_user_active', input)),
     resetPassword: ownerOperation(platform, UsersApiInputSchemas.resetPassword, (ctx, input) => platform.authAdmin.setPassword(ctx, { userId: input.id, password: input.password })),
     setMembership: ownerOperation(platform, UsersApiInputSchemas.setMembership, (ctx, input) => platform.rpc(ctx, 'set_membership', input)),

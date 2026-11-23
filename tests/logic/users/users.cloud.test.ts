@@ -33,6 +33,11 @@ describe.sequential('UsersApi integration using approved Cloud development proje
     const saved=value(await api.updateUser(owner,{id:created.id,expectedRevision:details.revision,fullName:'שם מתוקן בדוי',email:input.email}));
     expect(value(await api.getUser(owner,{id:created.id})).fullName).toBe('שם מתוקן בדוי');
     expect(await api.updateUser(owner,{id:created.id,expectedRevision:details.revision,fullName:'ישן',email:input.email})).toMatchObject({ok:false,error:{code:'CONFLICT'}});
+    const newEmail=`p141-new-${randomUUID()}@example.invalid`;
+    const renamed=value(await api.updateUser(owner,{id:created.id,expectedRevision:saved.revision,fullName:'שם מתוקן בדוי',email:newEmail}));
+    expect(renamed.revision).toBeGreaterThan(saved.revision);
+    expect(value(await api.getUser(owner,{id:created.id})).email).toBe(newEmail);
+    input.email=newEmail;
     const replacement=randomBytes(32).toString('base64url');
     value(await api.resetPassword(owner,{id:created.id,password:replacement}));
     expect(await api.listUsers(member,{})).toMatchObject({ok:false,error:{code:'UNAUTHENTICATED'}});

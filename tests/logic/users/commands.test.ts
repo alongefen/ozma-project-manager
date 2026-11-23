@@ -69,14 +69,16 @@ describe('UsersApi command orchestration',()=>{
     expect(await f.api.setUserActive(f.ctx,{id,expectedRevision:2,active:false})).toEqual(conflict);
     expect(f.rpc).toHaveBeenCalledTimes(1);
   });
-  it('blocks email changes without mutating Auth or the database while the shared contract is blocked',async()=>{
-    const f=fixture();
-    expect(await f.api.updateUser(f.ctx,{id,expectedRevision:3,fullName:'שינוי',email:'changed@example.invalid'})).toMatchObject({ok:false,error:{code:'UNAVAILABLE'}});
-    expect(f.authAdmin.setEmail).not.toHaveBeenCalled();expect(f.rpc).not.toHaveBeenCalled();
+  it('delegates name and email edits with the client revision to AuthAdmin.setEmail, with no second write',async()=>{
+    const f=fixture();f.authAdmin.setEmail.mockResolvedValue(ok({id,revision:4}));
+    expect(await f.api.updateUser(f.ctx,{id,expectedRevision:3,fullName:'שינוי',email:'changed@example.invalid'})).toEqual(ok({id,revision:4}));
+    expect(f.authAdmin.setEmail).toHaveBeenCalledWith(f.ctx,{userId:id,expectedRevision:3,fullName:'שינוי',email:'changed@example.invalid'});
+    expect(f.rpc).not.toHaveBeenCalled();
   });
-  it('rejects stale profile edits before any Auth email change',async()=>{
-    const f=fixture();
-    expect(await f.api.updateUser(f.ctx,{id,expectedRevision:2,fullName:'שינוי',email:'changed@example.invalid'})).toMatchObject({ok:false,error:{code:'CONFLICT'}});
-    expect(f.authAdmin.setEmail).not.toHaveBeenCalled();expect(f.rpc).not.toHaveBeenCalled();
+  it('returns CONFLICT from setEmail without retrying',async()=>{
+    const f=fixture();const conflict={ok:false as const,error:{code:'CONFLICT' as const,message:'יש לרענן'}};
+    f.authAdmin.setEmail.mockResolvedValue(conflict);
+    expect(await f.api.updateUser(f.ctx,{id,expectedRevision:2,fullName:'שינוי',email:'changed@example.invalid'})).toEqual(conflict);
+    expect(f.authAdmin.setEmail).toHaveBeenCalledTimes(1);
   });
 });
