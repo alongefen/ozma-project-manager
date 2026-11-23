@@ -82,9 +82,9 @@ function NewPersonForm({ onClose, onCreated }: { onClose: () => void; onCreated:
   const [errors, setErrors] = useState<NewPersonErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  // One request id per opening: a retry after a lost answer cannot create a second person.
+  // Same values keep the same request id (a retry after a lost answer cannot create a second person); an edit makes a new one.
   const requestId = useRef(crypto.randomUUID());
-  const set = (field: keyof typeof values) => (e: React.ChangeEvent<HTMLInputElement>) => setValues(v => ({ ...v, [field]: e.target.value }));
+  const set = (field: keyof typeof values) => (e: React.ChangeEvent<HTMLInputElement>) => { requestId.current = crypto.randomUUID(); setValues(v => ({ ...v, [field]: e.target.value })); };
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();

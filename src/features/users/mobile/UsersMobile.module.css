@@ -1,5 +1,5 @@
 .list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.card { padding: 0; }
+.card.card { padding: 0; }
 .open { all: unset; box-sizing: border-box; display: grid; gap: 8px; width: 100%; padding: 16px; min-height: 44px; cursor: pointer; }
 .open:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; border-radius: 10px; }
 .head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
