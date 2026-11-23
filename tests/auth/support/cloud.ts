@@ -1,4 +1,5 @@
-import {readFileSync} from 'node:fs';
+import {existsSync,readFileSync} from 'node:fs';
+import {cloudEnvPath,cloudOwnerPath} from '../../support/cloud-paths';
 import {parseEnv} from 'node:util';
 import {createClient} from '@supabase/supabase-js';
 import {randomBytes, randomUUID} from 'node:crypto';
@@ -6,10 +7,11 @@ import type {Db, RequestContext, Actor} from '../../../src/types/contracts';
 
 // Runtime-only fixture loading. Never log these files or returned clients.
 export function cloudEnvironment() {
-  const file=process.env.P13_ENV_FILE ? parseEnv(readFileSync(process.env.P13_ENV_FILE,'utf8')) : {};
+  const envPath=cloudEnvPath();
+  const file=existsSync(envPath) ? parseEnv(readFileSync(envPath,'utf8')) : {};
   const get=(key:string)=>process.env[key] || file[key];
   const url=get('SUPABASE_URL'); const key=get('SUPABASE_PUBLISHABLE_KEY'); const secret=get('SUPABASE_SECRET_KEY');
-  if(!url || !key || !secret) throw new Error('נדרשים SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY');
+  if(!url || !key || !secret) throw new Error(`חסרות הגדרות ענן; הקובץ הצפוי: ${envPath}`);
   if(new URL(url).hostname!=='izjmvyguzbampoasvnru.supabase.co') throw new Error('יעד הבדיקה אינו פרויקט הפיתוח המאושר');
   return {url,key,secret};
 }
@@ -19,8 +21,8 @@ export function cloudClients() {
   return {admin:createClient(env.url,env.secret,options) as Db,publicClient:()=>createClient(env.url,env.key,options) as Db};
 }
 export async function cloudOwner() {
-  const file=process.env.P13_OWNER_FIXTURE;
-  if(!file) throw new Error('נדרש P13_OWNER_FIXTURE של בעלים בדוי קיים');
+  const file=cloudOwnerPath();
+  if(!existsSync(file)) throw new Error(`חסר קובץ בעלים בדוי; הקובץ הצפוי: ${file}`);
   const credentials=JSON.parse(readFileSync(file,'utf8')) as {email:string;password:string};
   const {publicClient}=cloudClients();const db=publicClient();
   const response=await db.auth.signInWithPassword(credentials);
