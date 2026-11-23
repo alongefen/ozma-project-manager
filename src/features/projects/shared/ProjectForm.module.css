@@ -25,3 +25,8 @@
   .full { grid-column: 1 / -1; }
   .dates { grid-template-columns: 1fr 1fr; }
 }
+
+.inSheet { padding-bottom: 0; }
+.sheetBar { position: sticky; bottom: -20px; display: flex; gap: 10px; padding: 12px 0 4px; background: var(--surface); border-top: 1px solid var(--line); }
+.sheetBar > * { flex: 1; }
+@media (min-width: 1024px) { .sheetBar { bottom: -25px; justify-content: flex-start; } .sheetBar > * { flex: 0 0 auto; } }

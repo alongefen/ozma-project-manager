@@ -5,6 +5,8 @@ import { Button, Card, Notice } from '@/components/ui';
 import { removeMembership, setFinanceAccess, setMembership } from '@/features/users/logic/actions';
 import type { MemberRow, ProjectRole, Result } from '@/types/contracts';
 import { errorText } from './view-model';
+import { Select } from './Select';
+import { Sheet } from './Sheet';
 import css from './AccessManager.module.css';
 
 export type Candidate = { id: string; fullName: string };
@@ -23,6 +25,7 @@ export function AccessManager({ projectId, members, candidates }: { projectId: s
   const [removing, setRemoving] = useState<string | null>(null);
   const [userId, setUserId] = useState('');
   const [role, setRole] = useState<ProjectRole>('worker');
+  const [adding, setAdding] = useState(false);
 
   async function run<T>(key: string, call: () => Promise<Result<T>>, done: string) {
     setBusy(key); setError(null); setInfo(null);
@@ -34,7 +37,17 @@ export function AccessManager({ projectId, members, candidates }: { projectId: s
     router.refresh();
   }
 
-  const add = () => userId && run('add', () => setMembership({ userId, projectId, role, expectedRevision: null }), 'השיוך נשמר').then(() => setUserId(''));
+  const closeAdd = () => { setAdding(false); setUserId(''); setRole('worker'); };
+  async function add() {
+    if (!userId) return;
+    setBusy('add'); setError(null); setInfo(null);
+    const result = await setMembership({ userId, projectId, role, expectedRevision: null });
+    setBusy(null);
+    if (!result.ok) { setError(errorText(result.error.code, result.error.message)); closeAdd(); return; }
+    setInfo('הגישה נוספה');
+    closeAdd();
+    router.refresh();
+  }
   const changeRole = (m: MemberRow, next: ProjectRole) => run(m.userId, () => setMembership({ userId: m.userId, projectId, role: next, expectedRevision: m.revision }), next === 'worker' && m.financeAccess ? 'התפקיד עודכן. גישת הכספים כובתה כי עובד אינו מקבל כספים' : 'התפקיד עודכן');
   const finance = (m: MemberRow, enabled: boolean) => run(m.userId, () => setFinanceAccess({ userId: m.userId, projectId, enabled, expectedRevision: m.revision }), enabled ? 'גישת כספים נפתחה' : 'גישת כספים נסגרה');
   const remove = (m: MemberRow) => run(m.userId, () => removeMembership({ userId: m.userId, projectId, expectedRevision: m.revision }), 'הגישה הוסרה');
@@ -44,7 +57,10 @@ export function AccessManager({ projectId, members, candidates }: { projectId: s
       {error && <Notice tone="error">{error}</Notice>}
       {info && <Notice>{info}</Notice>}
       <Card panel className={css.card}>
-        <h2 className={css.title}>משויכים לפרויקט</h2>
+        <div className={css.cardHead}>
+          <h2 className={css.title}>משויכים לפרויקט</h2>
+          <Button size="small" onClick={() => setAdding(true)}>הוספת גישה</Button>
+        </div>
         {members.length === 0 && <p className={css.empty}>לא שויך אף אחד לפרויקט</p>}
         <ul className={css.list}>
           {members.map(m => (
@@ -63,13 +79,11 @@ export function AccessManager({ projectId, members, candidates }: { projectId: s
                 </div>
               ) : (
                 <div className={css.controls}>
-                  <label className={css.inline}>
-                    <span className="sr-only">תפקיד של {m.fullName}</span>
-                    <select className={css.select} value={m.role} disabled={busy !== null} onChange={e => changeRole(m, e.target.value as ProjectRole)}>
-                      <option value="manager">{ROLE_LABEL.manager}</option>
-                      <option value="worker">{ROLE_LABEL.worker}</option>
-                    </select>
-                  </label>
+                  <div className={css.roleSelect}>
+                    <Select label={`תפקיד של ${m.fullName}`} hideLabel value={m.role} disabled={busy !== null}
+                      options={[{ value: 'manager', label: ROLE_LABEL.manager }, { value: 'worker', label: ROLE_LABEL.worker }]}
+                      onChange={v => v !== m.role && changeRole(m, v as ProjectRole)} />
+                  </div>
                   {m.role === 'manager' && (
                     <label className={css.check}>
                       <input type="checkbox" checked={m.financeAccess} disabled={busy !== null} onChange={e => finance(m, e.target.checked)} />
@@ -83,29 +97,19 @@ export function AccessManager({ projectId, members, candidates }: { projectId: s
           ))}
         </ul>
       </Card>
-      <Card panel className={css.card}>
-        <h2 className={css.title}>הוספת גישה</h2>
+      <Sheet open={adding} onClose={closeAdd} title="הוספת גישה" menus>
         {candidates.length === 0 ? <p className={css.empty}>אין עוד משתמשים פעילים להוספה</p> : (
-          <div className={css.add}>
-            <label className={css.field}>
-              <span>אדם</span>
-              <select className={css.select} value={userId} onChange={e => setUserId(e.target.value)}>
-                <option value="">בחירת אדם</option>
-                {candidates.map(c => <option key={c.id} value={c.id}>{c.fullName}</option>)}
-              </select>
-            </label>
-            <label className={css.field}>
-              <span>תפקיד בפרויקט</span>
-              <select className={css.select} value={role} onChange={e => setRole(e.target.value as ProjectRole)}>
-                <option value="worker">{ROLE_LABEL.worker}</option>
-                <option value="manager">{ROLE_LABEL.manager}</option>
-              </select>
-            </label>
-            <Button disabled={!userId || busy !== null} onClick={add}>{busy === 'add' ? 'שומר…' : 'הוספה'}</Button>
-          </div>
+          <>
+            <Select label="אדם" value={userId} onChange={setUserId} placeholder="בחירת אדם" options={candidates.map(c => ({ value: c.id, label: c.fullName }))} />
+            <Select label="תפקיד בפרויקט" value={role} onChange={v => setRole(v as ProjectRole)} options={[{ value: 'worker', label: ROLE_LABEL.worker }, { value: 'manager', label: ROLE_LABEL.manager }]} />
+            <p className={css.muted}>גישה לכספים נפתחת רק למנהל, אחרי ההוספה.</p>
+            <div className={css.row}>
+              <Button disabled={!userId || busy !== null} onClick={add}>{busy === 'add' ? 'שומר…' : 'הוספה'}</Button>
+              <Button variant="secondary" onClick={closeAdd}>ביטול</Button>
+            </div>
+          </>
         )}
-        <p className={css.muted}>גישה לכספים נפתחת רק למנהל, אחרי ההוספה.</p>
-      </Card>
+      </Sheet>
     </div>
   );
 }

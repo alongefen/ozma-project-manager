@@ -1,7 +1,12 @@
 .page { display: grid; gap: 20px; }
 .back { color: var(--nav-active-ink); font-weight: 700; text-decoration: none; }
 .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-.headSide { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.nameRow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.cardHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.main { display: grid; gap: 20px; align-content: start; }
+.danger { background: #fff6f6; border-color: var(--err-line); }
+.dangerTitle { font-size: 19px; font-weight: 800; color: var(--err-ink); }
+.dangerText { font-size: 14px; color: var(--err-ink); }
 .inner { display: flex; gap: 6px; border-bottom: 1px solid var(--line); }
 .inner a, .current { padding: 12px 18px; font-weight: 700; color: #68747c; text-decoration: none; border-bottom: 3px solid transparent; }
 .current { color: var(--nav-active-ink); border-bottom-color: var(--blue); }
