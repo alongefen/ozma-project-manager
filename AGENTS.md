@@ -58,7 +58,7 @@ A project management system for the construction company "חי עוצמה בבנ
 
 ## D31: migrations, costs and services
 
-The existing development project is `izjmvyguzbampoasvnru` in Ireland (A-31). A new migration, new service, cost, paid AI, production or deployment needs explicit approval in advance, stating what, why, the cost and how to roll back. No resets, and no re-running existing migrations. An earlier approval never stretches to cover more.
+The existing Supabase project `izjmvyguzbampoasvnru` in Ireland (A-31) is not development-only: Alon confirmed on 23.11.2026 that it will also be the production database. Treat it as production-bound: fake test data only for now, tests clean up only their own rows, and the backup question returns to Alon before real data. A new migration, new service, cost, paid AI, production or deployment needs explicit approval in advance, stating what, why, the cost and how to roll back. No resets, and no re-running existing migrations. An earlier approval never stretches to cover more.
 
 ## Git
 
