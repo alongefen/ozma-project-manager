@@ -1,0 +1,20 @@
+.page { display: grid; gap: 20px; }
+.back { color: var(--nav-active-ink); font-weight: 700; text-decoration: none; }
+.head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.headSide { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.inner { display: flex; gap: 6px; border-bottom: 1px solid var(--line); }
+.inner a, .current { padding: 12px 18px; font-weight: 700; color: #68747c; text-decoration: none; border-bottom: 3px solid transparent; }
+.current { color: var(--nav-active-ink); border-bottom-color: var(--blue); }
+.cols { display: grid; gap: 20px; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); align-items: start; }
+.card { display: grid; gap: 16px; }
+.title { font-size: 19px; font-weight: 800; }
+.cover { width: 100%; max-height: 240px; object-fit: cover; border-radius: 10px; background: var(--gray-bg); display: block; }
+.list { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+.listCol { margin: 0; display: grid; gap: 14px; }
+.list > div, .listCol > div { display: grid; gap: 2px; min-width: 0; }
+.wide { grid-column: 1 / -1; }
+.list dt, .listCol dt { font-size: 13px; color: var(--muted); }
+.list dd, .listCol dd { margin: 0; overflow-wrap: anywhere; }
+.notes { white-space: pre-wrap; }
+.side { display: grid; gap: 20px; }
+@media (max-width: 1100px) { .cols { grid-template-columns: 1fr; } }
