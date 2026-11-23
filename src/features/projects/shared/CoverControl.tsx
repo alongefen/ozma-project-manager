@@ -9,18 +9,23 @@ import { coverSrc, errorText } from './view-model';
 import css from './CoverControl.module.css';
 
 /** Owner-only cover image (F03): pick one image through the shared upload, then bind it to the project. */
-export function CoverControl({ id, revision, coverFileId }: { id: string; revision: number; coverFileId: string | null }) {
+export function CoverControl({ id, revision, coverFileId, onSaved }: { id: string; revision: number; coverFileId: string | null; /** Called with the new revision once the cover is bound (the wizard keeps its own copy). */ onSaved?: (revision: number) => void }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
-  const src = coverSrc(coverFileId);
+  const [current, setCurrent] = useState(coverFileId);
+  const [rev, setRev] = useState(revision);
+  const src = coverSrc(current);
 
   async function onUploaded(files: FileRef[]) {
     const file = files[0];
     if (!file) return;
     setError(null);
-    const result = await setProjectCover({ id, expectedRevision: revision, fileId: file.id });
+    const result = await setProjectCover({ id, expectedRevision: rev, fileId: file.id });
     if (!result.ok) { setError(errorText(result.error.code, result.error.message)); return; }
+    setCurrent(file.id);
+    setRev(result.value.revision);
+    onSaved?.(result.value.revision);
     setSaved(true);
     router.refresh();
   }

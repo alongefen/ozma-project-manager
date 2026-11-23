@@ -20,6 +20,11 @@ export type FormValues = {
 export type FieldKey = keyof FormValues;
 export type FieldErrors = Partial<Record<FieldKey, string>>;
 
+export const FIELD_LABELS: Record<FieldKey, string> = {
+  name: 'שם הפרויקט', businessName: 'שם העסק', siteAddress: 'כתובת האתר', contactName: 'שם איש קשר', contactPhone: 'טלפון איש קשר',
+  contactEmail: 'מייל איש קשר', contactRole: 'תפקיד איש קשר', businessNumber: 'מספר חברה', startDate: 'תחילה בפועל', endDate: 'סיום בפועל', accessNotes: 'הערות',
+};
+
 export const REQUIRED_MESSAGE = 'שדה חובה';
 export const INVALID_MESSAGE = 'יש לבדוק את הערך שהוזן';
 

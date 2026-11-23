@@ -1,0 +1,36 @@
+.trigger { justify-self: start; display: inline-block; }
+.wizard { display: grid; gap: 8px; }
+.progress { display: grid; gap: 8px; }
+.stepName { font-size: 17px; font-weight: 800; }
+.stepName span { color: var(--muted); font-weight: 700; font-size: 14px; margin-inline-end: 6px; }
+.bars { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
+.bar { height: 4px; border-radius: 2px; background: var(--line); }
+.barOn { background: var(--blue); }
+.viewport { overflow: hidden; }
+.track { display: flex; align-items: stretch; transition: transform .28s ease; }
+.step { flex: 0 0 100%; min-width: 0; box-sizing: border-box; display: grid; gap: 8px; align-content: start; padding: 4px; }
+.step input, .step textarea { max-width: 100%; box-sizing: border-box; }
+.twoWide { display: grid; gap: 10px; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.two > *, .twoWide > * { min-width: 0; }
+.label { font-size: 14px; font-weight: 600; }
+.textarea { width: 100%; min-height: 190px; padding: 12px 14px; border: 1px solid var(--field-line); border-radius: 8px; background: var(--surface); color: var(--ink); resize: none; box-sizing: border-box; }
+.hint { font-size: 14px; color: var(--muted); }
+.status { min-height: 0; margin: 0; }
+.statusText { font-size: 14px; font-weight: 600; color: var(--err-ink); }
+.people { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; max-height: 250px; overflow-y: auto; }
+.person { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.pname { overflow-wrap: anywhere; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); padding: 3px; gap: 3px; background: #e9edf0; border-radius: 10px; }
+.segBtn { min-height: 44px; border: 0; border-radius: 8px; background: transparent; color: #55626a; font-weight: 700; cursor: pointer; }
+.segBtn[aria-checked='true'] { background: var(--surface); color: var(--nav-active-ink); box-shadow: 0 1px 3px #0002; }
+.fin { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; }
+.fin input { width: 22px; height: 22px; }
+.finOff { opacity: .4; cursor: not-allowed; }
+.finOff input { cursor: not-allowed; }
+@media (prefers-reduced-motion: reduce) { .track { transition: none; } }
+@media (min-width: 1024px) {
+  .twoWide { grid-template-columns: 1fr 1fr; gap: 14px; }
+  .person { grid-template-columns: 1fr 210px auto; align-items: center; }
+  .people { max-height: 280px; }
+}
