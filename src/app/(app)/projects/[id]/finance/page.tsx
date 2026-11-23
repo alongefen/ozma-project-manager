@@ -2,7 +2,7 @@ import { notFound, redirect } from 'next/navigation';
 import { createPlatform } from '@/lib/auth/platform';
 import { SIGN_IN_PATH } from '@/lib/navigation';
 import { Notice } from '@/components/ui';
-import { loadFinance } from '@/features/finance/shared/load';
+import { loadFinanceScreen } from '@/features/finance/shared/load';
 import { parseFilter, type FinanceQuery } from '@/features/finance/shared/query';
 import { FinanceMobile } from '@/features/finance/mobile/FinanceMobile';
 import { FinanceNavProvider } from '@/features/finance/shared/nav';
@@ -20,12 +20,12 @@ export default async function ProjectFinancePage({ params, searchParams }: { par
   const platform = await createPlatform();
   const context = await platform.auth.getContext();
   if (!context.ok) redirect(SIGN_IN_PATH);
-  const filter = parseFilter(query, context.value.today);
-  const data = await loadFinance(platform, context.value, id, filter);
+  const filter = parseFilter(query);
+  const data = await loadFinanceScreen(platform, context.value, id, filter);
   if (data.kind === 'hidden') notFound();
   if (data.kind === 'signed-out') redirect(SIGN_IN_PATH);
   if (data.kind === 'error') return <Notice tone="error">{data.message}</Notice>;
-  const props = { book: data.book, today: context.value.today };
+  const props = { book: data.book, filteredRows: data.filteredRows, today: context.value.today };
   return (
     <FinanceNavProvider projectId={id} filter={filter}>
       <FinanceMobile {...props} />
