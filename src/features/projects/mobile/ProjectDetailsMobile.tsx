@@ -1,12 +1,9 @@
-import Link from 'next/link';
-import { Badge, Card, Notice } from '@/components/ui';
+import { Card, Notice } from '@/components/ui';
 import type { ProjectDetails } from '@/types/contracts';
-import { BackTitle } from '../shared/BackTitle';
 import { EditProjectSheet } from '../shared/EditProjectSheet';
 import { ProjectActions } from '../shared/ProjectActions';
-import { ProjectTabs } from '../shared/ProjectTabs';
 import { valuesFromDetails } from '../shared/form-model';
-import { actionsFor, coverSrc, dateText, isReadOnlyProject, managersText, orNotEntered, READ_ONLY_NOTICE, sectionsFor, statusLabel, telHref } from '../shared/view-model';
+import { actionsFor, coverSrc, dateText, isReadOnlyProject, managersText, orNotEntered, READ_ONLY_NOTICE, telHref } from '../shared/view-model';
 import css from './ProjectDetailsMobile.module.css';
 
 /**
@@ -19,12 +16,6 @@ export function ProjectDetailsMobile({ d, isOwner }: { d: ProjectDetails; isOwne
   const tel = telHref(d.contact.phone);
   return (
     <div className={`${css.page} m-only`}>
-      <BackTitle
-        title={d.name} backHref="/projects" backLabel="חזרה לרשימת הפרויקטים"
-        badge={<Badge tone={d.status === 'completed' || d.archived ? 'gray' : 'active'}>{statusLabel(d)}</Badge>}
-        actions={act.manage ? <Link href={`/projects/${d.id}/edit/access`} className={css.perm}>הרשאות</Link> : undefined}
-      />
-      <ProjectTabs projectId={d.id} sections={sectionsFor(d)} current="details" />
       {isReadOnlyProject(d) && !act.manage && <Notice>{READ_ONLY_NOTICE}</Notice>}
       {cover
         // eslint-disable-next-line @next/next/no-img-element

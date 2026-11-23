@@ -1,10 +1,8 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import type { FinanceBook, ProjectDetails, TransactionRow } from '@/types/contracts';
+import type { FinanceBook, TransactionRow } from '@/types/contracts';
 import { Button, Card, Notice } from '@/components/ui';
-import { ProjectTabs } from '@/features/projects/shared/ProjectTabs';
-import { sectionsFor } from '@/features/projects/shared/view-model';
 import { Chevron } from '../shared/Chevron';
 import { EntryForm } from '../shared/EntryForm';
 import { ExcelLink } from '../shared/ExcelLink';
@@ -39,13 +37,6 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
 
   return (
     <div className="fin fin-mobile m-only">
-      <div className="fin-mtop">
-        <Link href="/projects" className="fin-back" aria-label="חזרה לרשימת הפרויקטים"><Chevron side="right" /></Link>
-        <h1 className="fin-mtitle">{book.projectName}</h1>
-      </div>
-
-      <ProjectTabs projectId={book.projectId} sections={sectionsFor({ id: book.projectId, permissions: { viewFinance: true } as ProjectDetails['permissions'] })} current="finance" />
-
       <div className="fin-seg" role="group" aria-label="תקופה">
         <button type="button" aria-pressed={period !== 'all'} onClick={() => go({ ...filter, period: period === 'all' ? currentMonth(today) : period })}>חודש</button>
         <button type="button" aria-pressed={period === 'all'} onClick={() => go({ ...filter, period: 'all' })}>כל התקופה</button>

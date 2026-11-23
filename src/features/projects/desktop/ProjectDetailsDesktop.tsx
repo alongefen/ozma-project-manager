@@ -1,12 +1,9 @@
-import Link from 'next/link';
-import { Badge, Card, Notice } from '@/components/ui';
+import { Card, Notice } from '@/components/ui';
 import type { ProjectDetails } from '@/types/contracts';
-import { BackTitle } from '../shared/BackTitle';
 import { EditProjectSheet } from '../shared/EditProjectSheet';
-import { ProjectInnerNav } from '../shared/ProjectInnerNav';
 import { ProjectActions } from '../shared/ProjectActions';
 import { valuesFromDetails } from '../shared/form-model';
-import { actionsFor, coverSrc, dateText, isReadOnlyProject, managersText, orNotEntered, READ_ONLY_NOTICE, sectionsFor, statusLabel, telHref } from '../shared/view-model';
+import { actionsFor, coverSrc, dateText, isReadOnlyProject, managersText, orNotEntered, READ_ONLY_NOTICE, telHref } from '../shared/view-model';
 import css from './ProjectDetailsDesktop.module.css';
 
 /** Desktop project file: name and status together, permissions at the top for the owner, inner navigation, details and contact (DESIGN S05). */
@@ -16,15 +13,6 @@ export function ProjectDetailsDesktop({ d, isOwner }: { d: ProjectDetails; isOwn
   const tel = telHref(d.contact.phone);
   return (
     <div className={`${css.page} d-only`}>
-      <div>
-        <BackTitle
-          title={d.name} backHref="/projects" backLabel="חזרה לרשימת הפרויקטים"
-          badge={<Badge tone={d.status === 'completed' || d.archived ? 'gray' : 'active'}>{statusLabel(d)}</Badge>}
-          actions={act.manage ? <Link href={`/projects/${d.id}/edit/access`} className="ui-btn ui-btn--secondary">הרשאות</Link> : undefined}
-        />
-        <p className="ui-sub" style={{ marginTop: 0 }}>{d.siteAddress}</p>
-      </div>
-      <ProjectInnerNav projectId={d.id} sections={sectionsFor(d)} current="details" />
       {isReadOnlyProject(d) && !act.manage && <Notice>{READ_ONLY_NOTICE}</Notice>}
       <div className={css.cols}>
         <div className={css.main}>
