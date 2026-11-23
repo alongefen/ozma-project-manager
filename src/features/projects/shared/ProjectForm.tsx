@@ -1,8 +1,7 @@
 'use client';
 import { useEffect, useId, useState, type FormEvent } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Button, Card, Notice, TextField } from '@/components/ui';
+import { Card, FormActions, Notice, TextField } from '@/components/ui';
 import { createProject, updateProject } from '../logic/actions';
 import { emptyValues, firstErrorField, mapServerErrors, toFields, validateValues, type FieldErrors, type FieldKey, type FormValues } from './form-model';
 import { errorText } from './view-model';
@@ -133,21 +132,9 @@ export function ProjectForm(props: ProjectFormProps) {
           {errors.accessNotes && <span className="ui-field__error">{errors.accessNotes}</span>}
         </div>
       </Section>}
-      {sheet ? (
-        <div className={css.sheetBar}>
-          <Button type="submit" disabled={saving}>{saveLabel}</Button>
-          <Button variant="secondary" onClick={() => props.onCancel?.()}>ביטול</Button>
-        </div>
-      ) : (<>
-      <div className={css.deskBar}>
-        <Button type="submit" disabled={saving}>{saveLabel}</Button>
-        <Link href={cancelHref} className="ui-btn ui-btn--secondary" style={{ textDecoration: 'none' }}>ביטול</Link>
-      </div>
-      <div className={css.saveBar}>
-        <Button type="submit" disabled={saving}>{saveLabel}</Button>
-        <Link href={cancelHref} className="ui-btn ui-btn--secondary" style={{ textDecoration: 'none' }}>ביטול</Link>
-      </div>
-      </>)}
+      {sheet
+        ? <FormActions placement="sheet" submitLabel={saveLabel} busy={saving} onCancel={() => props.onCancel?.()} />
+        : <FormActions submitLabel={saveLabel} busy={saving} cancelHref={cancelHref} />}
     </form>
   );
 }

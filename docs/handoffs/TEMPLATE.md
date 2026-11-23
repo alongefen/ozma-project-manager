@@ -21,6 +21,7 @@ You are the task session for <ID>. Build the code yourself, then run one `review
 
 ## Done
 - <the concrete behaviours, including the forbidden cases checked on the server>.
+- UI checklist (screens only): follow `docs/UI_CONVENTIONS.md`: `PageHeader`, shared components, `loading.tsx`, 360-1280 RTL, confirm on destructive actions.
 - Tests: only the affected suites (A-36). Cloud tests: <allowed / ask the PM for a window>.
 - `docs/tasks/<ID>.md`: what changed, what was checked, the results, and what is still open.
 - One reviewer pass → fix the findings → rebase → PR → merge → fast-forward `main` (A-32).

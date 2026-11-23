@@ -1,14 +1,13 @@
 import 'server-only';
 import { notFound, redirect } from 'next/navigation';
-import { createPlatform } from '@/lib/auth/platform';
+import { getContext, getPlatform } from '@/components/shell/request';
 import { SIGN_IN_PATH } from '@/lib/navigation';
 import type { Platform, RequestContext } from '@/types/contracts';
 import { createProjectsApi } from '../logic';
 
 /** Signed-in context for a project page: signed out goes to sign-in, any other failure to a generic not-available state. */
 export async function pageContext(): Promise<{ platform: Platform; ctx: RequestContext }> {
-  const platform = await createPlatform();
-  const context = await platform.auth.getContext();
+  const [platform, context] = await Promise.all([getPlatform(), getContext()]);
   if (!context.ok) {
     if (context.error.code === 'UNAUTHENTICATED') redirect(SIGN_IN_PATH);
     throw new Error('context unavailable');

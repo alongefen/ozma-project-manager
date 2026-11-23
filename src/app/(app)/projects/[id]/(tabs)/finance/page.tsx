@@ -1,5 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
-import { createPlatform } from '@/lib/auth/platform';
+import { getContext, getPlatform } from '@/components/shell/request';
 import { SIGN_IN_PATH } from '@/lib/navigation';
 import { Notice } from '@/components/ui';
 import { loadFinanceScreen } from '@/features/finance/shared/load';
@@ -18,8 +18,7 @@ export const metadata = { title: 'כספי פרויקט' };
  */
 export default async function ProjectFinancePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<FinanceQuery> }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  const platform = await createPlatform();
-  const context = await platform.auth.getContext();
+  const [platform, context] = await Promise.all([getPlatform(), getContext()]);
   if (!context.ok) redirect(SIGN_IN_PATH);
   const filter = parseFilter(query);
   const data = await loadFinanceScreen(platform, context.value, id, filter);

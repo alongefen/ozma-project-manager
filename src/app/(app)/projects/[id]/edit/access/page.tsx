@@ -1,7 +1,5 @@
-import Link from 'next/link';
-import { Notice } from '@/components/ui';
+import { Page, PageHeader, StateMessage } from '@/components/ui';
 import { loadProject } from '@/features/projects/shared/load';
-import { BackTitle } from '@/features/projects/shared/BackTitle';
 import { AccessManager } from '@/features/projects/shared/AccessManager';
 import { createUsersApi } from '@/features/users/logic';
 
@@ -12,12 +10,7 @@ export default async function AccessPage({ params }: { params: Promise<{ id: str
   const { id } = await params;
   const { platform, ctx, project } = await loadProject(id);
   if (!ctx.actor.isOwner || !project.permissions.manageAccess) {
-    return (
-      <div>
-        <Notice tone="error">רק מנהל המערכת יכול לשייך אנשים לפרויקט.</Notice>
-        <p><Link href={`/projects/${id}`}>חזרה לתיק הפרויקט</Link></p>
-      </div>
-    );
+    return <StateMessage tone="error" backHref={`/projects/${id}`} backLabel="חזרה לתיק הפרויקט">רק מנהל המערכת יכול לשייך אנשים לפרויקט.</StateMessage>;
   }
   const users = createUsersApi(platform);
   const [members, everyone] = await Promise.all([users.listProjectMembers(ctx, { projectId: id }), users.listUsers(ctx, {})]);
@@ -25,10 +18,9 @@ export default async function AccessPage({ params }: { params: Promise<{ id: str
   const memberIds = new Set(members.value.map(m => m.userId));
   const candidates = everyone.value.filter(u => u.isActive && !u.isOwner && !memberIds.has(u.id)).map(u => ({ id: u.id, fullName: u.fullName }));
   return (
-    <div style={{ display: 'grid', gap: 16, maxWidth: 820 }}>
-      <BackTitle title="הרשאות" backHref={`/projects/${id}`} backLabel="חזרה לתיק הפרויקט" />
-      <p className="ui-sub" style={{ marginTop: -12 }}>{project.name}</p>
+    <Page narrow>
+      <PageHeader title="הרשאות" sub={project.name} backHref={`/projects/${id}`} backLabel="חזרה לתיק הפרויקט" />
       <AccessManager projectId={id} members={members.value} candidates={candidates} />
-    </div>
+    </Page>
   );
 }

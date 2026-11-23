@@ -1,12 +1,11 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Card } from '@/components/ui';
+import { Button, Card, ConfirmDialog, Sheet } from '@/components/ui';
 import { removeMembership, setFinanceAccess, setMembership } from '@/features/users/logic/actions';
 import type { MemberRow, ProjectRole, Result } from '@/types/contracts';
 import { errorText } from './view-model';
 import { Select } from './Select';
-import { Sheet } from './Sheet';
 import css from './AccessManager.module.css';
 
 export type Candidate = { id: string; fullName: string };
@@ -119,16 +118,7 @@ export function AccessManager({ projectId, members: initial, candidates: initial
                   <strong>{m.fullName}</strong>
                   {!m.isActive && <span className={css.muted}> (חשבון מושבת)</span>}
                 </div>
-                {removing === m.userId ? (
-                  <div className={css.confirm} role="group" aria-label={`הסרת ${m.fullName}`}>
-                    <p>להסיר את הגישה של {m.fullName} לפרויקט? לא תהיה לו יותר גישה אליו. ההיסטוריה נשמרת.</p>
-                    <div className={css.row}>
-                      <Button disabled={busy} onClick={() => remove(m)}>הסרת גישה</Button>
-                      <Button variant="secondary" onClick={() => setRemoving(null)}>ביטול</Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className={css.controls}>
+                <div className={css.controls}>
                     <div className={css.roleSelect}>
                       <Select label={`תפקיד של ${m.fullName}`} hideLabel value={m.role} disabled={busy}
                         options={[{ value: 'manager', label: ROLE_LABEL.manager }, { value: 'worker', label: ROLE_LABEL.worker }]}
@@ -140,13 +130,21 @@ export function AccessManager({ projectId, members: initial, candidates: initial
                       {m.role !== 'manager' && <span className="sr-only"> (זמינה למנהל בלבד)</span>}
                     </label>
                     <Button variant="secondary" size="small" disabled={busy} onClick={() => setRemoving(m.userId)}>הסרת גישה</Button>
-                  </div>
-                )}
+                </div>
               </li>
             );
           })}
         </ul>
       </Card>
+      {(() => {
+        const m = members.find(x => x.userId === removing);
+        return (
+          <ConfirmDialog open={!!m} danger title="הסרת גישה" confirmLabel="הסרת גישה" busy={m ? pending.has(m.userId) : false}
+            onConfirm={() => m && remove(m)} onCancel={() => setRemoving(null)}>
+            <p>{m ? `להסיר את הגישה של ${m.fullName} לפרויקט? לא תהיה לו יותר גישה אליו. ההיסטוריה נשמרת.` : ''}</p>
+          </ConfirmDialog>
+        );
+      })()}
       <Sheet open={adding} onClose={closeAdd} title="הוספת גישה" menus>
         {candidates.length === 0 ? <p className={css.empty}>אין עוד משתמשים פעילים להוספה</p> : (
           <>

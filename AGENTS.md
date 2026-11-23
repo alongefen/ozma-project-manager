@@ -49,6 +49,10 @@ A project management system for the construction company "חי עוצמה בבנ
   - There are two shells, phone and desktop, and every feature delivers both together on top of shared logic.
   - It's a webapp, not React Native.
 
+## UI (UX-FOUNDATION)
+
+- Every screen follows [UI_CONVENTIONS](docs/UI_CONVENTIONS.md): shared header, components, loading and speed rules. Read it before building any screen.
+
 ## Technical (A-21)
 
 - Next.js, cloud Supabase and Vercel. No local Supabase, no Docker.
