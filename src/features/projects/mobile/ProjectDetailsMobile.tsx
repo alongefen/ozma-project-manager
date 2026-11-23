@@ -1,37 +1,49 @@
 import Link from 'next/link';
 import { Badge, Card, Notice } from '@/components/ui';
 import type { ProjectDetails } from '@/types/contracts';
+import { EditProjectSheet } from '../shared/EditProjectSheet';
 import { ProjectActions } from '../shared/ProjectActions';
+import { ProjectTabs } from '../shared/ProjectTabs';
+import { valuesFromDetails } from '../shared/form-model';
 import { actionsFor, coverSrc, dateText, isReadOnlyProject, managersText, orNotEntered, READ_ONLY_NOTICE, sectionsFor, statusLabel, telHref } from '../shared/view-model';
 import css from './ProjectDetailsMobile.module.css';
 
-/** Phone project file: the entry screen. Large rows lead to the sections, one screen each (UX-19, no tabs). */
-export function ProjectDetailsMobile({ d }: { d: ProjectDetails }) {
+/**
+ * Phone project file: name with its status, permissions button for the owner, section tabs across the
+ * width, then details in two columns. Editing opens a bottom sheet (Alon, 23.11).
+ */
+export function ProjectDetailsMobile({ d, isOwner }: { d: ProjectDetails; isOwner: boolean }) {
   const act = actionsFor(d);
   const cover = coverSrc(d.coverFileId);
   const tel = telHref(d.contact.phone);
   return (
     <div className={`${css.page} m-only`}>
-      <Link href="/projects" className={css.back}>‹ כל הפרויקטים</Link>
       <header className={css.head}>
-        <h2 className={css.name}>{d.name}</h2>
-        <Badge tone={d.status === 'completed' || d.archived ? 'gray' : 'active'}>{statusLabel(d)}</Badge>
+        <div className={css.nameRow}>
+          <h2 className={css.name}>{d.name}</h2>
+          <Badge tone={d.status === 'completed' || d.archived ? 'gray' : 'active'}>{statusLabel(d)}</Badge>
+        </div>
+        {act.manage && <Link href={`/projects/${d.id}/edit/access`} className={css.perm}>הרשאות</Link>}
       </header>
+      <ProjectTabs projectId={d.id} sections={sectionsFor(d)} current="details" />
       {isReadOnlyProject(d) && !act.manage && <Notice>{READ_ONLY_NOTICE}</Notice>}
       {cover
         // eslint-disable-next-line @next/next/no-img-element
         ? <img className={css.cover} src={cover} alt="תמונת השער של הפרויקט" />
         : null}
       <Card className={css.card}>
-        <h3 className={css.title}>פרטים</h3>
+        <div className={css.cardHead}>
+          <h3 className={css.title}>פרטי הפרויקט</h3>
+          {act.edit && <EditProjectSheet id={d.id} revision={d.revision} coverFileId={d.coverFileId} isOwner={isOwner} manage={act.manage} initial={valuesFromDetails(d)} icon />}
+        </div>
         <dl className={css.list}>
           <div><dt>עסק</dt><dd>{d.businessName}</dd></div>
-          <div><dt>כתובת</dt><dd>{d.siteAddress}</dd></div>
+          <div><dt>מנהלים</dt><dd>{managersText(d.managerNames)}</dd></div>
+          <div className={css.wide}><dt>כתובת</dt><dd>{d.siteAddress}</dd></div>
           <div><dt>תחילה בפועל</dt><dd>{dateText(d.startDate)}</dd></div>
           <div><dt>סיום בפועל</dt><dd>{dateText(d.endDate)}</dd></div>
-          <div><dt>מנהלים</dt><dd>{managersText(d.managerNames)}</dd></div>
-          {act.showBusinessNumber && <div><dt>מספר חברה</dt><dd className="ltr">{orNotEntered(d.businessNumber)}</dd></div>}
-          <div><dt>הערות</dt><dd className={css.notes}>{orNotEntered(d.accessNotes)}</dd></div>
+          {act.showBusinessNumber && <div><dt>מספר חברה</dt><dd><span className="ltr">{orNotEntered(d.businessNumber)}</span></dd></div>}
+          <div className={css.wide}><dt>הערות</dt><dd className={css.notes}>{orNotEntered(d.accessNotes)}</dd></div>
         </dl>
       </Card>
       <Card className={css.card}>
@@ -43,19 +55,12 @@ export function ProjectDetailsMobile({ d }: { d: ProjectDetails }) {
           <div><dt>מייל</dt><dd>{d.contact.email ? <a className="ltr" href={`mailto:${d.contact.email}`}>{d.contact.email}</a> : orNotEntered(null)}</dd></div>
         </dl>
       </Card>
-      <Card className={css.rows}>
-        <ul>
-          {sectionsFor(d).map(s => (
-            <li key={s.key}><Link href={s.href} className={css.row}>{s.label}<span className={css.chev} aria-hidden="true">‹</span></Link></li>
-          ))}
-        </ul>
-      </Card>
-      {(act.edit || act.manage) && (
-        <div className={css.actions}>
-          {act.edit && <Link href={`/projects/${d.id}/edit`} className="ui-btn ui-btn--block">עריכת פרטים</Link>}
-          {act.manage && <Link href={`/projects/${d.id}/edit/access`} className="ui-btn ui-btn--secondary ui-btn--block">ניהול הפרויקט ושיוכים</Link>}
-          {act.manage && <ProjectActions id={d.id} revision={d.revision} status={d.status} archived={d.archived} />}
-        </div>
+      {act.manage && (
+        <Card className={`${css.card} ${css.danger}`}>
+          <h3 className={css.dangerTitle}>ניהול מצב הפרויקט</h3>
+          <p className={css.dangerText}>פעולות משמעותיות: סיום והעברה לארכיון. שום דבר לא נמחק, ואפשר להחזיר.</p>
+          <ProjectActions id={d.id} revision={d.revision} status={d.status} archived={d.archived} />
+        </Card>
       )}
     </div>
   );

@@ -9,13 +9,19 @@ import { errorText } from './view-model';
 import css from './ProjectForm.module.css';
 
 export type ProjectFormProps =
-  | { mode: 'create'; isOwner: boolean }
-  | { mode: 'edit'; isOwner: boolean; projectId: string; revision: number; initial: FormValues };
+  | { mode: 'create'; isOwner: boolean; onDone?: undefined; onCancel?: undefined }
+  | { mode: 'edit'; isOwner: boolean; projectId: string; revision: number; initial: FormValues; /** Inside a pop-up: close it after saving instead of navigating. */ onDone?: () => void; onCancel?: () => void };
 
 const LABELS: Record<FieldKey, string> = {
   name: 'שם הפרויקט', businessName: 'שם העסק', siteAddress: 'כתובת האתר', contactName: 'שם איש קשר', contactPhone: 'טלפון איש קשר',
   contactEmail: 'מייל איש קשר', contactRole: 'תפקיד איש קשר', businessNumber: 'מספר חברה', startDate: 'תחילה בפועל', endDate: 'סיום בפועל', accessNotes: 'הערות',
 };
+
+function Section({ sheet, title, children }: { sheet: boolean; title: string; children: React.ReactNode }) {
+  return sheet
+    ? <section className={css.card}><h3 className={css.cardTitle}>{title}</h3>{children}</section>
+    : <Card panel className={css.card}><h2 className={css.cardTitle}>{title}</h2>{children}</Card>;
+}
 
 /**
  * Project form F02, one component for both layouts: a single column with a save bar above the
@@ -58,6 +64,7 @@ export function ProjectForm(props: ProjectFormProps) {
       : await updateProject({ id: props.projectId, expectedRevision: props.revision, fields });
     if (result.ok) {
       setDirty(false);
+      if (props.onDone) { props.onDone(); router.refresh(); return; }
       router.push(`/projects/${result.value.id}`);
       router.refresh();
       return;
@@ -87,18 +94,18 @@ export function ProjectForm(props: ProjectFormProps) {
   );
 
   const cancelHref = props.mode === 'edit' ? `/projects/${props.projectId}` : '/projects';
+  const sheet = props.mode === 'edit' && props.onCancel !== undefined;
   const saveLabel = saving ? 'שומר…' : props.mode === 'create' ? 'יצירת פרויקט' : 'שמירה';
   const errorList = (Object.keys(errors) as FieldKey[]).filter(k => errors[k]);
   return (
-    <form id={formId} className={css.form} onSubmit={submit} noValidate>
+    <form id={formId} className={`${css.form}${sheet ? ` ${css.inSheet}` : ''}`} onSubmit={submit} noValidate>
       {message && <Notice tone="error">{message}</Notice>}
       {errorList.length > 0 && (
         <ul className={css.summary} aria-label="שדות לתיקון">
           {errorList.map(k => <li key={k}>{LABELS[k]}: {errors[k]}</li>)}
         </ul>
       )}
-      <Card panel className={css.card}>
-        <h2 className={css.cardTitle}>פרטי הפרויקט</h2>
+      <Section sheet={sheet} title="פרטי הפרויקט">
         <div className={css.grid}>
           {field('name', { required: true })}
           {field('businessName', { required: true })}
@@ -109,24 +116,28 @@ export function ProjectForm(props: ProjectFormProps) {
           </div>
           {isOwner && field('businessNumber', { ltr: true, hint: 'מוצג לבן בלבד' })}
         </div>
-      </Card>
-      <Card panel className={css.card}>
-        <h2 className={css.cardTitle}>איש קשר</h2>
+      </Section>
+      <Section sheet={sheet} title="איש קשר">
         <div className={css.grid}>
           {field('contactName', { required: true })}
           {field('contactPhone', { required: true, ltr: true, type: 'tel' })}
           {field('contactEmail', { ltr: true, type: 'email' })}
           {field('contactRole')}
         </div>
-      </Card>
-      <Card panel className={css.card}>
-        <h2 className={css.cardTitle}>הערות</h2>
+      </Section>
+      <Section sheet={sheet} title="הערות">
         <div>
           <label className={css.label} htmlFor={`${formId}-notes`}>{LABELS.accessNotes}</label>
           <textarea id={`${formId}-notes`} className={css.textarea} value={values.accessNotes} onChange={set('accessNotes')} maxLength={2000} aria-invalid={errors.accessNotes ? true : undefined} />
           {errors.accessNotes && <span className="ui-field__error">{errors.accessNotes}</span>}
         </div>
-      </Card>
+      </Section>
+      {sheet ? (
+        <div className={css.sheetBar}>
+          <Button type="submit" disabled={saving}>{saveLabel}</Button>
+          <Button variant="secondary" onClick={() => props.onCancel?.()}>ביטול</Button>
+        </div>
+      ) : (<>
       <div className={css.deskBar}>
         <Button type="submit" disabled={saving}>{saveLabel}</Button>
         <Link href={cancelHref} className="ui-btn ui-btn--secondary" style={{ textDecoration: 'none' }}>ביטול</Link>
@@ -135,6 +146,7 @@ export function ProjectForm(props: ProjectFormProps) {
         <Button type="submit" disabled={saving}>{saveLabel}</Button>
         <Link href={cancelHref} className="ui-btn ui-btn--secondary" style={{ textDecoration: 'none' }}>ביטול</Link>
       </div>
+      </>)}
     </form>
   );
 }

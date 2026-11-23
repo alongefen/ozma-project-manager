@@ -46,8 +46,8 @@ export function ProjectActions({ id, revision, status, archived }: { id: string;
   }
   return (
     <div className={css.row}>
-      {!archived && <Button variant="secondary" onClick={() => setPending('status')}>{finishing ? 'סיום פרויקט' : 'פתיחה מחדש'}</Button>}
-      <Button variant="secondary" onClick={() => setPending('archive')}>{archived ? 'החזרה מהארכיון' : 'העברה לארכיון'}</Button>
+      {!archived && <Button variant="secondary" className={css.danger} onClick={() => setPending('status')}>{finishing ? 'סיום פרויקט' : 'פתיחה מחדש'}</Button>}
+      <Button variant="secondary" className={css.danger} onClick={() => setPending('archive')}>{archived ? 'החזרה מהארכיון' : 'העברה לארכיון'}</Button>
     </div>
   );
 }

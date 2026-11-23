@@ -6,11 +6,11 @@ export const metadata = { title: 'תיק פרויקט' };
 
 export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { project } = await loadProject(id);
+  const { ctx, project } = await loadProject(id);
   return (
     <>
-      <ProjectDetailsMobile d={project} />
-      <ProjectDetailsDesktop d={project} />
+      <ProjectDetailsMobile d={project} isOwner={ctx.actor.isOwner} />
+      <ProjectDetailsDesktop d={project} isOwner={ctx.actor.isOwner} />
     </>
   );
 }
