@@ -20,7 +20,7 @@
 
 ## עדכון המעקב הנוכחי
 
-משימת `PM-CLAUDE-TRANSITION` מכוח A-37: עדכון המעקב במעבר ל-Claude ורישום דחיית CI-CLOUD (A-38). בעלות תיעוד בלבד: `AGENTS.md`, ‏`docs/ARCHITECTURE.md` (הערות A-38 בלבד), ‏`docs/DECISIONS.md`, ‏`docs/WORK_PLAN.md`, ‏`docs/NEXT_SESSION.md`, ‏`docs/OPEN_QUESTIONS.md`, הפתיחים `PROJECT_MANAGER`, ‏`CI-CLOUD`, ‏`P1.3-PROFILE-UPDATE`, ‏`P1.4.1-users`, ‏`P1.4.8-integration` ו-`P1.4.9-integration` תחת `docs/handoffs/`, וכן `docs/tasks/CI-CLOUD.md` ו-`docs/tasks/PM-CLAUDE-TRANSITION.md`. אין קוד או ענן. [מסירה](tasks/PM-CLAUDE-TRANSITION.md).
+משימת `PM-TOKEN-EFFICIENCY` מכוח A-39: זרימת עבודה חסכונית בטוקנים. בעלות תיעוד ותצורת סוכנים בלבד: `AGENTS.md`, ‏`.claude/agents/**`, ‏`docs/DECISIONS.md`, ‏`docs/WORK_PLAN.md`, ‏`docs/NEXT_SESSION.md`, ‏`docs/handoffs/PROJECT_MANAGER.md`, ‏`docs/handoffs/TEMPLATE.md` ו-`docs/tasks/PM-TOKEN-EFFICIENCY.md`. אין קוד או ענן. [מסירה](tasks/PM-TOKEN-EFFICIENCY.md).
 
 ## כללי עבודה
 
@@ -33,7 +33,7 @@
 7. כל משימה מתעדת ב-`docs/tasks/<ID>.md` באותו קומיט. מסמך משותף מעדכנת רק משימה שהוא בבעלותה.
 8. לפני קוד כותבים בקובץ המשימה צעדים ובדיקות, ומתחילים מבדיקה שנכשלת.
 9. מעבר שער אינו אישור D31.
-10. אין צורך באישור אלון למיזוג (A-26), גם לא בפעם הראשונה. הסקירה והבדיקות מבוצעות בתוך המשימה באמצעות תתי־סוכנים לפי A-30; מנהל המשימה אחראי למיזוג ול-SHA. מנהל הפרויקט עוקב אחר התוצרים והתלויות, ושערי המוצר נשארים.
+10. לפי A-39 שיחת המשימה בונה בעצמה ומפעילה תת־סוכן `reviewer` אחד על Sonnet; עד שתי שיחות משימה במקביל. אין צורך באישור אלון למיזוג (A-26), גם לא בפעם הראשונה. הסקירה והבדיקות מבוצעות בתוך המשימה באמצעות תתי־סוכנים לפי A-30; מנהל המשימה אחראי למיזוג ול-SHA. מנהל הפרויקט עוקב אחר התוצרים והתלויות, ושערי המוצר נשארים.
 
 ## בעלות על תשתית משותפת והעברת אחריות
 
