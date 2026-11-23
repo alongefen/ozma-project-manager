@@ -6,11 +6,12 @@
 
 - **Depth phase is done and G2 is approved (A-40).** P1.4.1-P1.4.10 are merged; P1.4.10 also fixed `update_project` dropping `business_number`. See [P1.4.10](tasks/P1.4.10.md).
 - **Screens are being built, each phone + desktop over shared logic.** Merged: P1.5 shells and sign-in (PR #47), P2.2 project file/form/wizard (#49, #56, #66), P2.6 project finance (#48, #57, #58, #59, #62), UX-FOUNDATION (#63; rules in [UI_CONVENTIONS](UI_CONVENTIONS.md)), P2.3 tasks (#64), P2.1 workers (#65), TAB-NAV-FIX (#67).
-- **No task session is running.** Working model is A-39: open a task with a brief from [TEMPLATE](handoffs/TEMPLATE.md); the task session builds and runs one `reviewer`; at most two task sessions at once; the PM does not write code or poll.
+- **Running (opened 23.11.2026): P2.4 documents ([session](#local_f42a4973-bfe3-4bb6-b007-dee1d7071e94)) and P2.5 diary and reports ([session](#local_2c3ba0d0-b7bb-48bd-bfdb-81623fb989c7)), in parallel, own worktrees.** Don't open more until one reports.
+- Previously: no task session was running. Working model is A-39: open a task with a brief from [TEMPLATE](handoffs/TEMPLATE.md); the task session builds and runs one `reviewer`; at most two task sessions at once; the PM does not write code or poll.
 
 ## Next (in this order)
 
-1. **P2.4 documents** and **P2.5 diary and reports**: independent, run in parallel. Both add project tabs: build them under `src/app/(app)/projects/[id]/(tabs)/`, content-only `loading.tsx`, add the tab to the order in `tab-motion` (UI_CONVENTIONS). Briefs must tell the session to read UI_CONVENTIONS in full.
+1. **P2.4 documents** and **P2.5 diary and reports**: opened, in progress (independent, parallel). Both add project tabs: build them under `src/app/(app)/projects/[id]/(tabs)/`, content-only `loading.tsx`, add the tab to the order in `tab-motion` (UI_CONVENTIONS). Briefs must tell the session to read UI_CONVENTIONS in full.
 2. **P2.7 home and `/finance` (all projects)**, after P2.1-P2.6. The nav item "כספים" already points to `/finance`, which 404s until P2.7. The logic exists (P1.4.7).
 3. **P2.8 core integration**, then gate G3 (Alon).
 
