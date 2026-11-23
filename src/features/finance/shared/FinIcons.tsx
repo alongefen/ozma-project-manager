@@ -24,3 +24,27 @@ export function ExcelIcon({ size = 28 }: { size?: number }) {
     </svg>
   );
 }
+
+export function PrintIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg className="fin-icon" viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z" />
+    </svg>
+  );
+}
+
+export function LinkIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg className="fin-icon" viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />
+    </svg>
+  );
+}
+
+export function FilterIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg className="fin-icon" viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 5h16l-6 7v6l-4 2v-8z" />
+    </svg>
+  );
+}

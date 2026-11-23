@@ -5,7 +5,7 @@ import type { FinanceBook, ProjectDetails, TransactionRow } from '@/types/contra
 import { Button, Card, Notice } from '@/components/ui';
 import { EntryForm } from '../shared/EntryForm';
 import { ExcelLink } from '../shared/ExcelLink';
-import { Filters } from '../shared/Filters';
+import { DesktopFilterBar } from './DesktopFilterBar';
 import { EntrySheet } from '../shared/EntrySheet';
 import { CancelConfirm } from '../shared/CancelConfirm';
 import { ExcelIcon, PencilIcon, TrashIcon } from '../shared/FinIcons';
@@ -54,7 +54,7 @@ export function FinanceDesktop({ book, today }: Props) {
           <SummaryDetails book={book} balanceLabel={period === 'all' ? 'שארית בסוף התקופה' : 'שארית חודש'} />
         </section>
 
-        <div className="fin-bar"><Filters today={today} /></div>
+        <div className="fin-bar"><DesktopFilterBar today={today} /></div>
 
         {!book.canWrite && <div className="fin-bar"><Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice></div>}
 
