@@ -16,12 +16,11 @@ type Props = {
   defaultMonth: { year: number; month: number };
   /** inline = demo quick-entry grid (desktop); screen = single column full screen (phone). */
   variant: 'inline' | 'screen';
-  canCancel: boolean;
   onDone: () => void;
 };
 
 /** One form for both shells; the layout classes differ, the fields and rules do not. */
-export function EntryForm({ projectId, today, row, defaultMonth, variant, canCancel, onDone }: Props) {
+export function EntryForm({ projectId, today, row, defaultMonth, variant, onDone }: Props) {
   const uid = useId();
   const tx = useTransactions(projectId);
   const [draft, setDraft] = useState<EntryDraft>(
@@ -33,7 +32,6 @@ export function EntryForm({ projectId, today, row, defaultMonth, variant, canCan
   const requestId = useRef(crypto.randomUUID());
   const formRef = useRef<HTMLFormElement>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [confirmCancel, setConfirmCancel] = useState(false);
   const set = <K extends keyof EntryDraft>(key: K, value: EntryDraft[K]) => setDraft(d => ({ ...d, [key]: value }));
 
   async function submit(event?: { preventDefault(): void }) {
@@ -99,19 +97,6 @@ export function EntryForm({ projectId, today, row, defaultMonth, variant, canCan
         </div>
       </div>
       {tx.error && <Notice tone="error">{tx.error}</Notice>}
-      {row && canCancel && (
-        <div className="fin-entry__cancel">
-          {confirmCancel ? (
-            <>
-              <span>לבטל את התנועה? היא תישמר בהיסטוריה ולא תיספר בסכומים.</span>
-              <Button variant="secondary" size="small" disabled={tx.busy} onClick={async () => { if (await tx.cancel(row)) onDone(); }}>כן, לבטל תנועה</Button>
-              <Button variant="secondary" size="small" onClick={() => setConfirmCancel(false)}>חזרה</Button>
-            </>
-          ) : (
-            <Button variant="secondary" size="small" onClick={() => setConfirmCancel(true)}>ביטול תנועה</Button>
-          )}
-        </div>
-      )}
     </form>
   );
 }

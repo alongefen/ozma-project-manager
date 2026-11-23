@@ -1,16 +1,19 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import type { FinanceBook, TransactionRow } from '@/types/contracts';
+import type { FinanceBook, ProjectDetails, TransactionRow } from '@/types/contracts';
 import { Button, Card, Notice } from '@/components/ui';
 import { EntryForm } from '../shared/EntryForm';
 import { ExcelLink } from '../shared/ExcelLink';
 import { Filters } from '../shared/Filters';
 import { EntrySheet } from '../shared/EntrySheet';
-import { PencilIcon } from '../shared/FinIcons';
+import { CancelConfirm } from '../shared/CancelConfirm';
+import { ExcelIcon, PencilIcon, TrashIcon } from '../shared/FinIcons';
 import { SummaryDetails } from '../shared/Summary';
 import { useFinanceNav } from '../shared/nav';
 import { KIND_LABELS, bookRows, isIncomeKind, monthLabel, monthsNewestFirst, rowAmount, rowDate, shekels } from '../shared/present';
+import { ProjectInnerNav } from '@/features/projects/shared/ProjectInnerNav';
+import { sectionsFor } from '@/features/projects/shared/view-model';
 import { currentMonth, exportHref, financeHref } from '../shared/query';
 
 type Props = { book: FinanceBook; today: string };
@@ -19,6 +22,7 @@ type Props = { book: FinanceBook; today: string };
 export function FinanceDesktop({ book, today }: Props) {
   const { filter } = useFinanceNav();
   const [dialog, setDialog] = useState<{ row: TransactionRow | null } | null>(null);
+  const [cancelRow, setCancelRow] = useState<TransactionRow | null>(null);
   const rows = bookRows(book.months);
   const period = filter.period;
   const entryMonth = period === 'all' ? currentMonth(today) : period;
@@ -27,18 +31,17 @@ export function FinanceDesktop({ book, today }: Props) {
 
   return (
     <div className="fin fin-desktop d-only">
+      <Link href="/projects" className="fin-backlink">‹ חזרה לפרויקטים</Link>
       <div className="fin-head">
-        <div>
-          <Link href={`/projects/${book.projectId}`} className="fin-backlink">חזרה לפרויקט</Link>
-          <h1 className="ui-page-title">כספים: {book.projectName}</h1>
-        </div>
+        <h1 className="ui-page-title">{book.projectName}</h1>
         <div className="fin-head__actions">
           {book.canWrite && <Button size="small" onClick={() => setDialog({ row: null })}>הוספת תנועה</Button>}
-          <a className="ui-btn ui-btn--secondary ui-btn--small" href={exportHref(book.projectId, filter)}>ייצוא ל-Excel</a>
+          <a className="ui-btn ui-btn--secondary ui-btn--small" href={exportHref(book.projectId, filter)}><ExcelIcon size={20} /> ייצוא ל-Excel</a>
           <Button variant="secondary" size="small" onClick={() => window.print()}>הדפסה</Button>
           <ExcelLink projectId={book.projectId} link={book.excelLink} canWrite={book.canWrite} />
         </div>
       </div>
+      <ProjectInnerNav projectId={book.projectId} sections={sectionsFor({ id: book.projectId, permissions: { viewFinance: true } as ProjectDetails['permissions'] })} current="finance" />
 
       <Card className="fin-main">
         <section className="fin-summary" aria-label={`סיכום ${label}`}>
@@ -75,7 +78,10 @@ export function FinanceDesktop({ book, today }: Props) {
                   <td className="fin-num">{isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
                   <td className="fin-num">{!isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
                   <td className="no-print">{book.canWrite && (
-                    <button type="button" className="fin-iconbtn" onClick={() => setDialog({ row })} aria-label={`עריכת תנועה: ${row.details}`}><PencilIcon /></button>
+                    <span className="fin-rowactions">
+                      {book.canCancel && <button type="button" className="fin-iconbtn fin-iconbtn--danger" onClick={() => setCancelRow(row)} aria-label={`ביטול תנועה: ${row.details}`}><TrashIcon /></button>}
+                      <button type="button" className="fin-iconbtn" onClick={() => setDialog({ row })} aria-label={`עריכת תנועה: ${row.details}`}><PencilIcon /></button>
+                    </span>
                   )}</td>
                 </tr>
               ))}
@@ -89,9 +95,11 @@ export function FinanceDesktop({ book, today }: Props) {
 
       {dialog && (
         <EntrySheet title={dialog.row ? 'עריכת תנועה' : 'תנועה חדשה'} onClose={() => setDialog(null)}>
-          <EntryForm projectId={book.projectId} today={today} row={dialog.row} defaultMonth={entryMonth} variant="screen" canCancel={book.canCancel} onDone={() => setDialog(null)} />
+          <EntryForm projectId={book.projectId} today={today} row={dialog.row} defaultMonth={entryMonth} variant="screen" onDone={() => setDialog(null)} />
         </EntrySheet>
       )}
+
+      {cancelRow && <CancelConfirm projectId={book.projectId} row={cancelRow} onClose={() => setCancelRow(null)} />}
 
       {period === 'all' && (
         <Card className="fin-main fin-monthsbox">

@@ -1,8 +1,10 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import type { FinanceBook, TransactionRow } from '@/types/contracts';
+import type { FinanceBook, ProjectDetails, TransactionRow } from '@/types/contracts';
 import { Button, Card, Notice } from '@/components/ui';
+import { ProjectTabs } from '@/features/projects/shared/ProjectTabs';
+import { sectionsFor } from '@/features/projects/shared/view-model';
 import { Chevron } from '../shared/Chevron';
 import { EntryForm } from '../shared/EntryForm';
 import { ExcelLink } from '../shared/ExcelLink';
@@ -12,7 +14,8 @@ import { useFinanceNav } from '../shared/nav';
 import { KIND_LABELS, bookRows, isReduction, monthLabel, monthsNewestFirst, rowAmount, rowDate, shekels } from '../shared/present';
 import { currentMonth, exportHref, financeHref } from '../shared/query';
 import { EntrySheet } from '../shared/EntrySheet';
-import { ExcelIcon, PencilIcon } from '../shared/FinIcons';
+import { CancelConfirm } from '../shared/CancelConfirm';
+import { ExcelIcon, PencilIcon, TrashIcon } from '../shared/FinIcons';
 
 type Props = { book: FinanceBook; today: string };
 
@@ -25,19 +28,22 @@ const step = (m: { year: number; month: number }, delta: number) => {
 export function FinanceMobile({ book, today }: Props) {
   const { filter, go } = useFinanceNav();
   const [sheet, setSheet] = useState<{ row: TransactionRow | null } | null>(null);
-  const [panel, setPanel] = useState<'filter' | 'actions' | null>(null);
+  const [cancelRow, setCancelRow] = useState<TransactionRow | null>(null);
+  const [panel, setPanel] = useState<'filter' | null>(null);
   const period = filter.period;
   const entryMonth = period === 'all' ? currentMonth(today) : period;
   const rows = bookRows(book.months);
   const filtered = filter.day !== undefined || !!filter.search;
-  const toggle = (p: 'filter' | 'actions') => setPanel(v => (v === p ? null : p));
+  const toggle = (p: 'filter') => setPanel(v => (v === p ? null : p));
 
   return (
     <div className="fin fin-mobile m-only">
       <div className="fin-mtop">
-        <Link href={`/projects/${book.projectId}`} className="fin-back" aria-label="חזרה לפרויקט"><Chevron side="right" /></Link>
+        <Link href="/projects" className="fin-back" aria-label="חזרה לרשימת הפרויקטים"><Chevron side="right" /></Link>
         <h1 className="fin-mtitle">{book.projectName}</h1>
       </div>
+
+      <ProjectTabs projectId={book.projectId} sections={sectionsFor({ id: book.projectId, permissions: { viewFinance: true } as ProjectDetails['permissions'] })} current="finance" />
 
       <div className="fin-seg" role="group" aria-label="תקופה">
         <button type="button" aria-pressed={period !== 'all'} onClick={() => go({ ...filter, period: period === 'all' ? currentMonth(today) : period })}>חודש</button>
@@ -54,7 +60,7 @@ export function FinanceMobile({ book, today }: Props) {
       <Card className="fin-msum">
         <div className="fin-msum__head">
           <h2>{period === 'all' ? 'כל התקופה' : monthLabel(period)}</h2>
-          <button type="button" className="fin-iconbtn fin-iconbtn--excel no-print" aria-label="ייצוא וקישור ל-Excel" aria-expanded={panel === 'actions'} onClick={() => toggle('actions')}><ExcelIcon /></button>
+          <a className="fin-export no-print" href={exportHref(book.projectId, filter)}><span>ייצוא ל-Excel</span><ExcelIcon /></a>
         </div>
         <div className="fin-msum__row"><span>הכנסות</span><strong className="fin-num">{shekels(book.period.income)}</strong></div>
         <div className="fin-msum__row"><span>סה״כ הוצאה כולל מס 3%</span><strong className="fin-num">{shekels(book.period.totalExpense)}</strong></div>
@@ -68,14 +74,6 @@ export function FinanceMobile({ book, today }: Props) {
       </div>
       {!book.canWrite && <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}
       {panel === 'filter' && <Card><Filters today={today} showMonth={false} /></Card>}
-      {panel === 'actions' && (
-        <Card className="fin-actionlist">
-          <a className="ui-btn ui-btn--secondary ui-btn--block" href={exportHref(book.projectId, filter)}>ייצוא ל-Excel</a>
-          <Button variant="secondary" block onClick={() => window.print()}>הדפסה</Button>
-          <ExcelLink projectId={book.projectId} link={book.excelLink} canWrite={book.canWrite} />
-        </Card>
-      )}
-
       {period === 'all' ? (
         <ul className="fin-list" aria-label="חודשים">
           {monthsNewestFirst(book).map(({ summary: s }) => (
@@ -92,18 +90,21 @@ export function FinanceMobile({ book, today }: Props) {
         <>
           <ul className="fin-list" aria-label="תנועות">
             {rows.map(row => (
-              <li key={row.id}>
-                <button type="button" className="fin-item" disabled={!book.canWrite} onClick={() => setSheet({ row })}>
-                  <span className="fin-item__top">
-                    <span className="fin-item__kind">{KIND_LABELS[row.kind]}</span>
-                    <strong className={`fin-num${isReduction(row.kind) ? ' fin-neg' : ''}`}>{rowAmount(row)}</strong>
-                  </span>
-                  <span className="fin-item__details">{row.details}</span>
-                  <span className="fin-item__bottom">
-                    <span className="fin-item__sub fin-num">{rowDate(row)}</span>
-                    {book.canWrite && <span className="fin-item__edit"><PencilIcon /><span className="sr-only">עריכה</span></span>}
-                  </span>
-                </button>
+              <li key={row.id} className="fin-item">
+                <span className="fin-item__top">
+                  <span className="fin-item__kind">{KIND_LABELS[row.kind]}</span>
+                  <strong className={`fin-num${isReduction(row.kind) ? ' fin-neg' : ''}`}>{rowAmount(row)}</strong>
+                </span>
+                <span className="fin-item__details">{row.details}</span>
+                <span className="fin-item__bottom">
+                  <span className="fin-item__sub fin-num">{rowDate(row)}</span>
+                  {book.canWrite && (
+                    <span className="fin-rowactions no-print">
+                      {book.canCancel && <button type="button" className="fin-iconbtn fin-iconbtn--danger" onClick={() => setCancelRow(row)} aria-label={`ביטול תנועה: ${row.details}`}><TrashIcon /></button>}
+                      <button type="button" className="fin-iconbtn" onClick={() => setSheet({ row })} aria-label={`עריכת תנועה: ${row.details}`}><PencilIcon /></button>
+                    </span>
+                  )}
+                </span>
               </li>
             ))}
             {rows.length === 0 && (
@@ -119,9 +120,16 @@ export function FinanceMobile({ book, today }: Props) {
         </>
       )}
 
+      <div className="fin-footlinks no-print">
+        <ExcelLink projectId={book.projectId} link={book.excelLink} canWrite={book.canWrite} />
+        <Button variant="secondary" size="small" onClick={() => window.print()}>הדפסה</Button>
+      </div>
+
+      {cancelRow && <CancelConfirm projectId={book.projectId} row={cancelRow} onClose={() => setCancelRow(null)} />}
+
       {sheet && (
         <EntrySheet title={sheet.row ? 'עריכת תנועה' : 'תנועה חדשה'} onClose={() => setSheet(null)}>
-          <EntryForm projectId={book.projectId} today={today} row={sheet.row} defaultMonth={entryMonth} variant="screen" canCancel={book.canCancel} onDone={() => setSheet(null)} />
+          <EntryForm projectId={book.projectId} today={today} row={sheet.row} defaultMonth={entryMonth} variant="screen" onDone={() => setSheet(null)} />
         </EntrySheet>
       )}
     </div>
