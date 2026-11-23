@@ -1,20 +1,19 @@
 'use client';
 import { useId, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import type { FinanceFilter } from '@/types/contracts';
 import { Button } from '@/components/ui';
 import { MONTH_NAMES } from './present';
-import { currentMonth, financeHref, yearOptions } from './query';
+import { currentMonth, yearOptions } from './query';
+import { useFinanceNav } from './nav';
 
-type Props = { projectId: string; filter: FinanceFilter; today: string; showMonth?: boolean };
+type Props = { today: string; showMonth?: boolean };
 
-/** Period, day and text filters. Changing one navigates; the server recomputes the book. */
-export function Filters({ projectId, filter, today, showMonth = true }: Props) {
-  const router = useRouter();
+/** Period, day and text filters. Changes show instantly; the server recomputes the book. */
+export function Filters({ today, showMonth = true }: Props) {
+  const { filter, go } = useFinanceNav();
   const uid = useId();
   const [search, setSearch] = useState(filter.search ?? '');
   const [day, setDay] = useState(filter.day === undefined ? '' : String(filter.day));
-  const go = (next: FinanceFilter) => router.push(financeHref(projectId, next));
   const period = filter.period;
   const selMonth = period === 'all' ? '' : String(period.month);
   const selYear = period === 'all' ? '' : String(period.year);
@@ -39,15 +38,15 @@ export function Filters({ projectId, filter, today, showMonth = true }: Props) {
       {showMonth && (
         <>
           <div className="fin-field">
-            <label htmlFor={`${uid}-fin-period-month`}>חודש</label>
-            <select id={`${uid}-fin-period-month`} value={period === 'all' ? 'all' : selMonth} onChange={e => setPeriod(e.target.value, selYear)}>
+            <label htmlFor={`${uid}-m`}>חודש</label>
+            <select id={`${uid}-m`} value={period === 'all' ? 'all' : selMonth} onChange={e => setPeriod(e.target.value, selYear)}>
               <option value="all">כל התקופה</option>
               {MONTH_NAMES.map((name, i) => <option key={name} value={i + 1}>{name}</option>)}
             </select>
           </div>
           <div className="fin-field">
-            <label htmlFor={`${uid}-fin-period-year`}>שנה</label>
-            <select id={`${uid}-fin-period-year`} value={selYear} disabled={period === 'all'} onChange={e => setPeriod(selMonth, e.target.value)}>
+            <label htmlFor={`${uid}-y`}>שנה</label>
+            <select id={`${uid}-y`} value={selYear} disabled={period === 'all'} onChange={e => setPeriod(selMonth, e.target.value)}>
               {period === 'all' && <option value="">—</option>}
               {yearOptions(today, period === 'all' ? undefined : period.year).map(y => <option key={y} value={y}>{y}</option>)}
             </select>
@@ -55,12 +54,12 @@ export function Filters({ projectId, filter, today, showMonth = true }: Props) {
         </>
       )}
       <div className="fin-field fin-field--day">
-        <label htmlFor={`${uid}-fin-day`}>יום</label>
-        <input id={`${uid}-fin-day`} inputMode="numeric" maxLength={2} value={day} onChange={e => setDay(e.target.value)} />
+        <label htmlFor={`${uid}-d`}>יום</label>
+        <input id={`${uid}-d`} inputMode="numeric" maxLength={2} value={day} onChange={e => setDay(e.target.value)} />
       </div>
       <div className="fin-field fin-field--search">
-        <label htmlFor={`${uid}-fin-search`}>ספק / פרטים</label>
-        <input id={`${uid}-fin-search`} value={search} onChange={e => setSearch(e.target.value)} />
+        <label htmlFor={`${uid}-s`}>ספק / פרטים</label>
+        <input id={`${uid}-s`} value={search} onChange={e => setSearch(e.target.value)} />
       </div>
       <div className="fin-filters__actions">
         <Button type="submit" size="small">סינון</Button>

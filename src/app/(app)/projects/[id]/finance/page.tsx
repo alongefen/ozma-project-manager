@@ -5,6 +5,7 @@ import { Notice } from '@/components/ui';
 import { loadFinance } from '@/features/finance/shared/load';
 import { parseFilter, type FinanceQuery } from '@/features/finance/shared/query';
 import { FinanceMobile } from '@/features/finance/mobile/FinanceMobile';
+import { FinanceNavProvider } from '@/features/finance/shared/nav';
 import { FinanceDesktop } from '@/features/finance/desktop/FinanceDesktop';
 import '@/features/finance/shared/finance.css';
 
@@ -24,11 +25,11 @@ export default async function ProjectFinancePage({ params, searchParams }: { par
   if (data.kind === 'hidden') notFound();
   if (data.kind === 'signed-out') redirect(SIGN_IN_PATH);
   if (data.kind === 'error') return <Notice tone="error">{data.message}</Notice>;
-  const props = { book: data.book, filter, today: context.value.today };
+  const props = { book: data.book, today: context.value.today };
   return (
-    <>
+    <FinanceNavProvider projectId={id} filter={filter}>
       <FinanceMobile {...props} />
       <FinanceDesktop {...props} />
-    </>
+    </FinanceNavProvider>
   );
 }
