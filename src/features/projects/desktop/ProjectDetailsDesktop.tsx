@@ -56,7 +56,10 @@ export function ProjectDetailsDesktop({ d, isOwner }: { d: ProjectDetails; isOwn
           )}
         </div>
         <Card panel className={css.card}>
-          <h2 className={css.title}>איש קשר</h2>
+          <div className={css.cardHead}>
+            <h2 className={css.title}>איש קשר</h2>
+            {act.edit && <EditProjectSheet id={d.id} revision={d.revision} coverFileId={d.coverFileId} isOwner={isOwner} manage={act.manage} initial={valuesFromDetails(d)} contactOnly />}
+          </div>
           <dl className={css.listCol}>
             <div><dt>שם</dt><dd>{d.contact.name}</dd></div>
             <div><dt>תפקיד</dt><dd>{orNotEntered(d.contact.roleTitle)}</dd></div>

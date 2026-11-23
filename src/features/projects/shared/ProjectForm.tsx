@@ -10,7 +10,7 @@ import css from './ProjectForm.module.css';
 
 export type ProjectFormProps =
   | { mode: 'create'; isOwner: boolean; onDone?: undefined; onCancel?: undefined }
-  | { mode: 'edit'; isOwner: boolean; projectId: string; revision: number; initial: FormValues; /** Inside a pop-up: close it after saving instead of navigating. */ onDone?: () => void; onCancel?: () => void };
+  | { mode: 'edit'; isOwner: boolean; projectId: string; revision: number; initial: FormValues; /** Inside a pop-up: close it after saving instead of navigating. */ onDone?: () => void; onCancel?: () => void; /** Show only these parts of the form (the rest is kept and saved unchanged). */ parts?: ('details' | 'contact' | 'notes')[] };
 
 const LABELS: Record<FieldKey, string> = {
   name: 'שם הפרויקט', businessName: 'שם העסק', siteAddress: 'כתובת האתר', contactName: 'שם איש קשר', contactPhone: 'טלפון איש קשר',
@@ -95,6 +95,7 @@ export function ProjectForm(props: ProjectFormProps) {
 
   const cancelHref = props.mode === 'edit' ? `/projects/${props.projectId}` : '/projects';
   const sheet = props.mode === 'edit' && props.onCancel !== undefined;
+  const shows = (part: 'details' | 'contact' | 'notes') => props.mode !== 'edit' || !props.parts || props.parts.includes(part);
   const saveLabel = saving ? 'שומר…' : props.mode === 'create' ? 'יצירת פרויקט' : 'שמירה';
   const errorList = (Object.keys(errors) as FieldKey[]).filter(k => errors[k]);
   return (
@@ -105,7 +106,7 @@ export function ProjectForm(props: ProjectFormProps) {
           {errorList.map(k => <li key={k}>{LABELS[k]}: {errors[k]}</li>)}
         </ul>
       )}
-      <Section sheet={sheet} title="פרטי הפרויקט">
+      {shows('details') && <Section sheet={sheet} title="פרטי הפרויקט">
         <div className={css.grid}>
           {field('name', { required: true })}
           {field('businessName', { required: true })}
@@ -116,22 +117,22 @@ export function ProjectForm(props: ProjectFormProps) {
           </div>
           {isOwner && field('businessNumber', { ltr: true, hint: 'מוצג לבן בלבד' })}
         </div>
-      </Section>
-      <Section sheet={sheet} title="איש קשר">
+      </Section>}
+      {shows('contact') && <Section sheet={sheet} title="איש קשר">
         <div className={css.grid}>
           {field('contactName', { required: true })}
           {field('contactPhone', { required: true, ltr: true, type: 'tel' })}
           {field('contactEmail', { ltr: true, type: 'email' })}
           {field('contactRole')}
         </div>
-      </Section>
-      <Section sheet={sheet} title="הערות">
+      </Section>}
+      {shows('notes') && <Section sheet={sheet} title="הערות">
         <div>
           <label className={css.label} htmlFor={`${formId}-notes`}>{LABELS.accessNotes}</label>
           <textarea id={`${formId}-notes`} className={css.textarea} value={values.accessNotes} onChange={set('accessNotes')} maxLength={2000} aria-invalid={errors.accessNotes ? true : undefined} />
           {errors.accessNotes && <span className="ui-field__error">{errors.accessNotes}</span>}
         </div>
-      </Section>
+      </Section>}
       {sheet ? (
         <div className={css.sheetBar}>
           <Button type="submit" disabled={saving}>{saveLabel}</Button>

@@ -46,7 +46,10 @@ export function ProjectDetailsMobile({ d, isOwner }: { d: ProjectDetails; isOwne
         </dl>
       </Card>
       <Card className={css.card}>
-        <h3 className={css.title}>איש קשר</h3>
+        <div className={css.cardHead}>
+          <h3 className={css.title}>איש קשר</h3>
+          {act.edit && <EditProjectSheet id={d.id} revision={d.revision} coverFileId={d.coverFileId} isOwner={isOwner} manage={act.manage} initial={valuesFromDetails(d)} icon contactOnly />}
+        </div>
         <dl className={css.list}>
           <div><dt>שם</dt><dd>{d.contact.name}</dd></div>
           <div><dt>תפקיד</dt><dd>{orNotEntered(d.contact.roleTitle)}</dd></div>
