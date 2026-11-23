@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Badge, Card, Notice } from '@/components/ui';
 import type { ProjectDetails } from '@/types/contracts';
+import { BackTitle } from '../shared/BackTitle';
 import { EditProjectSheet } from '../shared/EditProjectSheet';
 import { ProjectInnerNav } from '../shared/ProjectInnerNav';
 import { ProjectActions } from '../shared/ProjectActions';
@@ -15,17 +16,14 @@ export function ProjectDetailsDesktop({ d, isOwner }: { d: ProjectDetails; isOwn
   const tel = telHref(d.contact.phone);
   return (
     <div className={`${css.page} d-only`}>
-      <Link href="/projects" className={css.back}>‹ חזרה לפרויקטים</Link>
-      <header className={css.head}>
-        <div>
-          <div className={css.nameRow}>
-            <h1 className="ui-page-title">{d.name}</h1>
-            <Badge tone={d.status === 'completed' || d.archived ? 'gray' : 'active'}>{statusLabel(d)}</Badge>
-          </div>
-          <p className="ui-sub">{d.siteAddress}</p>
-        </div>
-        {act.manage && <Link href={`/projects/${d.id}/edit/access`} className="ui-btn ui-btn--secondary">הרשאות</Link>}
-      </header>
+      <div>
+        <BackTitle
+          title={d.name} backHref="/projects" backLabel="חזרה לרשימת הפרויקטים"
+          badge={<Badge tone={d.status === 'completed' || d.archived ? 'gray' : 'active'}>{statusLabel(d)}</Badge>}
+          actions={act.manage ? <Link href={`/projects/${d.id}/edit/access`} className="ui-btn ui-btn--secondary">הרשאות</Link> : undefined}
+        />
+        <p className="ui-sub" style={{ marginTop: 0 }}>{d.siteAddress}</p>
+      </div>
       <ProjectInnerNav projectId={d.id} sections={sectionsFor(d)} current="details" />
       {isReadOnlyProject(d) && !act.manage && <Notice>{READ_ONLY_NOTICE}</Notice>}
       <div className={css.cols}>
