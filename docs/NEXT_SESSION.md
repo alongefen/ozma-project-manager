@@ -1,46 +1,27 @@
-<div dir="rtl">
+# Next session
 
-# הסשן הבא
+23.11.2026. `origin/main` before the P1.4.10 PR: `9ac0122`. This file was rewritten in English (agent-facing doc).
 
-22.11.2026, ערב. `origin/main` בעת העדכון, לפני מיזוגו: `6ceb34ff9d557c4c1c27bd01eeed25565408a8b0`; [CI עליו עבר](https://github.com/alongefen/ozma-project-manager/actions/runs/45051451348).
+## State
 
-הבנייה והניהול עברו ל-Claude (A-37), אחרי ששיחות Codex נעצרו במגבלת שימוש; השעה לפי דיווח מנהל הפרויקט: 18:24. שיחת הניהול: ״ניהול פרויקט עוצמה שלב 1.4״ (`local_dd06cdba-b833-4572-b7b1-b9a5a789d56a`).
+- **Phase 1 logic is complete.** All P1.4 tasks are merged: P1.4.1 PR #29 `cb4f44c`; P1.4.2 PR #27 `d9b97ad`; P1.4.3 PR #30 `6ceb34f`; P1.4.4 PR #33 `ab94f83`; P1.4.5 PR #28 `3d77909`; P1.4.6 PR #31 `e6e0a09`; P1.4.7 PR #44 `9ac0122`; P1.4.8 engine PR #12 `bf19434`, integration PR #39 `c5ea1c7`, docs PR #41 `0b84be7`; P1.4.9 engine PR #20 `c6910e3`, integration PR #36 `7e6fe5d`. P1.3-PROFILE-UPDATE is merged too (PR #40 `9a1b1af`).
+- **P1.4.10 (depth gate) is done and waits for Alon: G2.** Evidence and the coverage matrix are in [P1.4.10](tasks/P1.4.10.md). It also fixed `update_project` losing `project_private.business_number` (migration `20261123083021`, approved by Alon under D31 on 23.11.2026, applied once to `izjmvyguzbampoasvnru`).
+- **Do not start screens until Alon passes G2.** The next task after G2 is P1.5 (two shells, base components, sign-in); see WORK_PLAN. GU also applies there.
+- Working model is A-39: the project manager opens a task with a brief from [TEMPLATE](handoffs/TEMPLATE.md); the task session builds and runs one `reviewer`; at most two task sessions at once.
 
-## מצב
+## Open items to carry (none blocks G2 by itself)
 
-- **זרימת עבודה חדשה (A-39, 23.11.2026):** שיחת משימה בונה בעצמה עם `reviewer` אחד על Sonnet; עד שתי שיחות במקביל; פתיחים לפי [TEMPLATE](handoffs/TEMPLATE.md). שיחות פעילות ממשיכות מהמצב הקיים.
+- Excel visual check in RTL was never done (P1.4.9).
+- U+FFFE and U+FFFF in the Excel engine produce a corrupt file; the fix was reported in progress and has not been delivered.
+- The ExcelJS `uuid` alert was assessed and left unfixed.
+- L7 protections (exact 30-attempts-per-5-minutes refill, session length via the Management API) were not verified in the cloud (P1.3).
+- `tests/db/support/cloud.ts` finds `.env.local` and `supabase/.temp/p12-owner.json` only relative to the current directory, so it fails from a worktree with `CONFLICT` (nothing written). `tests/support/cloud-paths.ts` already solves this for the other suites; moving `tests/db` onto it is a small shared test-support change. On macOS the reports cloud test also needs `REPORT_TEST_CHROME`.
+- CI-CLOUD is deferred (A-38). CI runs only the `unit` project; `tests/auth`, `tests/storage`, `tests/db` and every `*.cloud.test.ts` run by hand in a cloud window.
+- Backups are deferred. Ask Alon before there is real data.
 
-- הושלמו ומוזגו: P1.1, ‏P1.2 ותיקונה, P1.3, ‏P1.4.2 (PR #27, ‏`d9b97ad`), ‏P1.4.3 (PR #30, ‏`6ceb34f`), ‏P1.4.4, ‏P1.4.5 ו-P1.4.6. הראיות בקובצי המסירה ב-`docs/tasks/`.
-- מנועי PDF ו-Excel מוזגו; החיבורים עוד לא נמסרו. לפי הדיווח, הבדיקה החזותית של RTL ב-Excel עדיין לא הושלמה; התראת uuid לא תוקנה. לפי דיווח שיחת Excel, התווים U+FFFE ו-U+FFFF מפיקים קובץ פגום; התיקון במנוע בעבודה וטרם נמסר.
-- מגבלות P1.3 שאינן חוסמות: refill מדויק של 30 ניסיונות בחמש דקות ומשך סשן ב-Management API לא אומתו ישירות.
-- CI-CLOUD נדחתה (A-38).
+## Cloud and limits
 
-| משימה | שיחת Claude | מצב |
-|---|---|---|
-| מיזוג P1.4.2 ו-P1.4.3 | `local_8a081501-5192-48c0-94aa-ecefd611e4be` | שני ה-PR מוזגו |
-| [P1.3-PROFILE-UPDATE](handoffs/P1.3-PROFILE-UPDATE.md) | `local_0e37410f-7a5f-479e-b68b-81459bb5e1a4` (שיחה חדשה, 23.11; הישנה `local_9229c3b8` לא מחודשת; המיגרציה אושרה ב-D31 ב-23.11, הגישה ל-Supabase ניתנה) | לפי הדיווח פותחה מקומית (דווחו 75 בדיקות מקומיות) ובסקירה עצמאית; עדיין ממתינה לאלון לבדיקת הקטלוג, לא הופעלה מיגרציה |
-| [חיבור PDF](handoffs/P1.4.8-integration.md) | `local_26e4381b-5198-4276-beb5-4289c5986874` (שיחה חדשה, 23.11; הישנה `local_a1774efd` לא מחודשת) | התחילה, לא נמסרה |
-| [חיבור Excel](handoffs/P1.4.9-integration.md) | `local_88f7deb0-e0f4-4b99-886f-13629eac8d3b` | מוזג (PR #36, `32831ad`); בדיקת RTL חזותית פתוחה, ללא בעלים |
-| [P1.4.1](handoffs/P1.4.1-users.md) | תיפתח אחרי מיזוג תיקון הפרופיל | חסומה |
-| P1.4.7 | טרם נפתחה | התלויות הושלמו; תיפתח כשמתפנית אחת משתי השיחות הפעילות (עד שתיים, A-39) |
-
-## חסמים וממצאים פתוחים
-
-- **תיקון הפרופיל, לפי דיווח המשימה ולא אימות של מנהל הפרויקט:** הבאג בשינוי אימייל אושר בקוד, ותיקון מלא דורש מיגרציה. בדיקת הקטלוג לקריאה בלבד נדחתה כי לחיבור Supabase של השיחה אין הרשאה לפרויקט: אף בדיקה לא רצה ולא נכתב דבר. נדרש שאלון ייתן גישה או יריץ בעצמו את שאילתת הקריאה. המיגרציה לא אושרה ולא הופעלה.
-- **P1.4.1:** טיוטת PR #29, ראש `78f56d5`, ענף `codex/p1-4-1-users`. לפי המסירה 26 בדיקות מקומיות ו-CI עברו. לפי דיווח מנהל הפרויקט, ריצת הענן של שני התרחישים התחילה ב-18:24:12 ונקטעה בלי תוצאה: לא עברה ולא נכשלה, ולפי מנהל הפרויקט אין תהליך בדיקה פעיל. גוף ה-PR וקובץ המשימה בענף עדיין אומרים שטרם הורצה.
-- **ממצא פתוח לפני G2, ללא בעלים:** עדכון פרויקט בידי הבעלים בלי `businessNumber` מוחק את מספר החברה השמור. זוהה בקריאת SQL ולא שוחזר; [הפירוט והתנאים לתיקון](WORK_PLAN.md#משימה-p1410-שער-העומק).
-
-## הרצה מקומית ובדיקות
-
-- חלון ענן בלעדי אחד בכל פעם, בהקצאה מפורשת של מנהל הפרויקט ובשחרור מפורש. אין מצב חלון רגעי במסמך ואין הרשאת הרצה אוטומטית.
-- לפי דיווח מנהל הפרויקט, הגדרות הענן (`.env.local`, ו-fixture הבעלים תחת `supabase/.temp`) ב-worktree הישן `/Users/alongefen/.codex/worktrees/p1-2-database/ozma-project-manager`; לא פותחים אותן ולא רושמים ערכים. אין לנקות worktrees; חלק מהישנים גם מקשרים node_modules אל `/private/tmp/ozma-p1-3-platform`.
-- בשינוי קוד CI מריץ בדיקות סיווג היקף, התקנה, lint, טיפוסים, בדיקות שלד, `npm test` (פרויקט `unit` ב-Vitest) ובנייה. הוא אינו מריץ את `cloud`. לפי `vitest.config.ts` כל `tests/auth`, ‏`tests/storage` ו-`tests/db` הן `cloud`, ולכן גם הבדיקות המקומיות שבהן אינן רצות ב-CI.
-- לא מחדשים שיחות Codex ישנות, גם כשהמכסה תחזור (לפי הדיווח, ב-25.11 ב-11:22). לא נוגעים במיזוג שנקטע ב-worktree הישן של P1.4.3. ה-stash הישן של AGENTS ו-`.gstack/` נשמרים; אין להחיל את ה-stash.
-
-## גבולות
-
-פרויקט הפיתוח הקיים `izjmvyguzbampoasvnru`, Free באירלנד; ענן בלבד בלי Docker/מסד מקומי. אין להפעיל מיגרציות מחדש או לאפס נתוני בדיקה. אין אישור חדש למיגרציות, שירותים, עלויות, ייצור או פריסה. A-34/A-35 נשארות: אין שירות מיילים חדש, אין hook חוסם ו-Confirm email כבוי בכוונה. מסכים רק אחרי P1.4.10 ו-G2; לפני נתונים אמיתיים חוזרים לנושא הגיבוי.
-
-הצעד הבא: אלון מסדיר את בדיקת הקטלוג; מנהל הפרויקט פותח את P1.4.7 ועוקב אחר PDF ו-Excel. אחרי מיזוג תיקון הפרופיל נפתחת P1.4.1, ואחרי כל משימות הלוגיקה P1.4.10 ו-G2 בידי אלון.
-
-</div>
+- One exclusive cloud window at a time, assigned explicitly by the project manager and released explicitly. Cloud files (`.env.local`, `supabase/.temp/p12-owner.json`) live in the main checkout; never open, print or copy them. Fake data only; tests clean up only their own rows.
+- The Supabase project `izjmvyguzbampoasvnru` is production-bound (D31). A new migration, service, cost, paid AI, production or deployment needs explicit prior approval with what, why, cost and rollback. No resets, no re-running existing migrations.
+- A-34/A-35 stand: no mail service, no blocking hook, email confirmation is off on purpose.
+- Old Codex sessions and worktrees are not resumed or cleaned; the old AGENTS stash and `.gstack/` stay untouched.
