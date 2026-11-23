@@ -4,6 +4,7 @@ import { SIGN_IN_PATH } from '@/lib/navigation';
 import { Notice } from '@/components/ui';
 import { loadFinanceScreen } from '@/features/finance/shared/load';
 import { parseFilter, type FinanceQuery } from '@/features/finance/shared/query';
+import { PrintView } from '@/features/finance/shared/PrintView';
 import { FinanceMobile } from '@/features/finance/mobile/FinanceMobile';
 import { FinanceNavProvider } from '@/features/finance/shared/nav';
 import { FinanceDesktop } from '@/features/finance/desktop/FinanceDesktop';
@@ -30,6 +31,7 @@ export default async function ProjectFinancePage({ params, searchParams }: { par
     <FinanceNavProvider projectId={id} filter={filter}>
       <FinanceMobile {...props} />
       <FinanceDesktop {...props} />
+      <PrintView book={props.book} filteredRows={props.filteredRows} />
     </FinanceNavProvider>
   );
 }

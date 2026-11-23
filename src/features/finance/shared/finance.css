@@ -127,9 +127,23 @@
   .fin-entry--inline .fin-field--details, .fin-entry--inline .fin-entry__actions { grid-column: 1 / -1; }
   .fin-entry--inline .fin-entry__actions { padding-top: 0; }
 }
+/* Print: only the print view (summary and the full list of transactions), never the screen layout. */
+.fin-print { display: none; }
 @media print {
-  .no-print, .m-header, .m-nav, .d-aside, .d-header, .fin-progress { display: none !important; }
+  .no-print, .m-header, .m-nav, .d-aside, .d-header, .fin-progress, .fin-mobile, .fin-desktop { display: none !important; }
+  .fin-print { display: block; color: #000; font-size: 12px; }
+  .fin-print h1 { font-size: 20px; margin-bottom: 4px; }
+  .fin-print h2 { font-size: 15px; margin: 16px 0 6px; }
+  .fin-print__sub { color: #444; margin-bottom: 10px; }
+  .fin-print .fin-kpis { margin-bottom: 8px; }
+  .fin-print .fin-kpis strong { font-size: 18px; }
+  .fin-print .fin-details-list { grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 8px; }
+  .fin-print .fin-details-list > div { flex-direction: column; border-top: 0; padding: 0; }
+  .fin-print .fin-table th, .fin-print .fin-table td { padding: 5px 8px; font-size: 12px; }
+  .fin-print .fin-table tr { break-inside: avoid; }
+  .fin-print__month th { background: #eef2f4; font-size: 13px; }
   .app-main { margin: 0 !important; }
+  .app-content { padding: 0 !important; max-width: none !important; }
   body { background: #fff; }
 }
 
