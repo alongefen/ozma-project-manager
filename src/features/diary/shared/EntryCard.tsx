@@ -1,12 +1,11 @@
 'use client';
-import Link from 'next/link';
 import type { DiaryRow } from '@/types/contracts';
 import { Button, Card } from '@/components/ui';
 import { format } from '@/lib/format';
 import { editedText, fileUrl, isImage, reportUrl } from './model';
 
 /** One report: who wrote it and when (server time), the text, attachments, and only the actions the server allows. */
-export function EntryCard({ row, showProject, onCancel }: { row: DiaryRow; showProject: boolean; onCancel?: (row: DiaryRow) => void }) {
+export function EntryCard({ row, showProject, onEdit, onCancel }: { row: DiaryRow; showProject: boolean; onEdit?: (row: DiaryRow) => void; onCancel?: (row: DiaryRow) => void }) {
   const edited = editedText(row);
   return (
     <Card className="dr-card" data-testid="diary-entry">
@@ -30,7 +29,7 @@ export function EntryCard({ row, showProject, onCancel }: { row: DiaryRow; showP
       )}
       <div className="dr-card__actions">
         <a className="ui-btn ui-btn--secondary ui-btn--small" href={reportUrl({ kind: 'entry', entryId: row.id })} target="_blank" rel="noopener noreferrer">הדפסה / PDF</a>
-        {row.canCorrect && <Link className="ui-btn ui-btn--secondary ui-btn--small" href={`/diary/${row.id}/edit`}>עריכה</Link>}
+        {row.canCorrect && onEdit && <Button variant="secondary" size="small" onClick={() => onEdit(row)}>עריכה</Button>}
         {row.canMoveOrCancel && onCancel && <Button variant="secondary" size="small" onClick={() => onCancel(row)}>ביטול דיווח</Button>}
       </div>
     </Card>

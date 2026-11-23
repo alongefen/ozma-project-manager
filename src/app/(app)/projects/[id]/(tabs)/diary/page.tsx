@@ -4,6 +4,7 @@ import { SIGN_IN_PATH } from '@/lib/navigation';
 import { StateMessage } from '@/components/ui';
 import { loadDiaryScreen } from '@/features/diary/shared/load';
 import { parseFilter } from '@/features/diary/shared/model';
+import { DiaryProvider } from '@/features/diary/shared/DiaryProvider';
 import { DiaryMobile } from '@/features/diary/mobile/DiaryMobile';
 import { DiaryDesktop } from '@/features/diary/desktop/DiaryDesktop';
 import '@/features/diary/shared/diary.css';
@@ -20,9 +21,9 @@ export default async function ProjectDiaryPage({ params, searchParams }: { param
   if (data.kind === 'hidden') notFound();
   if (data.kind === 'error') return <StateMessage tone="error" backHref={`/projects/${id}`} backLabel="חזרה לתיק הפרויקט">היומן אינו זמין כרגע. נסו שוב בעוד רגע.</StateMessage>;
   return (
-    <>
+    <DiaryProvider screen={data.screen}>
       <DiaryMobile screen={data.screen} />
       <DiaryDesktop screen={data.screen} title="יומן" />
-    </>
+    </DiaryProvider>
   );
 }

@@ -5,11 +5,13 @@ import type { DiaryRow } from '@/types/contracts';
 import { Button, ConfirmDialog, Notice } from '@/components/ui';
 import { cancelEntry, listEntries } from '../logic/actions';
 import { EntryCard } from './EntryCard';
+import { useDiary } from './DiaryProvider';
 import { groupByDate, mergePage, type DiaryFilter } from './model';
 
 /** The list both layouts render: grouped by work date, "load more" with the server cursor, owner-only cancel with a confirm. */
 export function DiaryList({ initial, nextCursor, filter, showProject }: { initial: DiaryRow[]; nextCursor: string | null; filter: DiaryFilter; showProject: boolean }) {
   const router = useRouter();
+  const { openEdit } = useDiary();
   const [, startTransition] = useTransition();
   const [seen, setSeen] = useState(initial);
   const [rows, setRows] = useState(initial);
@@ -51,7 +53,7 @@ export function DiaryList({ initial, nextCursor, filter, showProject }: { initia
       {groupByDate(rows).map(g => (
         <section key={g.date} className="dr-day" aria-label={g.label}>
           <h3 className="dr-day__title">{g.label}</h3>
-          {g.rows.map(r => <EntryCard key={r.id} row={r} showProject={showProject} onCancel={x => { setRemoveError(null); setRemoving(x); }} />)}
+          {g.rows.map(r => <EntryCard key={r.id} row={r} showProject={showProject} onEdit={openEdit} onCancel={x => { setRemoveError(null); setRemoving(x); }} />)}
         </section>
       ))}
       {error && <Notice tone="error">{error}</Notice>}
