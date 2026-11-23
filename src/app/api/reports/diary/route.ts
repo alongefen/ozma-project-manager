@@ -33,6 +33,8 @@ export async function GET(request: Request) {
     const platform = await createPlatform();
     const context = await platform.auth.getContext();
     if (!context.ok) return respond(context);
+    // A render is expensive; a request another site triggers with the user's cookie is refused.
+    if (request.headers.get('sec-fetch-site') === 'cross-site') return respond(failure('FORBIDDEN'));
     const input = parseQuery(new URL(request.url).searchParams);
     if (!input) return respond(failure('VALIDATION'));
     const result = await createReportsApi(platform).renderReportPart(context.value, { scope: input.scope as ReportScope, part: input.part });
