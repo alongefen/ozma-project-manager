@@ -16,7 +16,7 @@ export default async function FinancePage() {
   const result = await loadTransfer(platform, context.value);
   if (result.kind === 'hidden') notFound();
   if (result.kind === 'signed-out') redirect(SIGN_IN_PATH);
-  if (result.kind === 'error') return <StateMessage tone="error" backHref="/" backLabel="חזרה לבית">{FINANCE_ERROR}</StateMessage>;
+  if (result.kind === 'error') return <StateMessage tone="error" backHref="/projects" backLabel="חזרה לפרויקטים">{FINANCE_ERROR}</StateMessage>;
   return (
     <>
       <TransferMobile months={result.months} />
