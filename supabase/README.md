@@ -39,7 +39,7 @@
 
 ## עדכון שם ואימייל — P1.3-PROFILE-UPDATE 
 
-המיגרציה `20261122175041_atomic_profile_email_update.sql` הופעלה בפרויקט הפיתוח באישור D31 (23.11.2026). בלי המיגרציה `setEmail` מחזירה UNAVAILABLE ואינה משנה את Auth.
+המיגרציה `20261123075644_atomic_profile_email_update.sql` הופעלה בפרויקט הפיתוח באישור D31 (23.11.2026). בלי המיגרציה `setEmail` מחזירה UNAVAILABLE ואינה משנה את Auth.
 
 סדר הקריאות בשרת, אחרי בדיקת בעלים:
 
