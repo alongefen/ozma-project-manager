@@ -58,7 +58,10 @@ export function DiaryProvider({ screen, startOpen, closeHref, children }: { scre
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const link = (e.target as Element | null)?.closest?.('a[href]');
-      if (!link || link.getAttribute('target') === '_blank' || new URL((link as HTMLAnchorElement).href, location.href).pathname !== REPORT_PATH) return;
+      if (!link || link.getAttribute('target') === '_blank') return;
+      const url = new URL((link as HTMLAnchorElement).href, location.href);
+      // The general button, or the project button pointing at the project diary that is already on screen.
+      if (url.pathname !== REPORT_PATH && !(url.pathname === location.pathname && url.searchParams.get('new') === '1')) return;
       e.preventDefault();
       e.stopPropagation();
       setDialog({ row: null });

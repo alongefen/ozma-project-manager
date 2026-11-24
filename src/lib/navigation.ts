@@ -50,6 +50,22 @@ export function moreLinks(isOwner: boolean): NavItem[] {
   return [{ key: 'users', href: '/users', label: 'עובדים והרשאות', icon: 'users' }];
 }
 
+const PROJECT_ROUTE = /^\/projects\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\/|$)/i;
+
+/**
+ * Where the "דיווח חדש" button goes, derived from the CURRENT address only and never remembered: inside a project it is that
+ * project's diary with the window open (preset to the project); anywhere else it is the general report flow, no project preset.
+ */
+export function reportHref(pathname: string): string {
+  const id = PROJECT_ROUTE.exec(pathname)?.[1];
+  return id ? `/projects/${id}/diary?new=1` : REPORT_PATH;
+}
+
+/** The href a nav item links to now: only the report button depends on where the person is. */
+export function navHref(item: NavItem, pathname: string): string {
+  return item.key === 'report' ? reportHref(pathname) : item.href;
+}
+
 export function isActive(pathname: string, href: string): boolean {
   const path = href.split('?')[0];
   return pathname === path || pathname.startsWith(path + '/');

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { activeItem, desktopNav, initials, isActive, moreLinks, phoneNav, screenTitle } from '@/lib/navigation';
+import { activeItem, desktopNav, navHref, reportHref, initials, isActive, moreLinks, phoneNav, screenTitle } from '@/lib/navigation';
 
 describe('phone navigation', () => {
   it.each([true, false])('has an odd number of items with the report button in the middle (owner=%s)', isOwner => {
@@ -49,5 +49,23 @@ describe('initials', () => {
     expect(initials('בן יוסף')).toBe('בי');
     expect(initials('  דנה  ')).toBe('ד');
     expect(initials('')).toBe('?');
+  });
+});
+
+describe('report button context (NEW-REPORT-CONTEXT)', () => {
+  const A = '11111111-1111-4111-8111-111111111111';
+  const B = '22222222-2222-4222-8222-222222222222';
+  const report = phoneNav(true).find(i => i.key === 'report')!;
+  it('goes to the current project diary with the window open, and to the general flow elsewhere', () => {
+    expect(reportHref(`/projects/${A}`)).toBe(`/projects/${A}/diary?new=1`);
+    expect(reportHref(`/projects/${A}/tasks`)).toBe(`/projects/${A}/diary?new=1`);
+    for (const p of ['/projects', '/projects/new', '/', '/diary', '/diary/new', '/finance', '/more']) expect(reportHref(p)).toBe('/diary/new');
+  });
+  it('remembers nothing: A, then the list, then B, then the list', () => {
+    const seq = [`/projects/${A}/diary`, '/projects', `/projects/${B}`, '/projects'];
+    expect(seq.map(p => navHref(report, p))).toEqual([`/projects/${A}/diary?new=1`, '/diary/new', `/projects/${B}/diary?new=1`, '/diary/new']);
+  });
+  it('leaves the other items alone', () => {
+    for (const i of phoneNav(true).filter(x => x.key !== 'report')) expect(navHref(i, `/projects/${A}`)).toBe(i.href);
   });
 });

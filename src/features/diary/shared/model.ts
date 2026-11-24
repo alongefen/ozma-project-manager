@@ -88,15 +88,6 @@ export function matchesFilter(row: DiaryRow, filter: DiaryFilter): boolean {
   return (!filter.projectId || row.projectId === filter.projectId) && (!filter.from || row.workDate >= filter.from) && (!filter.to || row.workDate <= filter.to);
 }
 
-/** The project a request came from, read from its referring address (`/projects/<id>/...`). Only the id is used, never the address. */
-export function projectFromReferrer(referrer: string | null): string | null {
-  if (!referrer) return null;
-  try {
-    const m = /^\/projects\/([^/]+)(?:\/|$)/.exec(new URL(referrer).pathname);
-    return m && isUuid(m[1]) ? m[1] : null;
-  } catch { return null; }
-}
-
 /** The address of the diary for the filter popup's values: only chosen values go in the URL; none gives the bare path. */
 export function filterHref(basePath: string, values: FormData): string {
   const params = new URLSearchParams();

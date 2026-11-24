@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Icon } from '@/components/ui';
-import { activeItem, type NavItem } from '@/lib/navigation';
+import { activeItem, navHref, type NavItem } from '@/lib/navigation';
 
 /** Phone bottom navigation. Odd item count, "דיווח חדש" prominent in the middle. No sidebar, no tab bar. */
 export function BottomNav({ items }: { items: NavItem[] }) {
@@ -13,7 +13,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
       {items.map(item => (
         <Link
           key={item.key}
-          href={item.href}
+          href={navHref(item, pathname)}
           className={`m-nav__item${item.prominent ? ' m-nav__item--report' : ''}`}
           aria-current={current?.key === item.key ? 'page' : undefined}
         >
