@@ -59,7 +59,7 @@ export function buildPlan(today = new Date()) {
         {key: 'a-d2', by: 'owner', category: 'plans', access: {mode: 'all'}, name: 'תוכנית קומת מרתף (דמו).pdf', kind: 'pdf'},
         {key: 'a-d3', by: 'm1', category: 'additional_plans', access: {mode: 'selected', users: ['m1', 'w1']}, name: 'תוכנית חשמל - מנהלת ועובד נבחר (דמו).pdf', kind: 'pdf'},
         {key: 'a-d4', by: 'owner', category: 'renderings', access: {mode: 'all'}, name: 'הדמיית חזית (דמו).jpg', kind: 'photo', tone: 3},
-        {key: 'a-d5', by: 'owner', category: 'additional_plans', access: {mode: 'owner'}, name: 'כתב כמויות פנימי - לבעלים בלבד (דמו).xlsx', kind: 'xlsx'},
+        {key: 'a-d5', by: 'owner', category: 'additional_plans', access: {mode: 'owner'}, name: 'כתב כמויות פנימי - לבעלים בלבד (דמו).pdf', kind: 'pdf'},
       ],
       tasks: [
         {key: 'a-t1', body: 'לתאם בדיקת מפקח לתקרת קומה ב', due: d(-5), done: false},
@@ -104,7 +104,7 @@ export function buildPlan(today = new Date()) {
         {key: 'b-d1', by: 'owner', category: 'specification', access: {mode: 'all'}, name: 'מפרט שיפוץ (דמו).pdf', kind: 'pdf'},
         {key: 'b-d2', by: 'owner', category: 'plans', access: {mode: 'all'}, name: 'תוכנית חלוקה חדשה (דמו).pdf', kind: 'pdf'},
         {key: 'b-d3', by: 'owner', category: 'renderings', access: {mode: 'selected', users: ['m2']}, name: 'הדמיית מטבח - למנהל בלבד (דמו).jpg', kind: 'photo', tone: 5},
-        {key: 'b-d4', by: 'owner', category: 'additional_plans', access: {mode: 'owner'}, name: 'תמחור הלקוחה - לבעלים בלבד (דמו).xlsx', kind: 'xlsx'},
+        {key: 'b-d4', by: 'owner', category: 'additional_plans', access: {mode: 'owner'}, name: 'תמחור הלקוחה - לבעלים בלבד (דמו).pdf', kind: 'pdf'},
       ],
       tasks: [
         {key: 'b-t1', body: 'להזמין שתי קופסאות אריחים חסרות', due: d(-2), done: false},
@@ -144,7 +144,7 @@ export function buildPlan(today = new Date()) {
       docs: [
         {key: 'c-d1', by: 'owner', category: 'specification', access: {mode: 'all'}, name: 'מפרט חלל מסחרי (דמו).pdf', kind: 'pdf'},
         {key: 'c-d2', by: 'owner', category: 'plans', access: {mode: 'all'}, name: 'תוכנית ריצוף (דמו).pdf', kind: 'pdf'},
-        {key: 'c-d3', by: 'owner', category: 'additional_plans', access: {mode: 'owner'}, name: 'סיכום רווחיות - לבעלים בלבד (דמו).xlsx', kind: 'xlsx'},
+        {key: 'c-d3', by: 'owner', category: 'additional_plans', access: {mode: 'owner'}, name: 'סיכום רווחיות - לבעלים בלבד (דמו).pdf', kind: 'pdf'},
       ],
       tasks: [
         {key: 'c-t1', body: 'לשלוח ללקוח מסמכי מסירה', due: d(10), done: true},

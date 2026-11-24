@@ -14,11 +14,11 @@ Needs a D31 approval before every real run (Alon's direct "כן", in the session
 | Finance opened to a manager | 1 (Dana on the building project); Yossi on the same project and Dana on the finished one have it closed |
 | Diary reports (2 later corrected, so versions show) | 22 (9 / 7 / 6), by workers, managers and the owner |
 | Report attachments: photos and one PDF | 6 |
-| Documents (PDF, JPEG rendering, Excel), different categories and access; 3 are owner-only | 12 (5 / 4 / 3) |
+| Documents (PDF and JPEG rendering; no Excel, see below), different categories and access; 3 are owner-only | 12 (5 / 4 / 3) |
 | Tasks (5 done, some overdue) | 10 |
 | Finance rows over 3 months (3 cancelled, 2 corrected, refunds/credits included) | 34 (13 / 11 / 10) |
 
-All writes go through the app's own database functions, signed in as the owner or as the demo person who "wrote" the item (a report is always written by its own author). Files are generated locally (neutral pictures, `@cantoo/pdf-lib` PDFs with ASCII text, a small `exceljs` file). The finished project is closed last, so everything could still be written first.
+All writes go through the app's own database functions, signed in as the owner or as the demo person who "wrote" the item (a report is always written by its own author). Files are generated locally (neutral pictures, `@cantoo/pdf-lib` PDFs with ASCII text, the `originals` storage bucket currently accepts only PDF and images, so the demo has no Office files). The finished project is closed last, so everything could still be written first.
 
 ## Run
 
@@ -60,7 +60,7 @@ Env file also needs `SUPABASE_ACCESS_TOKEN` (SQL via the Management API, as in `
 
 1. **Home**: the three "דוגמה" cards next to the real projects, with covers; the finished one is marked as finished.
 2. **Building project**: open it, show the open/overdue/done tasks, then the diary list (different authors, photos, one PDF) and one corrected report (version history). Print a day.
-3. **Documents**: categories, a PDF, a rendering, an Excel file; sign in as a worker (Avi) and note that the owner-only and "selected people" documents are not visible to them.
+3. **Documents**: categories, a PDF and a rendering; sign in as a worker (Avi) and note that the owner-only and "selected people" documents are not visible to them.
 4. **Finance** (as the owner): month totals, the cube, monthly advances, one cancelled row and one corrected row; then the all-projects summary.
 5. **People and roles**: the five demo people; Dana (manager) sees finance on the building project, Yossi (manager) does not on the same project; workers never see finance. On the finished project everyone except the owner can only view and print.
 6. Say plainly: this is fictional data and will be removed after the meeting.
