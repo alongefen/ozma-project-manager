@@ -9,7 +9,7 @@ import { PinHead } from './PinHead';
  * It is pinned to the top while the page scrolls (with `children`, such as the project tabs, under it).
  */
 export function PageHeader({ title, backHref, backLabel, badge, actions, sub, children }: {
-  title: ReactNode; backHref: string; backLabel: string; badge?: ReactNode; actions?: ReactNode; sub?: string; /** Pinned under the title row (the project tabs). */ children?: ReactNode;
+  title: ReactNode; backHref: string; backLabel: string; badge?: ReactNode; actions?: ReactNode; sub?: ReactNode; /** Pinned under the title row (the project tabs). */ children?: ReactNode;
 }) {
   return (
     <PinHead>

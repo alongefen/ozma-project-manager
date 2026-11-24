@@ -16,10 +16,9 @@ export function InnerPageSkeleton({ title, backHref, backLabel, subLoading, narr
   const href = backHref.replace('[id]', params?.id ?? '');
   return (
     <Page narrow={narrow}>
-      <PageHeader title={title} backHref={href} backLabel={backLabel} />
+      <PageHeader title={title} backHref={href} backLabel={backLabel} sub={subLoading ? <Skeleton height={16} width={160} /> : undefined} />
       <div role="status" aria-busy="true" className="ui-page">
         <span className="sr-only">טוען…</span>
-        {subLoading && <Skeleton height={16} width={160} />}
         {Array.from({ length: cards }, (_, i) => <div key={i} className="ui-card ui-skel-card"><Skeleton height={20} width="40%" /><Skeleton height={14} /><Skeleton height={14} width="80%" /></div>)}
       </div>
     </Page>
