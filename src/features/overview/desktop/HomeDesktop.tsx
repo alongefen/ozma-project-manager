@@ -1,5 +1,5 @@
 import type { HomeData } from '@/types/contracts';
-import { Counters, Cube, ProjectsHead } from '../shared/Parts';
+import { Counters, Cube, DesktopTitle, NewProjectButton } from '../shared/Parts';
 import { ProjectsBrowser } from '../shared/ProjectsBrowser';
 import d from './Desktop.module.css';
 
@@ -7,10 +7,10 @@ import d from './Desktop.module.css';
 export function HomeDesktop({ data, isOwner }: { data: HomeData; isOwner: boolean }) {
   return (
     <div className={`${d.page} d-only`}>
+      <DesktopTitle title="פרויקטים">{isOwner && <NewProjectButton />}</DesktopTitle>
       <div className={d.counters}><Counters counters={data.counters} /></div>
       {data.financeCube && <Cube cube={data.financeCube} />}
-      <ProjectsHead isOwner={isOwner} />
-      <div className={d.projects}><ProjectsBrowser projects={data.projects} /></div>
+      <div className={d.projects}><ProjectsBrowser projects={data.projects} isOwner={false} /></div>
     </div>
   );
 }

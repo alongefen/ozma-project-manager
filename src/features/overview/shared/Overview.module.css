@@ -10,10 +10,10 @@
 .cubeFigures dd { margin: 0; font-weight: 800; font-size: 18px; }
 .cubeLink { min-height: 44px; display: inline-flex; align-items: center; color: var(--nav-active-ink); font-weight: 700; text-decoration: none; }
 @media (min-width: 1024px) { .cubeFigures { grid-template-columns: repeat(5, minmax(0, 1fr)); } .cube { padding: 20px 25px; } }
-.head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .browser { display: grid; gap: 12px; }
 .tools { display: grid; gap: 10px; }
-.search { min-width: 0; }
+.searchRow { display: flex; align-items: flex-end; gap: 10px; }
+.search { min-width: 0; flex: 1; }
 .seg { display: grid; grid-template-columns: repeat(3, 1fr); padding: 4px; gap: 4px; background: #e9edf0; border-radius: 12px; }
 .seg button { min-height: 44px; border: 0; border-radius: 9px; background: transparent; color: #55626a; font: inherit; font-weight: 700; cursor: pointer; }
 .seg button[aria-pressed='true'] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px #0002; }

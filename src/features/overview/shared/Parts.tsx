@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import type { HomeData, ProjectCard } from '@/types/contracts';
 import { Badge, Card } from '@/components/ui';
 import { coverSrc } from '@/features/projects/shared/view-model';
@@ -35,12 +36,22 @@ export function Cube({ cube }: { cube: NonNullable<HomeData['financeCube']> }) {
   );
 }
 
-/** Section title with the owner-only "new project" entry (the wizard lives at /projects/new). */
-export function ProjectsHead({ isOwner }: { isOwner: boolean }) {
+/** Owner-only "new project" entry (the wizard lives at /projects/new). */
+export function NewProjectButton() {
+  return <Link href="/projects/new" className="ui-btn">פרויקט חדש</Link>;
+}
+
+/**
+ * Desktop page title row, the same size and place as the inner-page header (`ui-ph`): title on the right,
+ * actions at the far left. The phone shell header already shows the title, so this is desktop only.
+ */
+export function DesktopTitle({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className={css.head}>
-      <h2 className={css.sectionTitle}>פרויקטים</h2>
-      {isOwner && <Link href="/projects/new" className="ui-btn ui-btn--small">פרויקט חדש</Link>}
+    <div className="ui-ph d-only">
+      <div className="ui-ph__row">
+        <h1 className="ui-ph__title">{title}</h1>
+        {children && <div className="ui-ph__actions">{children}</div>}
+      </div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import type { HomeData } from '@/types/contracts';
-import { Counters, Cube, ProjectsHead } from '../shared/Parts';
+import { Counters, Cube } from '../shared/Parts';
 import { ProjectsBrowser } from '../shared/ProjectsBrowser';
 import m from './Mobile.module.css';
 
@@ -9,8 +9,7 @@ export function HomeMobile({ data, isOwner }: { data: HomeData; isOwner: boolean
     <div className={`${m.page} m-only`}>
       <Counters counters={data.counters} />
       {data.financeCube && <Cube cube={data.financeCube} />}
-      <ProjectsHead isOwner={isOwner} />
-      <ProjectsBrowser projects={data.projects} />
+      <ProjectsBrowser projects={data.projects} isOwner={isOwner} />
     </div>
   );
 }
