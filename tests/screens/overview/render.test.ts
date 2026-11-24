@@ -37,7 +37,7 @@ describe('מסך הבית', () => {
     expect(html).toContain('בניין בדוי');
   });
   it('תגים: סטטוס, משימות ודיווחים; נעלמים כשאין', () => {
-    expect(projectBadges(card).map(b => b.text)).toEqual(['פעיל', '2 משימות פתוחות', '3 דיווחים']);
+    expect(projectBadges(card).map(b => b.text)).toEqual(['פעיל', '3 דיווחים']);
     expect(projectBadges({ ...card, status: 'completed', openTaskCount: 0, reportCount: 0 }).map(b => b.text)).toEqual(['הסתיים']);
   });
   it('כפתור פרויקט חדש רק לבעלים, וחיפוש וסינון מופיעים', () => {
@@ -55,6 +55,11 @@ describe('מסך הבית', () => {
     expect(filterProjects(all, 'הנמל', 'all').map(c => c.id)).toEqual(['p2']);
     expect(filterProjects(all, '', 'completed').map(c => c.id)).toEqual(['p2']);
     expect(filterProjects(all, 'בדוי', 'completed')).toEqual([]);
+  });
+  it('תג משימות פתוחות: קישור למשימות הפרויקט, ונעלם כשאין', () => {
+    expect(both(home(null))).toContain('href="/projects/p1/tasks"');
+    expect(both(home(null))).toContain('2 משימות פתוחות');
+    expect(both({ ...home(null), projects: [{ ...card, openTaskCount: 0 }] })).not.toContain('/projects/p1/tasks');
   });
   it('רשימה ריקה: הודעה', () => {
     expect(both({ ...home(null), projects: [] })).toContain('אין פרויקטים להצגה');

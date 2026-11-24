@@ -64,15 +64,20 @@ export function ProjectList({ projects }: { projects: ProjectCard[] }) {
         const cover = coverSrc(card.coverFileId);
         return (
           <li key={card.id}>
-            <Link href={`/projects/${card.id}`} className={`ui-card ${css.project}`}>
+            <div className={`ui-card ${css.project}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               {cover ? <img className={css.thumb} src={cover} alt="" /> : <span className={css.thumbEmpty} aria-hidden="true" />}
               <div className={css.projectBody}>
-                <span className={css.projectName}>{card.name}</span>
+                <Link href={`/projects/${card.id}`} className={css.projectName}>{card.name}</Link>
                 <span className={css.projectSub}>{card.businessName} · {card.siteAddress}</span>
-                <div className={css.badges}>{projectBadges(card).map(b => <Badge key={b.text} tone={b.tone}>{b.text}</Badge>)}</div>
+                <div className={css.badges}>
+                  {projectBadges(card).map(b => <Badge key={b.text} tone={b.tone}>{b.text}</Badge>)}
+                  {card.openTaskCount > 0 && (
+                    <Link href={`/projects/${card.id}/tasks`} className={css.taskBadge}>{card.openTaskCount} משימות פתוחות</Link>
+                  )}
+                </div>
               </div>
-            </Link>
+            </div>
           </li>
         );
       })}
