@@ -16,7 +16,6 @@ export function counterItems(counters: HomeData['counters']): CounterItem[] {
 export type CardBadge = { text: string; tone: 'active' | 'gray' };
 export function projectBadges(card: ProjectCard): CardBadge[] {
   const badges: CardBadge[] = [card.status === 'active' ? { text: 'פעיל', tone: 'active' } : { text: 'הסתיים', tone: 'gray' }];
-  if (card.openTaskCount > 0) badges.push({ text: `${card.openTaskCount} משימות פתוחות`, tone: 'gray' });
   if (card.reportCount > 0) badges.push({ text: `${card.reportCount} דיווחים`, tone: 'gray' });
   return badges;
 }
