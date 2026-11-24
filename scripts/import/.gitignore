@@ -1,0 +1,3 @@
+# Local extraction output: real client data, never committed
+out/
+!out/.gitkeep

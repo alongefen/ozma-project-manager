@@ -1,0 +1,8 @@
+{
+  "source": "https://example.invalid",
+  "extractedAt": "2026-01-01",
+  "items": [
+    {"category": "restaurants", "place": "עיר לדוגמה", "title": "מסעדה לדוגמה", "status": "completed", "sourceUrl": "https://example.invalid/sample-restaurant/"},
+    {"category": "private", "place": "ישוב לדוגמה", "title": "שיפוץ דירה לדוגמה", "status": "coming_soon", "sourceUrl": null}
+  ]
+}
