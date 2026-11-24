@@ -29,7 +29,7 @@ describe('seed-accounts', () => {
     await seed({args: {...args, confirm: true, 'project-ref': PROJECT_REF}, env, log, print, clients: c});
     expect(c.rpcs).toEqual(['system_bootstrap_owner', 'create_profile', 'complete_profile_creation']);
     const printed = print.mock.calls.map(x => x[0]).join('\n');
-    expect(printed).toMatch(/owner\s+ben@fake.test\s+\S{24}/);
+    expect(printed).toMatch(/owner ben@fake.test\s+\S{24}/);
     expect(log.mock.calls.join('\n')).not.toMatch(/\S{24}/);
   });
 });

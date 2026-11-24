@@ -41,7 +41,9 @@ export async function seed({args, env, log = console.log, print = console.log, c
   const developerPassword = generatePassword();
 
   // 1. Owner: system_bootstrap_owner works only while no owner exists (ARCHITECTURE 4.2 "הקמת בן").
+  const showOnce = (who, email, pw) => print(`ONE-TIME PASSWORD (shown once, not stored) ${who} ${email}  ${pw}`);
   const ownerUser = await must(admin.auth.admin.createUser({email: input.ownerEmail, password: ownerPassword, email_confirm: true}), 'Creating the owner login');
+  showOnce('owner', input.ownerEmail, ownerPassword);
   await must(admin.rpc('system_bootstrap_owner', {input: {userId: ownerUser.user.id, fullName: input.ownerName}}), 'Bootstrapping the owner (an owner may already exist)');
 
   // 2. Developer: the same path the app uses for "create person", executed with Ben's own session.
@@ -49,13 +51,10 @@ export async function seed({args, env, log = console.log, print = console.log, c
   void signed;
   const requestId = stableUuid(`developer:${input.developerEmail}`);
   const devUser = await must(admin.auth.admin.createUser({email: input.developerEmail, password: developerPassword, email_confirm: true}), 'Creating the developer login');
+  showOnce('developer', input.developerEmail, developerPassword);
   await must(pub.rpc('create_profile', {input: {requestId, email: input.developerEmail, fullName: input.developerName}}), 'Creating the developer profile');
   await must(pub.rpc('complete_profile_creation', {input: {requestId, userId: devUser.user.id}}), 'Completing the developer profile');
 
-  // Passwords are shown exactly once. Alon hands Ben's over himself; the developer keeps their own.
-  print('=== ONE-TIME PASSWORDS, shown once, not stored anywhere ===');
-  print(`owner     ${input.ownerEmail}  ${ownerPassword}`);
-  print(`developer ${input.developerEmail}  ${developerPassword}`);
   return {wrote: true, ownerId: ownerUser.user.id, developerId: devUser.user.id};
 }
 

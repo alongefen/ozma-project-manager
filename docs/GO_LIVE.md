@@ -42,7 +42,7 @@ node --env-file=<env> scripts/ops/purge-demo.mjs
 node --env-file=<env> scripts/ops/purge-demo.mjs --confirm --project-ref=izjmvyguzbampoasvnru --expect-total=<total>
 ```
 
-Order inside the real run: storage objects, then one all-or-nothing SQL request, then auth users, then a verification that everything is empty. A failed run is safe to repeat (every step is a delete of what is still there). `--expect-total` fails the run if data changed since the dry run, for example a test session still writing.
+The real run refuses when any non-demo login exists (a guard against running it after go-live) unless `--include-real-users` is added, which Alon uses only if his own demo login is not `@example.invalid`. Order inside the real run: storage objects, then one all-or-nothing SQL request, then auth users, then a verification that everything is empty. A failed run is safe to repeat (every step is a delete of what is still there). `--expect-total` (printed by the dry run as `expectTotal`) fails the run if data changed since the dry run, for example a test session still writing.
 
 ## d. Accounts
 
@@ -51,9 +51,9 @@ node --env-file=<env> scripts/ops/seed-accounts.mjs --owner-email=<ben> --owner-
 node --env-file=<env> scripts/ops/seed-accounts.mjs --owner-email=... --owner-name=... --developer-email=... --confirm --project-ref=izjmvyguzbampoasvnru
 ```
 
-Ben becomes the owner through `system_bootstrap_owner` (works only while no owner exists). The developer account is created through the app's own `create_profile` flow with Ben's session. Two one-time passwords are printed once to the terminal; Alon hands Ben's over himself and keeps the developer's. Neither is stored. The script never overwrites an existing login; if a run stops half way, nothing real exists yet, so run the purge again and repeat.
+Ben becomes the owner through `system_bootstrap_owner` (works only while no owner exists). The developer account is created through the app's own `create_profile` flow with Ben's session. Each one-time password is printed once to the terminal right after its login is created (so a half-finished run never loses one); Alon hands Ben's over himself and keeps the developer's. Neither is stored. The script never overwrites an existing login; if a run stops half way, nothing real exists yet, so run the purge again and repeat.
 
-Developer account design: see "Developer account" in [tasks/GO-LIVE-PREP](tasks/GO-LIVE-PREP.md). In the current model it is a regular, visible person (`Alon (Developer & Support)`) with the manager role and finance access on every project. It is not an owner: the database allows exactly one owner (`one_owner` unique index).
+Developer account design: see "Developer account" in [tasks/GO-LIVE-PREP](tasks/GO-LIVE-PREP.md). In the current model it is a regular, visible person (`Alon (Developer & Support)`) with the manager role and finance access on every project loaded by the load script (projects Ben creates later need the developer added by Ben). It is not an owner: the database allows exactly one owner (`one_owner` unique index).
 
 ## e. Project load
 

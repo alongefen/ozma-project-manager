@@ -80,8 +80,10 @@ export async function run({args, env, log = console.log, sqlText = readFileSync(
   const admin = clients?.admin ?? createClient(e.SUPABASE_URL, e.SUPABASE_SECRET_KEY, {auth: {persistSession: false, autoRefreshToken: false}});
   const sql = clients?.sql ?? createSqlRunner({token: e.SUPABASE_ACCESS_TOKEN});
   const before = summarize(await collect({sql, admin}));
-  log(JSON.stringify({mode: mode.write ? 'REAL RUN' : 'DRY RUN', ...before, privilege: (await sql(probeSql()))[0]}, null, 2));
+  log(JSON.stringify({mode: mode.write ? 'REAL RUN' : 'DRY RUN', ...before, expectTotal: expectedTotal(before), privilege: (await sql(probeSql()))[0]}, null, 2));
   if (!mode.write) { log('Dry run only. Nothing was changed.'); return {wrote: false, before}; }
+  // Guard against running after go-live: any non-demo login or any real owner blocks the run unless explicitly overridden.
+  if (before.otherUsers.length > 0 && args['include-real-users'] !== true) throw new Error(`Refusing: ${before.otherUsers.length} non-demo login(s) exist. If these are demo logins you made yourself, add --include-real-users`);
   const total = expectedTotal(before);
   if (String(args['expect-total']) !== String(total)) throw new Error(`--expect-total must equal the dry-run total (${total}); the data changed or the flag is missing`);
   const {files, users} = await collect({sql, admin});
@@ -89,7 +91,7 @@ export async function run({args, env, log = console.log, sqlText = readFileSync(
   await sql(sqlText);                                // 2. database rows, one implicit transaction
   await removeAuthUsers(admin, users);               // 3. auth users (profiles reference them, so after step 2)
   const after = summarize(await collect({sql, admin}));
-  if (after.rowTotal !== 0 || after.authUsers !== 0) throw new Error('Verification failed: data remains. Re-run the purge (idempotent).');
+  if (after.rowTotal !== 0 || after.authUsers !== 0 || after.storageObjects !== 0) throw new Error('Verification failed: data remains. Re-run the purge (idempotent).');
   log('Purge complete and verified: all tables and auth users are empty.');
   return {wrote: true, before, after};
 }

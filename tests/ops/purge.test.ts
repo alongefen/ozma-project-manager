@@ -41,18 +41,25 @@ describe('purge-demo', () => {
   it('real run needs confirm, ref and the matching expected total', async () => {
     const f = fake();
     await expect(run({args: {confirm: true}, env, log: vi.fn(), clients: {admin: f.admin, sql: f.sql}})).rejects.toThrow(/project-ref/);
-    await expect(run({args: {confirm: true, 'project-ref': PROJECT_REF}, env, log: vi.fn(), sqlText: 'set local x;', clients: {admin: f.admin, sql: f.sql}})).rejects.toThrow(/expect-total/);
-    await expect(run({args: {confirm: true, 'project-ref': PROJECT_REF, 'expect-total': '1'}, env, log: vi.fn(), sqlText: 'set local x;', clients: {admin: f.admin, sql: f.sql}})).rejects.toThrow(/expect-total/);
+    await expect(run({args: {confirm: true, 'project-ref': PROJECT_REF, 'include-real-users': true}, env, log: vi.fn(), sqlText: 'set local x;', clients: {admin: f.admin, sql: f.sql}})).rejects.toThrow(/expect-total/);
+    await expect(run({args: {confirm: true, 'project-ref': PROJECT_REF, 'expect-total': '1', 'include-real-users': true}, env, log: vi.fn(), sqlText: 'set local x;', clients: {admin: f.admin, sql: f.sql}})).rejects.toThrow(/expect-total/);
     expect(f.state.calls).not.toContain('purge-sql');
   });
   it('real run: storage, then SQL, then auth users, then verifies empty', async () => {
     const f = fake();
     const total = expectedTotal(summarize({counts: {a: 3}, files: f.state.files, users: f.state.users}));
-    const r = await run({args: {confirm: true, 'project-ref': PROJECT_REF, 'expect-total': String(total)}, env, log: vi.fn(), sqlText: 'set local session_replication_role = replica;', clients: {admin: f.admin, sql: f.sql}});
+    const r = await run({args: {confirm: true, 'project-ref': PROJECT_REF, 'expect-total': String(total), 'include-real-users': true}, env, log: vi.fn(), sqlText: 'set local session_replication_role = replica;', clients: {admin: f.admin, sql: f.sql}});
     expect(r.wrote).toBe(true);
     const order = f.state.calls.filter(c => ['storage', 'purge-sql', 'auth'].includes(c));
     expect(order[0]).toBe('storage'); expect(order[1]).toBe('purge-sql'); expect(order[2]).toBe('auth');
     expect(f.state.users).toHaveLength(0);
+  });
+  it('refuses when non-demo logins exist unless overridden', async () => {
+    const f = fake();
+    const total = expectedTotal(summarize({counts: {a: 3}, files: f.state.files, users: f.state.users}));
+    const base = {confirm: true, 'project-ref': PROJECT_REF, 'expect-total': String(total)};
+    await expect(run({args: base, env, log: vi.fn(), sqlText: 'set local x;', clients: {admin: f.admin, sql: f.sql}})).rejects.toThrow(/non-demo/);
+    expect(f.state.calls).not.toContain('purge-sql');
   });
   it('summary separates demo accounts from others', () => {
     const s = summarize({counts: {a: 1}, files: [], users: [{email: 'x@example.invalid'}, {email: 'real@gmail.com'}]});
