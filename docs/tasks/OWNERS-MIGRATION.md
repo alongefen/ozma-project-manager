@@ -19,6 +19,11 @@
 - `tests/db/owners.test.ts` (real JWTs, fake data): runs after apply.
 - Not checked: the "last owner" guard against a non-self actor (unreachable through the API, since self-targeting is refused and a deactivated owner cannot act); UI label "אדמין" (not done, UI untouched).
 
+## Review notes (accepted)
+- Two owners acting on each other at the same instant can deadlock (caller's FOR SHARE vs advisory lock 190012); Postgres aborts one call (40P01). No corruption, invariants hold.
+- Promoting a user keeps their old memberships; they come back if the user is demoted later.
+- `tests/db/owners.test.ts` deactivates every owner it creates in `afterAll` (the old `system_owner_recovered` call shape needs exactly one owner).
+
 ## Rollback
 `supabase/rollback/20261124120000_multiple_owners.down.sql` (by hand, after Alon's yes): keeps the oldest owner, demotes the rest,
 recreates `one_owner`, drops the two new functions, restores the old `set_user_active` and `system_owner_recovered`.

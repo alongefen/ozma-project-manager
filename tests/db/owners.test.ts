@@ -1,9 +1,10 @@
 import { randomBytes, randomUUID } from 'node:crypto';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Json } from '../../src/types/database';
 import { actor, clients, login, owner, rpc, value, type Client, type TestActor } from './support/cloud';
 
 // OWNERS-MIGRATION: several owner-level accounts. Fake data only (@example.invalid); every account made here is ours.
+const made: string[] = [];
 let admin: Client, anonymous: Client, ben: TestActor, user: TestActor;
 const call = (client: Client, name: string, input: Json) => rpc(client, name as never, input);
 async function deny(client: Client, name: string, input: Json, code: string) {
@@ -15,6 +16,7 @@ async function newOwner(label: string): Promise<TestActor> {
   const email = `p12-${label}-${randomUUID()}@example.invalid`, password = randomBytes(32).toString('base64url');
   const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
   if (error || !data.user) throw new Error('createUser failed');
+  made.push(data.user.id);
   await value(admin, 'system_add_owner' as never, { userId: data.user.id, fullName: `אדמין בדיקה ${label}` });
   return login(email, password);
 }
@@ -24,11 +26,19 @@ beforeAll(async () => {
   ({ admin, anonymous } = clients()); ben = await owner(admin); user = await actor(admin, ben.client, 'plain');
 }, 120_000);
 
+// Leave no owner-level account behind: deactivating also removes the owner level.
+afterAll(async () => {
+  for (const id of made) {
+    const row = (await admin.from('profiles').select('is_owner,is_active,revision').eq('id', id).maybeSingle()).data;
+    if (row?.is_active) await value(ben.client, 'set_user_active', { id, active: false, expectedRevision: row.revision });
+  }
+}, 60_000);
+
 describe.sequential('כמה בעלים (OWNERS-MIGRATION)', () => {
   it('system_add_owner: שירות בלבד, אידמפוטנטי, ובעלים חדש פועל כבעלים', async () => {
     const email = `p12-add-${randomUUID()}@example.invalid`;
     const created = await admin.auth.admin.createUser({ email, password: randomBytes(32).toString('base64url'), email_confirm: true });
-    const id = created.data.user!.id; const input = { userId: id, fullName: 'אדמין בדיקה' };
+    const id = created.data.user!.id; made.push(id); const input = { userId: id, fullName: 'אדמין בדיקה' };
     for (const client of [anonymous, ben.client, user.client]) expect((await call(client, 'system_add_owner', input)).error).not.toBeNull();
     const first = await value<{ id: string; revision: number }>(admin, 'system_add_owner' as never, input);
     const second = await value<{ id: string; revision: number }>(admin, 'system_add_owner' as never, input);
