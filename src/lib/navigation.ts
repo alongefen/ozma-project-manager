@@ -13,8 +13,8 @@ export type NavItem = {
   prominent?: boolean;
 };
 
-// P2.7 (home) replaces this. Until then `/more` is the only real screen after sign-in.
-export const HOME_PATH = '/more';
+// The home screen is the projects page; the index route `/` redirects to it.
+export const HOME_PATH = '/projects';
 export const SIGN_IN_PATH = '/sign-in';
 export const REPORT_PATH = '/diary/new';
 
