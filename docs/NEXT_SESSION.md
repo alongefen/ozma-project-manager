@@ -1,12 +1,12 @@
 # Next session
 
-23.11.2026, evening. `origin/main`: `eac7c87`. Agent-facing doc, in English. Start here, then `git log --oneline -15` and `gh pr list`.
+23.11.2026, evening. `origin/main`: `2caa786`. Agent-facing doc, in English. Start here, then `git log --oneline -15` and `gh pr list`.
 
 ## State
 
 - **Depth phase is done and G2 is approved (A-40).** P1.4.1-P1.4.10 are merged; P1.4.10 also fixed `update_project` dropping `business_number`. See [P1.4.10](tasks/P1.4.10.md).
 - **Screens are being built, each phone + desktop over shared logic.** Merged: P1.5 shells and sign-in (PR #47), P2.2 project file/form/wizard (#49, #56, #66), P2.6 project finance (#48, #57, #58, #59, #62), UX-FOUNDATION (#63; rules in [UI_CONVENTIONS](UI_CONVENTIONS.md)), P2.3 tasks (#64), P2.1 workers (#65), TAB-NAV-FIX (#67).
-- **No task session is running.** P2.4 documents (#70), P2.5 diary and reports (#71) and P2.7 home and `/finance` (#73) are merged. Working model is A-39: open a task with a brief from [TEMPLATE](handoffs/TEMPLATE.md); at most two task sessions at once; the PM does not write code or poll.
+- **No task session is running.** P2.4 documents (#70), P2.5 diary and reports (#71) and P2.7 home and `/finance` (#73), P2.5 follow-ups (#75, #76), AUTO-UPLOAD (#78: files upload on selection) and STICKY-HEADER (#79: header, project tabs and action rows pinned, shared `PinHead`) are merged. PR #77 (`/` redirects to `/projects`, `HOME_PATH` = `/projects`) is open from the P2.7 session; P2.8 or Alon decides. Working model is A-39: open a task with a brief from [TEMPLATE](handoffs/TEMPLATE.md); at most two task sessions at once; the PM does not write code or poll.
 
 ## Next (in this order)
 
@@ -14,6 +14,9 @@
    Shared-file work for P2.8 (from P2.7): `HOME_PATH` in `src/lib/navigation.ts` is still `/more`, so sign-in does not land on `/`; nav item "פרויקטים" points to `/projects`, which has no page (home is the project list); `/reports/diary` has no nav entry; `screenTitle('/')` falls back to "חי עוצמה".
 
 ## Open items (none blocks the next tasks)
+
+- Not checked in a browser (no signed-in test session): P2.4, P2.5, P2.7, AUTO-UPLOAD, STICKY-HEADER at 360-1280. Needs one manual pass or P2.8.
+- Upload: failed attempts leave pending unused rows (server cleanup topic); the shared Sheet backdrop/X can still close a form mid-upload.
 
 - Excel RTL visual check never done; U+FFFE/U+FFFF in the Excel engine produce a corrupt file; the `uuid` alert in ExcelJS is assessed, not fixed.
 - L7 protections (30 attempts per 5 minutes refill, session length via Management API) were not verified in the cloud.
