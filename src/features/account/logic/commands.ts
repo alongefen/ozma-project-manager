@@ -54,7 +54,7 @@ export async function changeOwnPassword(deps: PasswordDeps, ctx: RequestContext,
 
 /**
  * A person changes their OWN name. The update path (`prepare_profile_update`) is owner-only in the database, so for now only
- * an admin can use it; a non-owner is refused by the server here and by the database. A function for everyone needs a migration (D31).
+ * an admin can use it; a non-owner is refused by the server here and by the database. By decision only an admin changes names.
  */
 export async function changeOwnName(platform: Platform, ctx: RequestContext, input: ChangeNameInput): Promise<Result<{ id: string; revision: number }>> {
   const parsed = ChangeNameSchema.safeParse(input);

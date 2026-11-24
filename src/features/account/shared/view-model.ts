@@ -2,9 +2,8 @@
 export const MIN_PASSWORD = 8;
 export const MAX_NAME = 120;
 
-/** Own-name editing for non-owners needs the database function `update_own_name` (not created yet, D31). Flip when it exists. */
-export const NON_OWNER_CAN_EDIT_OWN_NAME = false;
-export const canEditOwnName = (isOwner: boolean) => isOwner || NON_OWNER_CAN_EDIT_OWN_NAME;
+/** Only an admin changes names (Alon, 24.11.2026): the account card offers own-name editing to admins only. */
+export const canEditOwnName = (isOwner: boolean) => isOwner;
 
 export function validateName(name: string): string | undefined {
   const value = name.trim();

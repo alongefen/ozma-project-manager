@@ -14,7 +14,7 @@ describe('account view model', () => {
     expect(validatePasswordChange({ currentPassword: 'password-1', newPassword: 'password-1', confirm: 'password-1' }).newPassword).toContain('זהה');
     expect(validatePasswordChange({ currentPassword: 'password-1', newPassword: 'password-2', confirm: 'password-2' })).toEqual({});
   });
-  it('own-name editing is offered to admins only until the database function exists', () => {
+  it('own-name editing is offered to admins only (decision 24.11.2026)', () => {
     expect(canEditOwnName(true)).toBe(true);
     expect(canEditOwnName(false)).toBe(false);
   });
