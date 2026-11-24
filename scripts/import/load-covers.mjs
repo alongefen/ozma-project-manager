@@ -14,6 +14,7 @@ import {parseArgs, requireEnv, resolveMode, stableUuid} from '../ops/lib.mjs';
 import {toFields} from './load-projects.mjs';
 
 const MAX = 25 * 1024 * 1024;
+const SITE_HOST = 'hy-ozma-ltd.com';
 export function sniffMime(b) {
   if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg';
   if (Buffer.from(b.subarray(0, 8)).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) return 'image/png';
@@ -35,7 +36,7 @@ async function must(promise, what) {
 }
 const display = bytes => sharp(Buffer.from(bytes), {failOn: 'error', limitInputPixels: 100_000_000}).rotate().resize({width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true}).jpeg({quality: 80}).toBuffer();
 
-export async function loadCovers({args, env, log = console.log, clients = undefined, fetchImpl = fetch, readInput = p => JSON.parse(readFileSync(p, 'utf8'))}) {
+export async function loadCovers({args, env, log = console.log, clients = /** @type {any} */ (undefined), fetchImpl = fetch, readInput = p => JSON.parse(readFileSync(p, 'utf8'))}) {
   const mode = resolveMode(args, env);
   const rows = plan(readInput(String(args.input ?? 'scripts/import/out/projects.local.json')).items);
   log(JSON.stringify({mode: mode.write ? 'REAL RUN' : 'DRY RUN', covers: rows.length, distinctImages: new Set(rows.map(r => r.imageUrl)).size, sample: rows.slice(0, 3).map(r => `${r.name} <- ${r.imageUrl.split('/').pop()}`)}, null, 2));
@@ -54,12 +55,16 @@ export async function loadCovers({args, env, log = console.log, clients = undefi
     const project = await must(db.from('projects').select('id,revision').eq('name', row.name).single(), `Finding "${row.name}"`);
     const existing = await must(db.from('project_covers').select('id').eq('project_id', project.id).eq('is_active', true).maybeSingle(), 'Reading covers');
     if (existing) { skipped++; continue; }
-    const res = await fetchImpl(row.imageUrl);
+    if (new URL(row.imageUrl).hostname !== SITE_HOST) throw new Error(`Refusing a non-site image URL for "${row.name}"`);
+    const res = await fetchImpl(row.imageUrl, {signal: AbortSignal.timeout(30_000)});
     if (!res.ok) throw new Error(`Downloading ${row.imageUrl.split('/').pop()} failed (HTTP ${res.status})`);
+    if (Number(res.headers.get('content-length') ?? 0) > MAX) throw new Error(`Image too large for "${row.name}"`);
     const bytes = new Uint8Array(await res.arrayBuffer());
     const mime = sniffMime(bytes);
     if (!mime || bytes.length > MAX) throw new Error(`Unsupported or too large image for "${row.name}"`);
-    const name = decodeURIComponent(row.imageUrl.split('/').pop()).slice(0, 200);
+    const raw = row.imageUrl.split('/').pop();
+    let name = raw; try { name = decodeURIComponent(raw); } catch { /* keep the raw name */ }
+    name = name.slice(0, 200);
     const [desc] = await must(db.rpc('begin_upload', {input: {projectId: project.id, purpose: 'cover', files: [{clientId: stableUuid(`cover:${row.name}`), name, mime, sizeBytes: bytes.length}]}}), 'Starting the upload');
     const target = await must(admin.storage.from(desc.bucket).createSignedUploadUrl(desc.path, {upsert: false}), 'Creating the upload URL');
     await must(admin.storage.from(desc.bucket).uploadToSignedUrl(desc.path, target.token, bytes, {contentType: mime}), 'Uploading the original');

@@ -36,4 +36,25 @@ describe('covers', () => {
   it('a real run needs the typed project ref', async () => {
     await expect(loadCovers({args: {confirm: true}, env, log: vi.fn(), readInput: () => ({items})})).rejects.toThrow(/project-ref/);
   });
+  it('real run: skips projects with a cover, refuses foreign hosts, runs the upload steps in order', async () => {
+    const calls: string[] = [];
+    const jwt = `h.${Buffer.from(JSON.stringify({session_id: 's1'})).toString('base64url')}.s`;
+    const png = await (await import('sharp')).default({create: {width: 4, height: 4, channels: 3, background: '#fff'}}).png().toBuffer();
+    let hasCover = false;
+    const q = (t: string) => { const o: Record<string, unknown> = {}; for (const k of ['select', 'eq']) o[k] = () => o; o.single = async () => ({data: {id: 'p1', revision: 1}, error: null}); o.maybeSingle = async () => ({data: hasCover ? {id: 'c'} : null, error: null}); void t; return o; };
+    const db = {auth: {signInWithPassword: async () => ({data: {session: {access_token: jwt}, user: {id: 'u1'}}, error: null})}, from: q, rpc: async (n: string) => { calls.push(n); return {data: n === 'begin_upload' ? [{fileId: 'f1', bucket: 'originals', path: 'p1/f1'}] : {}, error: null}; }};
+    const bucket = (b: string) => ({createSignedUploadUrl: async () => ({data: {token: 't'}, error: null}), uploadToSignedUrl: async () => { calls.push('up:' + b); return {data: {}, error: null}; }, upload: async () => { calls.push('up:' + b); return {data: {}, error: null}; }});
+    const admin = {storage: {from: bucket}, rpc: async (n: string) => { calls.push(n); return {data: {}, error: null}; }};
+    const e = {...env, SUPABASE_PUBLISHABLE_KEY: 'p', SUPABASE_SECRET_KEY: 's', GO_LIVE_OWNER_PASSWORD: 'x'};
+    const args = {confirm: true, 'project-ref': PROJECT_REF, 'owner-email': 'b@fake.test'};
+    const input = {items: [{...items[0], imageUrl: 'https://hy-ozma-ltd.com/a.png'}]};
+    const fetchOk = vi.fn(async () => new Response(png, {status: 200}));
+    await loadCovers({args, env: e, log: vi.fn(), clients: {db, admin}, fetchImpl: fetchOk, readInput: () => input});
+    expect(calls).toEqual(['begin_upload', 'up:originals', 'up:display', 'system_finish_upload', 'set_project_cover']);
+    calls.length = 0; hasCover = true;
+    const r = await loadCovers({args, env: e, log: vi.fn(), clients: {db, admin}, fetchImpl: fetchOk, readInput: () => input});
+    expect(r).toMatchObject({done: 0, skipped: 1}); expect(calls).toEqual([]);
+    hasCover = false;
+    await expect(loadCovers({args, env: e, log: vi.fn(), clients: {db, admin}, fetchImpl: fetchOk, readInput: () => ({items: [{...items[0], imageUrl: 'https://evil.test/a.png'}]})})).rejects.toThrow(/non-site/);
+  });
 });

@@ -30,3 +30,4 @@ The list is shown to Alon before any load. Edit the local JSON to remove or rena
 ## Covers
 
 `scripts/import/load-covers.mjs` downloads each project's public banner from the website (38 distinct images, about 5 MB; two projects share one) and sets it as the project cover through the app's own path: `begin_upload`, signed upload, display copy, `system_finish_upload`, `set_project_cover`, as the owner. Projects that already have a cover are skipped. Dry run by default; a real run needs `--confirm`, the project ref and the owner password in `GO_LIVE_OWNER_PASSWORD`. Run on 24.11.2026 after Alon's request: 39 covers, 39 originals and 39 display copies verified in the database.
+A run that fails between the upload and `set_project_cover` leaves an unattached file row and its storage objects for that project; a retry creates a fresh upload, so it is safe, but the orphan stays until the next purge. Only images from `hy-ozma-ltd.com` are fetched (30 s timeout, 25 MB cap).
