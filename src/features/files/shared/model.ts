@@ -68,6 +68,17 @@ export const withoutDocument = (items: readonly DocumentRow[], id: string): Docu
 export const fileHref = (fileId: string, download: boolean): string =>
   `/api/storage/files/${fileId}${download ? '?download=1' : ''}`;
 
+/** Same rule as the diary: only a ready display image is shown; the route checks the viewer's access like "open". */
+export const thumbUrl = (f: { id: string; mime: string; displayState: string }): string | null =>
+  f.mime.startsWith('image/') && f.displayState === 'ready' ? `/api/storage/files/${f.id}?variant=display` : null;
+
+/** Short upper-case type shown on the tile: the file's extension, else the type. */
+export function extensionLabel(f: { name: string; mime: string }): string {
+  const dot = f.name.lastIndexOf('.');
+  const ext = dot > 0 ? f.name.slice(dot + 1).replace(/[^a-z0-9]/gi, '').slice(0, 4) : '';
+  return (ext || (f.mime === 'application/pdf' ? 'pdf' : f.mime.split('/')[1] ?? 'file')).toUpperCase();
+}
+
 export function kindLabel(mime: string): string {
   if (mime === 'application/pdf') return 'PDF';
   return mime.startsWith('image/') ? 'תמונה' : 'קובץ';

@@ -5,15 +5,22 @@
 .fl-list, .fl-people { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
 .fl-empty, .fl-lock { color: var(--muted); margin: 0; padding: 12px 0; }
 .fl-tools { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1 1 auto; }
-.fl-tools__search { flex: 1 1 0; min-width: 0; }
-.fl-tools__category { flex: 0 0 150px; width: 150px; }
-.fl-tools__archive { flex: none; gap: 6px; padding-inline: 12px; white-space: nowrap; }
+.fl-tools__search { flex: 1 1 0; min-width: 0; max-width: 360px; }
+.fl-tools__category { flex: 0 0 180px; width: 180px; }
+.fl-tools__archive { flex: none; margin-inline-start: auto; gap: 6px; padding-inline: 12px; white-space: nowrap; }
 .fl-tools__archive.is-on { background: var(--nav-active-bg); border-color: var(--blue); color: var(--nav-active-ink); }
 .fl-tools__archive .fl-count { min-width: 20px; padding: 0 6px; }
 @media (max-width: 1023.98px) { .fl-tools__category { flex-basis: 100px; width: 100px; } .fl-tools__archive { padding-inline: 10px; font-size: 14px; } }
 @media (max-width: 479.98px) { .fl-tools__archive .fl-count { display: none; } }
 .fl-card { display: grid; gap: 10px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; min-width: 0; }
-.fl-card__main { min-width: 0; }
+.fl-card__row { display: flex; gap: 12px; align-items: flex-start; min-width: 0; }
+.fl-card__main { min-width: 0; flex: 1 1 auto; }
+.fl-thumb { flex: none; width: 72px; height: 72px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--gray-bg); }
+.fl-thumb__img { display: block; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .15s; }
+.fl-thumb__img[data-state='ready'] { opacity: 1; }
+.fl-thumb__tile { width: 100%; height: 100%; display: grid; place-content: center; justify-items: center; gap: 2px; color: var(--gray-ink); }
+.fl-thumb__tile.is-pdf { color: var(--err-ink); background: var(--err-bg); }
+.fl-thumb__ext { font-size: 12px; font-weight: 800; letter-spacing: .5px; }
 .fl-card__name { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
 .fl-card__meta { margin: 4px 0 0; font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
 .fl-card__actions { display: flex; flex-wrap: wrap; gap: 8px; }

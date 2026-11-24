@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { DocumentRow } from '@/types/contracts';
-import { accessSummary, countsOf, emptyAccess, parseAccess, toggleUser, visibleDocuments } from '@/features/files/shared/model';
+import { accessSummary, countsOf, emptyAccess, parseAccess, toggleUser, visibleDocuments, thumbUrl, extensionLabel } from '@/features/files/shared/model';
 
 const u1 = '11111111-1111-4111-8111-111111111111';
 const u2 = '22222222-2222-4222-8222-222222222222';
@@ -40,5 +40,17 @@ describe('רשימות', () => {
     expect(visibleDocuments(items, 'plans', '').map(d => d.id)).toEqual(['1', '2']);
     expect(visibleDocuments(items, null, 'view').map(d => d.id)).toEqual(['3']);
     expect(visibleDocuments(items, 'plans', 'view')).toEqual([]);
+  });
+});
+
+describe('תצוגה מקדימה', () => {
+  it('תמונה מוכנה מקבלת כתובת תצוגה דרך נתיב ההרשאות; PDF, HEIC שנכשל וקבצים אחרים לא', () => {
+    expect(thumbUrl({ id: 'f1', mime: 'image/jpeg', displayState: 'ready' })).toBe('/api/storage/files/f1?variant=display');
+    expect(thumbUrl({ id: 'f2', mime: 'application/pdf', displayState: 'none' })).toBeNull();
+    expect(thumbUrl({ id: 'f3', mime: 'image/heic', displayState: 'failed' })).toBeNull();
+  });
+  it('תווית הסיומת על האריח', () => {
+    expect(extensionLabel({ name: 'plan.final.pdf', mime: 'application/pdf' })).toBe('PDF');
+    expect(extensionLabel({ name: 'noext', mime: 'image/heic' })).toBe('HEIC');
   });
 });
