@@ -25,7 +25,7 @@ export function Cube({ cube }: { cube: NonNullable<HomeData['financeCube']> }) {
     <Card className={css.cube}>
       <div className={css.cubeHead}>
         <h2 className={css.cubeTitle}>{cubeTitle(cube)}</h2>
-        <Link href="/finance" className={css.cubeLink}>סכום העברה ופירוט לפי חודשים</Link>
+        <Link href="/finance" className={css.cubeLink}>לפירוט התנועות</Link>
       </div>
       <dl className={css.cubeFigures}>
         {cubeRows(cube).map(row => (
@@ -66,16 +66,19 @@ export function ProjectList({ projects }: { projects: ProjectCard[] }) {
         return (
           <li key={card.id}>
             <Link href={`/projects/${card.id}`} className={`ui-card ${css.project}`}>
-              <span className={css.thumbWrap}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                {cover ? <img className={css.thumb} src={cover} alt="" /> : <span className={css.thumbEmpty} aria-hidden="true" />}
-                {bubble && <span className={css.bubble} role="img" aria-label={bubble.label}>{bubble.text}</span>}
-              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {cover ? <img className={css.thumb} src={cover} alt="" /> : <span className={css.thumbEmpty} aria-hidden="true" />}
               <div className={css.projectBody}>
                 <span className={css.projectName}>{card.name}</span>
                 <span className={css.projectSub}>{card.businessName} · {card.siteAddress}</span>
                 <div className={css.badges}>{projectBadges(card).map(b => <Badge key={b.text} tone={b.tone}>{b.text}</Badge>)}</div>
               </div>
+              {bubble && (
+                <span className={css.tasks} aria-label={bubble.label}>
+                  <span className={css.tasksCount}>{bubble.text}</span>
+                  <span className={css.tasksLabel}>משימות פתוחות</span>
+                </span>
+              )}
             </Link>
           </li>
         );

@@ -25,7 +25,7 @@ const both = (d: HomeData, isOwner = true) => renderToStaticMarkup(h('div', null
 describe('מסך הבית', () => {
   it('בעלים: קובייה וקישור לסכום העברה', () => {
     const html = both(home(cube));
-    expect(html).toContain('סכום העברה ופירוט');
+    expect(html).toContain('לפירוט התנועות');
     expect(html).toContain('href="/finance"');
     expect(html).toContain('הכנסות');
   });
