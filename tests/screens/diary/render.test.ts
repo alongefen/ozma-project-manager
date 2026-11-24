@@ -62,15 +62,16 @@ describe('מסכי היומן', () => {
   it('פרויקט שהסתיים: אין דיווח חדש, אין עריכה וביטול, ההדפסה נשארת', () => {
     const out = html(screen({ canReport: false, readOnlyNote: 'הפרויקט הסתיים או בארכיון. אפשר לצפות ולהדפיס בלבד.' }));
     expect(out).not.toContain('דיווח חדש');
-    expect(out).not.toContain('עריכה');
-    expect(out).not.toContain('ביטול דיווח');
+    expect(out).not.toContain('עריכת הדיווח');
+    expect(out).not.toContain('ביטול הדיווח');
     expect(out).toContain('אפשר לצפות ולהדפיס בלבד');
     expect(out).toContain('הדפסה / PDF');
+    expect(out).toContain('dr-iconbtn');
   });
   it('עריכה לפי הרשאת השרת בלבד, וביטול רק למי שהשרת מתיר', () => {
-    expect(html(screen({ rows: [row({ canCorrect: true })] }))).toContain('עריכה');
-    expect(html(screen({ rows: [row({ canCorrect: true })] }))).not.toContain('ביטול דיווח');
-    expect(html(screen({ rows: [row({ canCorrect: true, canMoveOrCancel: true })] }))).toContain('ביטול דיווח');
+    expect(html(screen({ rows: [row({ canCorrect: true })] }))).toContain('עריכת הדיווח');
+    expect(html(screen({ rows: [row({ canCorrect: true })] }))).not.toContain('ביטול הדיווח');
+    expect(html(screen({ rows: [row({ canCorrect: true, canMoveOrCancel: true })] }))).toContain('dr-iconbtn dr-iconbtn--danger');
   });
   it('בטאב של פרויקט: בלי בחירת פרויקט, וכפתור הדיווח פותח חלון (לא עמוד)', () => {
     const out = html(screen({ projects: null, fixedProjectId: P, basePath: `/projects/${P}/diary` }));

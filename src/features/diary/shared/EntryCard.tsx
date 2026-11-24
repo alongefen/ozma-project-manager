@@ -1,6 +1,7 @@
 'use client';
 import type { DiaryRow } from '@/types/contracts';
-import { Button, Card } from '@/components/ui';
+import { Card } from '@/components/ui';
+import { PencilIcon, PrintIcon, TrashIcon } from './DiaryIcons';
 import { format } from '@/lib/format';
 import { Attachments } from './Attachments';
 import { editedText, reportUrl } from './model';
@@ -18,10 +19,10 @@ export function EntryCard({ row, showProject, onEdit, onCancel }: { row: DiaryRo
       <p className="dr-card__body">{row.body}</p>
       {edited && <p className="dr-card__edited">{edited}</p>}
       <Attachments files={row.files} />
-      <div className="dr-card__actions">
-        <a className="ui-btn ui-btn--secondary ui-btn--small" href={reportUrl({ kind: 'entry', entryId: row.id })} target="_blank" rel="noopener noreferrer">הדפסה / PDF</a>
-        {row.canCorrect && onEdit && <Button variant="secondary" size="small" onClick={() => onEdit(row)}>עריכה</Button>}
-        {row.canMoveOrCancel && onCancel && <Button variant="secondary" size="small" onClick={() => onCancel(row)}>ביטול דיווח</Button>}
+      <div className="dr-card__actions no-print">
+        <a className="dr-iconbtn" href={reportUrl({ kind: 'entry', entryId: row.id })} target="_blank" rel="noopener noreferrer" aria-label="הדפסה או PDF של הדיווח" title="הדפסה / PDF"><PrintIcon /></a>
+        {row.canMoveOrCancel && onCancel && <button type="button" className="dr-iconbtn dr-iconbtn--danger" onClick={() => onCancel(row)} aria-label="ביטול הדיווח" title="ביטול דיווח"><TrashIcon /></button>}
+        {row.canCorrect && onEdit && <button type="button" className="dr-iconbtn" onClick={() => onEdit(row)} aria-label="עריכת הדיווח" title="עריכה"><PencilIcon /></button>}
       </div>
     </Card>
   );
