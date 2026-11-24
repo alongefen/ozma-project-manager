@@ -1,5 +1,5 @@
 'use client';
-import { Button, Card, Notice } from '@/components/ui';
+import { Button, Card, Notice, Pin } from '@/components/ui';
 import { DiaryList } from '../shared/DiaryList';
 import { DiaryToolbar } from '../shared/DiaryToolbar';
 import { useDiary } from '../shared/DiaryProvider';
@@ -10,10 +10,10 @@ export function DiaryDesktop({ screen, title }: { screen: DiaryScreen; title: st
   const { openNew } = useDiary();
   return (
     <div className="dr dr-desktop d-only">
-      <div className="dr-bar">
+      <Pin className="dr-bar">
         <h2 className="dr-bar__title">{title}</h2>
         {screen.canReport && <Button onClick={openNew}>+ דיווח חדש</Button>}
-      </div>
+      </Pin>
       {!screen.canReport && screen.readOnlyNote && <Notice>{screen.readOnlyNote}</Notice>}
       <DiaryToolbar screen={screen} idp="dr-d" />
       <Card panel>

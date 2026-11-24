@@ -10,6 +10,14 @@ Every screen uses the shared pieces below. Don't build a local copy; extend the 
 - **Page body:** wrap in `Page` (one 16px gap on phone, 20px on desktop). `narrow` caps forms and lists at 820px. No inline `style` for spacing.
 - **Project sections:** `ProjectTabs` (phone) and `ProjectInnerNav` (desktop) under the header, on every project screen.
 
+## Pinned top (sticky rule)
+
+Wherever a page scrolls, the title, the project tabs and the screen's primary action row stay pinned to the top, phone and desktop, so nobody scrolls up to act.
+
+- **Header and tabs:** `PageHeader` is pinned by itself (`PinHead`). The project tabs go in as its `children` (see `ProjectFrame`), so title and tabs pin together. Never add a second sticky header.
+- **Action row:** wrap a screen's primary actions (add, upload, filter, print, search plus add) in `<Pin>` from `@/components/ui`. It sticks right under the pinned header (`--pin-h`, measured by `PinHead`) or under the phone shell header on top-level routes (`--pin-top`). Never write `position: sticky` in a screen's CSS; `tests/screens/shell/sticky-header.test.ts` enforces it.
+- Keep the pinned area compact: one row of buttons, no notices or long text inside `Pin`. A page-level save bar stays `FormActions`. Sheets and dialogs sit above the pinned area (native dialog). The phone bottom nav is unchanged.
+
 ## Components
 
 | Need | Use |
@@ -54,4 +62,4 @@ Every screen uses the shared pieces below. Don't build a local copy; extend the 
 
 ## UI checklist (before "done")
 
-Back and title via `PageHeader`; shared components only; `loading.tsx` present; 360-1280 in RTL with no horizontal scroll; confirm on destructive actions; forbidden state shows no data.
+Back and title via `PageHeader`; primary action row in `Pin`; shared components only; `loading.tsx` present; 360-1280 in RTL with no horizontal scroll; confirm on destructive actions; forbidden state shows no data.

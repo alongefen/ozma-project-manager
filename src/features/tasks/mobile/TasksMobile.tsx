@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Button, Notice } from '@/components/ui';
+import { Button, Notice, Pin } from '@/components/ui';
 import { TaskGroup } from '../shared/TaskGroup';
 import { useTasks } from '../shared/TasksProvider';
 
@@ -10,7 +10,7 @@ export function TasksMobile() {
   const [showDone, setShowDone] = useState(true);
   return (
     <div className="tk tk-mobile m-only">
-      {canWrite ? <Button block onClick={openCreate}>פתק חדש</Button> : <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}
+      {canWrite ? <Pin><Button block onClick={openCreate}>פתק חדש</Button></Pin> : <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}
       <TaskGroup headingId="tk-m-open" title="לביצוע" tasks={lists.open} empty="אין משימות לביצוע" />
       <button type="button" className="tk-toggle" aria-expanded={showDone} onClick={() => setShowDone(v => !v)}>
         {showDone ? 'הסתרת משימות שבוצעו' : `הצגת משימות שבוצעו (${lists.completed.length})`}

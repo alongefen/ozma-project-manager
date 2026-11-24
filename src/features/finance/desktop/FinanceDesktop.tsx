@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { FinanceBook, TransactionRow } from '@/types/contracts';
-import { Button, Card, Notice } from '@/components/ui';
+import { Button, Card, Notice, Pin } from '@/components/ui';
 import { EntryForm } from '../shared/EntryForm';
 import { ExcelLink } from '../shared/ExcelLink';
 import { DesktopFilterBar } from './DesktopFilterBar';
@@ -48,7 +48,7 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
           <SummaryDetails book={book} balanceLabel={period === 'all' ? 'שארית בסוף התקופה' : 'שארית חודש'} />
         </section>
 
-        <div className="fin-bar"><DesktopFilterBar today={today} onAdd={book.canWrite ? () => setDialog({ row: null }) : undefined} /></div>
+        <Pin className="fin-bar"><DesktopFilterBar today={today} onAdd={book.canWrite ? () => setDialog({ row: null }) : undefined} /></Pin>
 
         {!book.canWrite && <div className="fin-bar"><Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice></div>}
 

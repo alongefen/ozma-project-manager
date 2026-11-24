@@ -245,3 +245,14 @@ button, a { touch-action: manipulation; }
 @media (max-width: 1023.98px) { .d-only { display: none !important; } }
 @media (min-width: 1024px) { .m-only { display: none !important; } }
 .ui-card__title { font-size: 19px; font-weight: 800; margin-bottom: 12px; }
+
+/* ---------- Pinned top (STICKY-HEADER) ----------
+   PinHead (inside PageHeader) pins the title and project tabs; Pin pins a screen's action row under it.
+   --pin-top: what already sticks above (the phone shell header on top-level routes); --pin-h: the PinHead's height. */
+.app-main { --pin-top: 0px; }
+@media (max-width: 1023.98px) { .app-main:has(.m-header) { --pin-top: var(--header-h); } }
+.ui-pinhead { position: sticky; top: var(--pin-top); z-index: 15; background: var(--bg); min-width: 0; }
+.ui-pin {
+  position: sticky; top: calc(var(--pin-top) + var(--pin-h, 0px)); z-index: 12; background: var(--bg); padding-block: 8px; min-width: 0;
+}
+@media print { .ui-pinhead, .ui-pin { position: static; } }

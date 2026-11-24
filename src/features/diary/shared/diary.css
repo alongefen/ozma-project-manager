@@ -41,8 +41,7 @@
 }
 
 /* Sticky filter and print bar (top of the log). On the phone the general diary sits under the shell header. */
-.dr-toolbar { position: sticky; top: 0; z-index: 10; display: flex; gap: 8px; padding: 8px 0; background: var(--bg, var(--surface)); }
-.dr-toolbar--under { top: var(--header-h); }
+.dr-toolbar { display: flex; gap: 8px; }
 .dr-toolbar .ui-btn { flex: 1; min-height: 44px; }
 .dr-toolbar__count { margin-inline-start: 6px; min-width: 22px; padding: 0 6px; border-radius: 11px; background: var(--blue); color: var(--surface); font-size: 13px; }
 .dr-att { display: grid; gap: 8px; min-width: 0; }

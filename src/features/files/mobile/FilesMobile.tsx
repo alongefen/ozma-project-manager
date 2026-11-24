@@ -1,5 +1,5 @@
 'use client';
-import { Button, Notice } from '@/components/ui';
+import { Button, Notice, Pin } from '@/components/ui';
 import { DocList } from '../shared/DocList';
 import { DocTools } from '../shared/DocTools';
 import { useFiles } from '../shared/FilesProvider';
@@ -10,7 +10,7 @@ export function FilesMobile() {
   const { category, setCategory, counts, canUpload, openUpload } = useFiles();
   return (
     <div className="fl fl-mobile m-only">
-      {canUpload ? <Button block onClick={openUpload}>העלאת מסמך</Button> : <Notice>אין הרשאה להעלות מסמכים כאן. אפשר לפתוח ולהוריד.</Notice>}
+      {canUpload ? <Pin><Button block onClick={openUpload}>העלאת מסמך</Button></Pin> : <Notice>אין הרשאה להעלות מסמכים כאן. אפשר לפתוח ולהוריד.</Notice>}
       {category === null ? (
         <section className="fl-group" aria-labelledby="fl-m-cats">
           <h2 id="fl-m-cats" className="fl-group__title">קטגוריות</h2>
