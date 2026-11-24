@@ -17,3 +17,10 @@
 - No cloud call has been made: the real seed and the removal run only after Alon's direct "כן" in the task session (separate "כן" for the removal).
 - The seed was written against the function bodies in the migrations, not run against the cloud; the first real run is the first end-to-end proof (a failure stops early and the ledger can be removed).
 - Screens were not opened (no app code changed); the smoke check after the real seed is recorded below once done.
+
+## Finding during the real run
+- The `originals` storage bucket allows only PDF and images (`allowed_mime_types`), although `begin_upload`/`system_finish_upload` accept Office types since 20261124095924. Uploading an Excel/Word file would fail in the app too. Not fixed here (D31: a bucket change needs its own approval); the demo uses PDFs instead. Reported to the project manager.
+
+## Real seed run (24.11.2026, after Alon's direct "כן")
+- First attempt stopped at the first Excel upload (bucket restriction above); the retry skipped finished steps and completed. Orphan: one pending, never uploaded Excel row of the building project, listed in the ledger, so the removal handles it.
+- Verified read-only with SQL: 3 demo projects (1 completed), 5 demo logins, 3 owners untouched, 39 real projects and their 39 covers untouched, 22 reports (24 versions), 12 documents, 10 tasks, 34 transactions (3 cancelled), all 7 protection triggers enabled. Not done: opening the screens in a browser.
