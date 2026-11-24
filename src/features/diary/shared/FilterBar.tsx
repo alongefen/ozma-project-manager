@@ -16,11 +16,11 @@ export function FilterBar({ filter, projects, action, idp }: { filter: DiaryFilt
       )}
       <div className="ui-field">
         <label className="ui-field__label" htmlFor={`${idp}-from`}>מתאריך</label>
-        <input id={`${idp}-from`} name="from" type="date" dir="ltr" className="ui-field__input" defaultValue={filter.from ?? ''} />
+        <input id={`${idp}-from`} name="from" type="date" className="ui-field__input" defaultValue={filter.from ?? ''} />
       </div>
       <div className="ui-field">
         <label className="ui-field__label" htmlFor={`${idp}-to`}>עד תאריך</label>
-        <input id={`${idp}-to`} name="to" type="date" dir="ltr" className="ui-field__input" defaultValue={filter.to ?? ''} />
+        <input id={`${idp}-to`} name="to" type="date" className="ui-field__input" defaultValue={filter.to ?? ''} />
       </div>
       <div className="dr-filter__actions">
         <button type="submit" className="ui-btn ui-btn--secondary">סינון</button>
