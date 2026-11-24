@@ -10,7 +10,7 @@ export function DiaryMobile({ screen }: { screen: DiaryScreen }) {
     <div className="dr dr-mobile m-only">
       {!screen.canReport && screen.readOnlyNote && <Notice>{screen.readOnlyNote}</Notice>}
       <DiaryToolbar screen={screen} idp="dr-m" />
-      <DiaryList initial={screen.rows} nextCursor={screen.nextCursor} filter={screen.filter} showProject={!screen.fixedProjectId} />
+      <DiaryList filter={screen.filter} showProject={!screen.fixedProjectId} />
     </div>
   );
 }

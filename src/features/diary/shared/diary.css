@@ -56,3 +56,6 @@
 }
 
 @media (min-width: 1024px) { .dr-toolbar__lead { margin-inline-start: auto; } }
+
+/* Chrome keeps the date text on the left in RTL unless told otherwise. */
+.dr-date { text-align: right; }

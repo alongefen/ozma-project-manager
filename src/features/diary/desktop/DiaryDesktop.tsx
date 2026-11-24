@@ -16,7 +16,7 @@ export function DiaryDesktop({ screen, title }: { screen: DiaryScreen; title: st
       {!screen.canReport && screen.readOnlyNote && <Notice>{screen.readOnlyNote}</Notice>}
       <DiaryToolbar screen={screen} idp="dr-d" lead={screen.canReport ? <Button onClick={openNew}>+ דיווח חדש</Button> : undefined} />
       <Card panel>
-        <DiaryList initial={screen.rows} nextCursor={screen.nextCursor} filter={screen.filter} showProject={!screen.fixedProjectId} />
+        <DiaryList filter={screen.filter} showProject={!screen.fixedProjectId} />
       </Card>
     </div>
   );
