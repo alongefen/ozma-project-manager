@@ -33,6 +33,7 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, o
   const [errors, setErrors] = useState<DraftErrors>({});
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [initialRequestId] = useState(() => crypto.randomUUID());
   const requestId = useRef(initialRequestId);
   // The last create payload sent: a changed draft after a failure is a new request, never the old id with new data.
@@ -53,6 +54,7 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, o
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    if (uploading) return;
     const parsed = parseDraft({ projectId, workDate, body });
     if (!parsed.ok) { setErrors(parsed.errors); return; }
     setErrors({}); setError(null); setBusy(true);
@@ -129,13 +131,13 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, o
           </ul>
         )}
         {isUuidLike(projectId)
-          ? <FileUpload purpose="diary" projectId={projectId} camera label="בחירת תמונה או PDF" disabled={busy} onUploaded={added => { setUploaded(true); setFiles(list => [...list, ...added.filter(a => !list.some(x => x.id === a.id))]); }} />
+          ? <FileUpload purpose="diary" projectId={projectId} camera label="בחירת תמונה או PDF" disabled={busy} onBusyChange={setUploading} onUploaded={added => { setUploaded(true); setFiles(list => [...list, ...added.filter(a => !list.some(x => x.id === a.id))]); }} />
           : <p className="ui-field__hint">יש לבחור פרויקט לפני צירוף קבצים</p>}
         <span className="ui-field__hint">עד 25MB לקובץ. הקובץ נשמר כפי שנשלח.</span>
       </div>
       {history.length > 0 && <details className="dr-fold"><summary>היסטוריית גרסאות</summary><ul className="dr-versions">{history.map(t => <li key={t}>{t}</li>)}</ul></details>}
       {error && <Notice tone="error">{error}</Notice>}
-      <FormActions submitLabel={busy ? 'שומר…' : entry ? 'שמירת השינויים' : 'שמירת הדיווח'} busy={busy} placement="sheet" onCancel={onCancel} />
+      <FormActions submitLabel={busy ? 'שומר…' : uploading ? 'מעלה קבצים…' : entry ? 'שמירת השינויים' : 'שמירת הדיווח'} busy={busy || uploading} placement="sheet" onCancel={onCancel} />
     </form>
   );
 }
