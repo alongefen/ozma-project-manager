@@ -19,7 +19,7 @@ describe('העלאה אוטומטית', () => {
     expect(html).toMatch(/<button[^>]*disabled[^>]*>בחירת קבצים/);
     expect(html).not.toMatch(/>העלאה</);
   });
-  it('הרכיב מתחיל להעלות בבחירה ומאפשר ניסיון חוזר באותו מזהה', () => {
+  it('הרכיב מתחיל להעלות בבחירה ומאפשר ניסיון חוזר לקובץ שנכשל', () => {
     const src = readFileSync('src/components/upload/FileUpload.tsx', 'utf8');
     expect(src).toContain('void run(fresh)');
     expect(src).toContain('void run([item])');

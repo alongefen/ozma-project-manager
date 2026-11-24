@@ -3,7 +3,7 @@
 Alon, 23.11.2026: no separate upload button after choosing a file, anywhere.
 
 ## Changed
-- `src/components/upload/FileUpload.tsx`: upload starts on selection (multiple files in one begin call). Per-file progress, error with retry/remove. Retry reuses the item key as `clientId`, so no duplicate. New `onBusyChange`; `onUploaded` always calls the latest callback. Removed the "העלאה" button and the "ready" state.
+- `src/components/upload/FileUpload.tsx`: upload starts on selection (multiple files in one begin call). Per-file progress, error with retry/remove. A retry never attaches a duplicate (only completed files reach `onUploaded`); the server does not dedupe on `clientId`, so a failed attempt leaves one pending, never-completed row (as before). New `onBusyChange`; `onUploaded` always calls the latest callback. Removed the "העלאה" button and the "ready" state.
 - `EntryForm` (diary): submit and label blocked while uploading ("מעלה קבצים…").
 - `UploadForm` (documents): flow unchanged in order: category and access are chosen first (mandatory, no default, picker locked until valid); picking a file now uploads and saves it at once through the existing create-document call. Category, access and close are locked while a file is in flight.
 - `CoverControl`: no code change; one image uploads on selection and is bound to the project as before.
@@ -19,4 +19,6 @@ Alon, 23.11.2026: no separate upload button after choosing a file, anywhere.
 - Cloud tests: not run.
 
 ## Open
+- Failed attempts leave pending unused rows; cleanup is a server-side topic, no change here.
+- The sheet backdrop/X (shared Sheet, not owned) can still close a form mid-upload; the diary Cancel button and document "סגירה" are blocked.
 - Closing the diary sheet after files uploaded but before saving leaves them as unattached uploads (unchanged behavior, server-side pending cleanup).

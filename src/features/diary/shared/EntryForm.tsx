@@ -92,7 +92,7 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, o
       <div className="ui-field">
         <label className="ui-field__label" htmlFor={`${id}-project`}>פרויקט</label>
         {lockedProject ? <p className="dr-fixed">{projectName}</p> : (
-          <select id={`${id}-project`} className="ui-field__input" value={projectId} disabled={uploaded} aria-invalid={errors.projectId ? true : undefined} onChange={e => setProjectId(e.target.value)}>
+          <select id={`${id}-project`} className="ui-field__input" value={projectId} disabled={uploaded || uploading} aria-invalid={errors.projectId ? true : undefined} onChange={e => setProjectId(e.target.value)}>
             <option value="">בחירת פרויקט</option>
             {entry && !projects.some(p => p.id === entry.projectId) && <option value={entry.projectId}>{entry.projectName}</option>}
             {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -137,7 +137,7 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, o
       </div>
       {history.length > 0 && <details className="dr-fold"><summary>היסטוריית גרסאות</summary><ul className="dr-versions">{history.map(t => <li key={t}>{t}</li>)}</ul></details>}
       {error && <Notice tone="error">{error}</Notice>}
-      <FormActions submitLabel={busy ? 'שומר…' : uploading ? 'מעלה קבצים…' : entry ? 'שמירת השינויים' : 'שמירת הדיווח'} busy={busy || uploading} placement="sheet" onCancel={onCancel} />
+      <FormActions submitLabel={busy ? 'שומר…' : uploading ? 'מעלה קבצים…' : entry ? 'שמירת השינויים' : 'שמירת הדיווח'} busy={busy || uploading} placement="sheet" onCancel={() => { if (!uploading) onCancel(); }} />
     </form>
   );
 }

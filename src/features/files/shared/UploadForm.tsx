@@ -25,7 +25,7 @@ export function UploadForm({ projectId, initialCategory, candidates, pending, bu
   const ready = category !== null && parsed.ok;
   return (
     <div className="fl-form">
-      <fieldset className="fl-access" disabled={busy || pending.length > 0}>
+      <fieldset className="fl-access" disabled={busy || uploading || pending.length > 0}>
         <legend className="ui-field__label">קטגוריה</legend>
         <div className="fl-cats">
           {CATEGORIES.map(c => (

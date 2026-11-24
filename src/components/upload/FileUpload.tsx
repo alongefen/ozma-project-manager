@@ -86,7 +86,7 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
     if (fresh.length > 0) void run(fresh);
   }
 
-  /** Uploads the given items. A retry reuses the item's key as the client id, so the server never creates a duplicate. */
+  /** Uploads the given items. The client id only matches results to items; a retry after a failure leaves the earlier pending server row unused (never attached, never completed). */
   async function run(queue: Item[]) {
     queue.forEach(i => patch(i.key, { status: 'uploading', progress: 0, error: undefined }));
     const begun = await post<UploadTarget[]>('/api/storage/uploads', {
