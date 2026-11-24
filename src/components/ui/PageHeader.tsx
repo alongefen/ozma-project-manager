@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { HeaderLogo } from './PageHeaderLogo';
 import { PinHead } from './PinHead';
 
 /**
@@ -21,6 +22,7 @@ export function PageHeader({ title, backHref, backLabel, badge, actions, sub, ch
         <h1 className="ui-ph__title">{title}</h1>
         {badge}
         {actions && <div className="ui-ph__actions">{actions}</div>}
+        <HeaderLogo className="ui-ph__logo" />
       </div>
       {sub && <p className="ui-sub ui-ph__sub">{sub}</p>}
     </div>

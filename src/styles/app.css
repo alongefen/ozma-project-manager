@@ -172,7 +172,12 @@ button, a { touch-action: manipulation; }
   position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 12px;
   min-height: var(--header-h); padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--line);
 }
-.m-header h1 { font-size: 20px; font-weight: 800; }
+.m-header h1 { font-size: 20px; font-weight: 800; min-width: 0; overflow-wrap: anywhere; }
+.m-header__end { display: flex; align-items: center; gap: 8px; flex: none; }
+/* Company logo (HEADER-LOGO): phone only (`m-only`), physical left, ratio kept, never shrinks so a long title wraps instead. */
+.ui-hlogo { display: block; flex: none; height: 30px; width: auto; max-width: none; object-fit: contain; }
+.ui-ph__logo { margin-inline-start: auto; }
+.ui-ph__actions ~ .ui-ph__logo { margin-inline-start: 0; }
 .m-header__account { display: grid; place-items: center; min-width: 44px; min-height: 44px; text-decoration: none; }
 .m-nav {
   position: fixed; inset-inline: 0; bottom: 0; z-index: 30; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
