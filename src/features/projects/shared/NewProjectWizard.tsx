@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, ConfirmDialog, DateField, Notice, Sheet, TextField } from '@/components/ui';
+import { Button, ConfirmDialog, DateField, Notice, SelectField, Sheet, TextField } from '@/components/ui';
 import { listUsers, removeMembership, setFinanceAccess, setMembership } from '@/features/users/logic/actions';
 import { createProject } from '../logic/actions';
 import { CoverControl } from './CoverControl';
@@ -11,7 +11,7 @@ import { LAST_FORM_STEP, STEPS, firstStepWithError, roleAction, stepFields, vali
 import css from './NewProjectWizard.module.css';
 
 type Person = { id: string; fullName: string; role: RoleChoice; finance: boolean; revision: number | null };
-const ROLES: { value: RoleChoice; label: string }[] = [{ value: 'none', label: 'ללא' }, { value: 'worker', label: 'עובד' }, { value: 'manager', label: 'מנהל' }];
+const ROLES: { value: RoleChoice; label: string }[] = [{ value: 'worker', label: 'עובד' }, { value: 'manager', label: 'מנהל' }];
 
 /**
  * "New project" as a window with five steps that slide sideways (Alon, 23.11): project details, contact,
@@ -31,6 +31,7 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
   const [people, setPeople] = useState<Person[] | null>(null);
   const [peopleError, setPeopleError] = useState<string | null>(null);
   const [leaving, setLeaving] = useState(false);
+  const [removing, setRemoving] = useState<Person | null>(null);
   const [requestId] = useState(() => crypto.randomUUID());
   const dirty = useRef(false);
   const formId = useId();
@@ -132,6 +133,9 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
     patchPerson(person.id, { revision: result.value.revision });
   }
 
+  const available = (people ?? []).filter(p => p.role === 'none');
+  const added = (people ?? []).filter(p => p.role !== 'none');
+
   const field = (key: FieldKey, extra: { ltr?: boolean; type?: string; hint?: string } = {}) => (
     <TextField label={FIELD_LABELS[key]} value={values[key]} onChange={set(key)} error={errors[key]} ltr={extra.ltr} type={extra.type} hint={extra.hint}
       autoComplete="off" inputMode={extra.type === 'tel' ? 'tel' : undefined} data-wizard-field={key} />
@@ -185,27 +189,37 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
                 <p className={css.hint}>בלחיצה על ״יצירת פרויקט״ הפרויקט נשמר. ההרשאות והתמונה בשלבים הבאים.</p>
               </div>
               <div className={css.step} inert={step !== 3} aria-hidden={step !== 3}>
-                <p className={css.hint}>הפרויקט נוצר. בחרו מי מקבל גישה אליו. אפשר לשנות גם אחר כך בעמוד ההרשאות.</p>
+                <p className={css.hint}>הפרויקט נוצר. הוסיפו עובדים לפרויקט, ואז בחרו לכל אחד תפקיד והרשאות. אפשר לשנות גם אחר כך בעמוד ההרשאות.</p>
                 {peopleError && <Notice tone="error">{peopleError}</Notice>}
                 {!people && !peopleError && <p className={css.hint}>טוען…</p>}
                 {people && people.length === 0 && <p className={css.hint}>אין עוד משתמשים פעילים לשיוך.</p>}
                 {people && people.length > 0 && (
-                  <ul className={css.people}>
-                    {people.map(p => (
-                      <li key={p.id} className={css.person}>
-                        <strong className={css.pname}>{p.fullName}</strong>
-                        <div className={css.seg} role="radiogroup" aria-label={`גישה של ${p.fullName}`}>
-                          {ROLES.map(r => (
-                            <button key={r.value} type="button" role="radio" aria-checked={p.role === r.value} className={css.segBtn} onClick={() => chooseRole(p, r.value)}>{r.label}</button>
+                  <>
+                    <SelectField label="הוספת עובד" placeholder={available.length ? 'בחירת עובד' : 'כל העובדים כבר נוספו'} value="" disabled={available.length === 0 || busy}
+                      options={available.map(p => ({ value: p.id, label: p.fullName }))}
+                      onChange={id => { const person = people.find(p => p.id === id); if (person) chooseRole(person, 'worker'); }} />
+                    {added.length === 0
+                      ? <p className={css.hint}>עוד לא נוספו עובדים. אפשר לדלג.</p>
+                      : (
+                        <ul className={css.people}>
+                          {added.map(p => (
+                            <li key={p.id} className={css.person}>
+                              <strong className={css.pname}>{p.fullName}</strong>
+                              <div className={css.seg} role="radiogroup" aria-label={`תפקיד של ${p.fullName}`}>
+                                {ROLES.map(r => (
+                                  <button key={r.value} type="button" role="radio" aria-checked={p.role === r.value} className={css.segBtn} onClick={() => chooseRole(p, r.value)}>{r.label}</button>
+                                ))}
+                              </div>
+                              <label className={`${css.fin}${p.role !== 'manager' ? ` ${css.finOff}` : ''}`} title={p.role !== 'manager' ? 'גישה לכספים זמינה למנהל בלבד' : undefined}>
+                                <input type="checkbox" checked={p.finance} disabled={p.role !== 'manager'} onChange={e => chooseFinance(p, e.target.checked)} />
+                                <span>גישה לכספים</span>
+                              </label>
+                              <button type="button" className={css.removeBtn} onClick={() => setRemoving(p)} aria-label={`הסרת ${p.fullName} מהפרויקט`}>הסרה</button>
+                            </li>
                           ))}
-                        </div>
-                        <label className={`${css.fin}${p.role !== 'manager' ? ` ${css.finOff}` : ''}`} title={p.role !== 'manager' ? 'גישה לכספים זמינה למנהל בלבד' : undefined}>
-                          <input type="checkbox" checked={p.finance} disabled={p.role !== 'manager'} onChange={e => chooseFinance(p, e.target.checked)} />
-                          <span>גישה לכספים</span>
-                        </label>
-                      </li>
-                    ))}
-                  </ul>
+                        </ul>
+                      )}
+                  </>
                 )}
               </div>
               <div className={css.step} inert={step !== 4} aria-hidden={step !== 4}>
@@ -217,10 +231,13 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
           <p className={css.status} role="status" aria-live="polite">{message && <span className={css.statusText}>{message}</span>}</p>
           <div className="ui-actions ui-actions--sheet">
             <Button disabled={busy} onClick={next}>{primaryLabel}</Button>
-            {canBack && <Button variant="secondary" disabled={busy} onClick={back}>הקודם</Button>}
+            {canBack && <span className={css.backSlot}><Button variant="secondary" disabled={busy} onClick={back}>הקודם</Button></span>}
           </div>
         </div>
       </Sheet>
+      <ConfirmDialog open={removing !== null} title="להסיר מהפרויקט?" confirmLabel="הסרה" danger onConfirm={() => { const p = removing; setRemoving(null); if (p) chooseRole(p, 'none'); }} onCancel={() => setRemoving(null)}>
+        <p>{removing?.fullName} יאבד את הגישה לפרויקט. שום דבר לא נמחק, ואפשר להוסיף אותו שוב.</p>
+      </ConfirmDialog>
       <ConfirmDialog open={leaving} title="לצאת בלי לשמור?" confirmLabel="יציאה בלי לשמור" danger onConfirm={leave} onCancel={() => setLeaving(false)}>
         <p>הפרטים שהוזנו עדיין לא נשמרו, והם יימחקו מהחלון. הפרויקט לא ייווצר.</p>
       </ConfirmDialog>
