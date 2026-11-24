@@ -3,6 +3,7 @@ import { Card, Notice } from '@/components/ui';
 import type { ProjectDetails } from '@/types/contracts';
 import { EditProjectSheet } from '../shared/EditProjectSheet';
 import { ProjectActions } from '../shared/ProjectActions';
+import { ProjectHardDelete } from '../shared/ProjectHardDelete';
 import { valuesFromDetails } from '../shared/form-model';
 import { actionsFor, coverSrc, dateText, isReadOnlyProject, managersText, orNotEntered, READ_ONLY_NOTICE, telHref } from '../shared/view-model';
 import css from './ProjectDetailsDesktop.module.css';
@@ -46,6 +47,7 @@ export function ProjectDetailsDesktop({ d, isOwner }: { d: ProjectDetails; isOwn
               <h2 className={css.dangerTitle}>ניהול מצב הפרויקט</h2>
               <p className={css.dangerText}>פעולות משמעותיות: סיום והעברה לארכיון. שום דבר לא נמחק, ואפשר להחזיר.</p>
               <ProjectActions id={d.id} revision={d.revision} status={d.status} archived={d.archived} />
+              <ProjectHardDelete id={d.id} isOwner={isOwner} archived={d.archived} completed={d.status === 'completed'} />
             </Card>
           )}
         </div>
