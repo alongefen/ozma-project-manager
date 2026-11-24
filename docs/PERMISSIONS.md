@@ -22,7 +22,7 @@
 | פונקציה | אמת כאשר |
 |---|---|
 | `active()` | יש פרופיל פעיל, ה-`session_id` קיים ב-`auth.sessions`, ונוצר לא לפני `sessions_valid_after` |
-| `owner()` | `active()` והפרופיל הוא הבעלים |
+| `owner()` | `active()` והפרופיל הוא בעלים. יכולים להיות כמה בעלים (בממשק: "אדמין"); בעלים משנה גישה של בעלים אחר, והבעלים האחרון אינו ניתן להורדה או להשבתה |
 | `role_in(p)` | התפקיד בשיוך ל-`p`, רק אם `active()` |
 | `member(p)` | `owner()`, או שיש `role_in(p)` |
 | `manager(p)` | `owner()`, או `role_in(p) = manager` |
@@ -80,7 +80,8 @@ P1.2 בונה את כולן, עם הגוף ועם בדיקה חיובית ושל
 |---|---|---|---|
 | `create_profile` | createUser | `owner()`. המשתמש כבר ב-Auth, האימייל נקרא משם | `user.created` |
 | `update_profile` | updateUser | `owner()`. האימייל מסונכרן מ-Auth | `user.updated` |
-| `set_user_active` | setUserActive | `owner()`, לא על הבעלים. מעדכן `sessions_valid_after` | `user.active_changed` |
+| `set_user_active` | setUserActive | `owner()`. בעלים רשאי להשבית בעלים אחר, אבל לא את עצמו ולא את האחרון; השבתת בעלים מורידה גם את רמת הבעלים. מעדכן `sessions_valid_after` | `user.active_changed` |
+| `set_owner_level` | setOwnerLevel | `owner()`. קידום או הורדה של בעלים (מוצג כ"אדמין"). לא על עצמו, לא על משתמש לא פעיל, ולא הבעלים האחרון | `owner.created` / `owner.demoted` |
 | `revoke_user_sessions` | resetPassword | `owner()`. מעדכן `sessions_valid_after` | `user.password_reset` |
 | `set_membership` | setMembership | `owner()`. משתמש פעיל שאינו הבעלים. לעובד מכבה כספים | `membership.changed` |
 | `remove_membership` | removeMembership | `owner()` | `membership.removed` |
@@ -130,7 +131,8 @@ P1.2 בונה את כולן, עם הגוף ועם בדיקה חיובית ושל
 |---|---|---|
 | `system_finish_upload` | המבצע פעיל והוא המעלה. ‏pending בלבד, פעם אחת | אין |
 | `system_bootstrap_owner` | אין בעלים | `owner.created` |
-| `system_owner_recovered` | נוהל שחזור, עם מזהה תמיכה | `owner.password_recovered` |
+| `system_add_owner` | קיים בעלים פעיל. שירות בלבד, אידמפוטנטי | `owner.created` |
+| `system_owner_recovered` | נוהל שחזור, עם מזהה תמיכה; `userId` של הבעלים (אפשר להשמיט רק כשיש בעלים אחד) | `owner.password_recovered` |
 
 הפונקציה `private.reject_auth_email` נמסרה ב-P1.2 עם EXECUTE ל-`supabase_auth_admin` בלבד ומחזירה שגיאה. לפי דיווח P1.3 היא לא חוברה ל-Auth. לפי A-34 אין לחבר או לבדוק hook לחסימת מיילים ואין צורך במיגרציית ניקיון; אין דרישת אפס מיילים.
 
