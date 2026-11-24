@@ -4,7 +4,7 @@ import { Button, Notice } from '@/components/ui';
 import { planReport } from '@/features/reports/logic/actions';
 import { reportUrl, isDate, isUuid, type ProjectOption } from './model';
 
-/** Pick a project (unless fixed) and a date, then open the PDF. A long day is split into parts by the server. */
+/** Pick a project (unless fixed) and a date, then print it (opens the PDF) or export it (downloads the PDF). A long day is split into parts by the server. */
 export function PrintByDate({ projects, fixedProjectId, today }: { projects: ProjectOption[]; fixedProjectId?: string; today: string }) {
   const idp = useId();
   const [projectId, setProjectId] = useState(fixedProjectId ?? '');
@@ -42,14 +42,14 @@ export function PrintByDate({ projects, fixedProjectId, today }: { projects: Pro
         <label className="ui-field__label" htmlFor={`${idp}-date`}>תאריך</label>
         <input id={`${idp}-date`} type="date" className="ui-field__input dr-date" value={date} onChange={e => { setDate(e.target.value); reset(); }} />
       </div>
-      <Button variant="secondary" block disabled={busy} onClick={prepare}>{busy ? 'מכין…' : 'הכנת הדפסה / PDF'}</Button>
+      <Button variant="secondary" block disabled={busy} onClick={prepare}>{busy ? 'מכין…' : 'הכנה'}</Button>
       {message && <Notice>{message}</Notice>}
       {parts > 0 && (
         <ul className="dr-parts">
           {Array.from({ length: parts }, (_, i) => i + 1).map(part => (
             <li key={part}>
-              <a className="ui-btn ui-btn--small" href={reportUrl({ kind: 'day', projectId, date }, { part })} target="_blank" rel="noopener noreferrer">{parts > 1 ? `פתיחת חלק ${part} מתוך ${parts}` : 'פתיחה להדפסה'}</a>
-              <a className="ui-btn ui-btn--secondary ui-btn--small" href={reportUrl({ kind: 'day', projectId, date }, { part, download: true })}>הורדה</a>
+              <a className="ui-btn ui-btn--small" href={reportUrl({ kind: 'day', projectId, date }, { part })} target="_blank" rel="noopener noreferrer">{parts > 1 ? `הדפסה: חלק ${part} מתוך ${parts}` : 'הדפסה'}</a>
+              <a className="ui-btn ui-btn--secondary ui-btn--small" href={reportUrl({ kind: 'day', projectId, date }, { part, download: true })}>{parts > 1 ? `ייצוא PDF: חלק ${part}` : 'ייצוא PDF'}</a>
             </li>
           ))}
         </ul>

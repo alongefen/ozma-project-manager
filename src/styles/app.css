@@ -255,4 +255,8 @@ button, a { touch-action: manipulation; }
 .ui-pin {
   position: sticky; top: calc(var(--pin-top) + var(--pin-h, 0px)); z-index: 12; background: var(--bg); padding-block: 8px; min-width: 0;
 }
-@media print { .ui-pinhead, .ui-pin { position: static; } }
+/* Print: only the screen's data. Shell, header, project tabs and every pinned bar are hidden (UI_CONVENTIONS, Print and export). */
+@media print {
+  .ui-pinhead, .ui-pin, .no-print, .m-header, .m-nav, .d-aside, .d-header { display: none !important; }
+  .app-main { margin: 0 !important; padding: 0 !important; }
+}

@@ -115,6 +115,7 @@
 }
 /* Print: only the print view (summary and the full list of transactions), never the screen layout. */
 .fin-print { display: none; }
+@page { size: A4; margin: 12mm; }
 @media print {
   .no-print, .m-header, .m-nav, .d-aside, .d-header, .fin-progress, .fin-mobile, .fin-desktop { display: none !important; }
   .fin-print { display: block; color: #000; font-size: 12px; }
@@ -126,6 +127,7 @@
   .fin-print .fin-details-list { grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 8px; }
   .fin-print .fin-details-list > div { flex-direction: column; border-top: 0; padding: 0; }
   .fin-print .fin-table th, .fin-print .fin-table td { padding: 5px 8px; font-size: 12px; }
+  .fin-print .fin-table { width: 100%; }
   .fin-print .fin-table tr { break-inside: avoid; }
   .fin-print__month th { background: #eef2f4; font-size: 13px; }
   .app-main { margin: 0 !important; }

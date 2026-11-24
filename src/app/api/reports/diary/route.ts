@@ -46,5 +46,8 @@ export async function GET(request: Request) {
       'Cache-Control': 'private, no-store',
       'X-Content-Type-Options': 'nosniff',
     } });
-  } catch { return respond(failure('UNAVAILABLE')); }
+  } catch (error) {
+    console.error('[reports] route failed:', error instanceof Error ? `${error.name}: ${error.message.slice(0, 200)}` : 'unknown');
+    return respond(failure('UNAVAILABLE'));
+  }
 }
