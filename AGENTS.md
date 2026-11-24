@@ -40,7 +40,7 @@ A project management system for the construction company "חי עוצמה בבנ
 - **Work diary (A-08, A-12, A-16, A-19, A-20):**
   - Only Ben changes a report's date or project.
   - Each person edits only their own reports; Ben can edit all of them.
-  - Every version is kept, and nothing is physically deleted.
+  - Every version is kept; nothing is deleted physically except by an owner-level account through the two-step permanent delete (A-44).
   - A PDF for a given date is required. It shows the reporter, creation, edits and attached PDFs.
   - The entry time is server time.
   - No legal requirements. Hebrew PDF generation is proven, so there is no spike.
