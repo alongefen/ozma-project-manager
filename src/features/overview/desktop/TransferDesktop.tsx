@@ -6,11 +6,11 @@ import css from '../shared/Overview.module.css';
 import d from './Desktop.module.css';
 
 /** Desktop transfer overview: one table, months newest first, each month's amount then its projects. */
-export function TransferDesktop({ months }: { months: TransferMonth[] }) {
+export function TransferDesktop({ months, embedded = false }: { months: TransferMonth[]; embedded?: boolean }) {
   const views = transferViews(months);
   return (
-    <div className={`${d.page} d-only`}>
-      <DesktopTitle title="כספים" />
+    <div className={`${d.page} d-only${embedded ? ' fin no-print' : ''}`}>
+      {embedded ? <h2>העברות מס לפי חודש</h2> : <DesktopTitle title="כספים" />}
       {views.length === 0 ? <Card panel><p className={css.empty}>{NO_TRANSFERS}</p></Card> : (
         <Card panel className={d.tableCard}>
           <table className={d.table}>

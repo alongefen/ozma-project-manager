@@ -5,10 +5,11 @@ import css from '../shared/Overview.module.css';
 import m from './Mobile.module.css';
 
 /** Phone transfer screen: one card per month with the amount to transfer; the breakdown per project opens under it. */
-export function TransferMobile({ months }: { months: TransferMonth[] }) {
+export function TransferMobile({ months, embedded = false }: { months: TransferMonth[]; embedded?: boolean }) {
   const views = transferViews(months);
   return (
-    <div className={`${m.page} m-only`}>
+    <div className={`${m.page} m-only${embedded ? ' fin no-print' : ''}`}>
+      {embedded && <h2>העברות מס לפי חודש</h2>}
       {views.length === 0 && <Card><p className={css.empty}>{NO_TRANSFERS}</p></Card>}
       {views.map((v, i) => (
         <Card key={v.key} className={m.month}>

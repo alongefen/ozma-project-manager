@@ -188,3 +188,8 @@
 
 /* The pinned filter bar keeps its own look (Pin sets the page background). */
 .ui-pin.fin-bar { background: #fafbfc; padding: 12px 28px; }
+
+/* All-projects page: project filter, project column and label (capped like the other filter fields) */
+.fin-fbar__project { flex: 0 1 240px; min-width: 180px; }
+.fin-project { min-width: 110px; overflow-wrap: anywhere; font-weight: 600; }
+.fin-item__project { color: var(--nav-active-ink); font-size: 13px; font-weight: 700; }

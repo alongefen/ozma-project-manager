@@ -9,7 +9,7 @@ import { currentMonth, yearOptions } from '../shared/query';
 
 /** Desktop filter bar: live search always visible, a popover under the button for period and day, chips for what is active. */
 export function DesktopFilterBar({ today, onAdd }: { today: string; onAdd?: () => void }) {
-  const { filter, go } = useFinanceNav();
+  const { filter, go, all, goProject } = useFinanceNav();
   const uid = useId();
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
@@ -37,6 +37,13 @@ export function DesktopFilterBar({ today, onAdd }: { today: string; onAdd?: () =
         <label htmlFor={`${uid}-s`}>חיפוש ספק / פרטים</label>
         <input id={`${uid}-s`} type="search" value={filter.search ?? ''} onChange={e => go({ ...filter, search: e.target.value || undefined })} placeholder="הקלידו לחיפוש" />
       </div>
+      {all && (
+        <div className="fin-field fin-fbar__project">
+          <label htmlFor={`${uid}-p`}>פרויקט</label>
+          <SelectField id={`${uid}-p`} value={all.project ?? ''} onChange={v => goProject(v || null)}
+            options={[{ value: '', label: 'כל הפרויקטים' }, ...all.projects.map(p => ({ value: p.id, label: p.name }))]} />
+        </div>
+      )}
       <div className="fin-pop" ref={wrap}>
         <Button variant="secondary" aria-expanded={open} aria-haspopup="dialog" onClick={() => setOpen(v => !v)}>
           <FilterIcon /> סינון{activeCount > 0 && <span className="fin-count">{activeCount}</span>}
