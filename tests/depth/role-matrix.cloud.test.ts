@@ -28,11 +28,16 @@ const ownerOnly: Record<string, () => Json> = {
   set_document_access: () => ({ id: ID(), expectedRevision: 1, access: { mode: 'all' } }),
   set_document_archived: () => ({ id: ID(), expectedRevision: 1, archived: true }),
   finance_all_month_totals: () => ({}),
+  hard_delete_preview: () => ({ kind: 'project', id: ID() }),
+  hard_delete_project: () => ({ id: ID(), confirmName: 'x' }),
+  hard_delete_document: () => ({ id: ID(), confirmName: 'x' }),
+  hard_delete_entry: () => ({ id: ID(), confirmName: 'x' }),
+  hard_delete_transaction: () => ({ id: ID() }),
 };
 // Callable by authorised project members; the project gate hides foreign projects (NOT_FOUND) or refuses by role.
 const projectScoped = ['update_project', 'create_task', 'update_task', 'set_task_completed', 'delete_task', 'begin_upload', 'create_document', 'create_entry', 'correct_entry', 'move_entry', 'cancel_entry', 'create_transaction', 'update_transaction', 'cancel_transaction', 'set_finance_link', 'project_permissions', 'project_access_candidates', 'project_manager_names', 'get_pending_upload', 'authorize_file', 'diary_summary', 'finance_month_totals'];
 const sessionScoped = ['get_actor', 'project_cards'];
-const serviceOnly = ['system_add_owner', 'system_bootstrap_owner', 'system_owner_recovered', 'system_finish_upload'];
+const serviceOnly = ['system_add_owner', 'system_bootstrap_owner', 'system_owner_recovered', 'system_finish_upload', 'system_storage_pending', 'system_storage_done'];
 const all = [...Object.keys(ownerOnly), ...projectScoped, ...sessionScoped, ...serviceOnly];
 
 let admin: Client, anonymous: Client, people: Record<Exclude<Role, 'anonymous'>, TestActor>, a: { id: string; revision: number };

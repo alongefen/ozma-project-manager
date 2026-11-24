@@ -5,6 +5,7 @@ import type { DocumentRow } from '@/types/contracts';
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: () => {} }) }));
 vi.mock('@/features/files/logic/actions', () => ({ createDocument: vi.fn(), setDocumentAccess: vi.fn(), setDocumentArchived: vi.fn() }));
+vi.mock('@/features/projects/logic/actions', () => ({ hardDelete: vi.fn(), previewHardDelete: vi.fn() }));
 
 import { FilesProvider } from '@/features/files/shared/FilesProvider';
 import { FilesMobile } from '@/features/files/mobile/FilesMobile';

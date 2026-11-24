@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import type { AccessCandidate, DocumentAccess, DocumentCategory, DocumentRow, FileRef, Result } from '@/types/contracts';
 import { ConfirmDialog, Notice, Sheet } from '@/components/ui';
 import { createDocument, setDocumentAccess, setDocumentArchived } from '../logic/actions';
+import { HardDeleteDialog } from '@/features/projects/shared/HardDelete';
 import { AccessForm } from './AccessForm';
 import { UploadForm } from './UploadForm';
 import { countsOf, visibleDocuments } from './model';
@@ -17,7 +18,7 @@ type Ctx = {
   counts: Record<DocumentCategory, number>; shown: DocumentRow[]; archivedCount: number;
   category: DocumentCategory | null; search: string;
   setCategory: (c: DocumentCategory | null) => void; setSearch: (s: string) => void; setShowArchived: (v: boolean) => void;
-  openUpload: () => void; openAccess: (d: DocumentRow) => void; askArchive: (d: DocumentRow) => void;
+  openUpload: () => void; openAccess: (d: DocumentRow) => void; askArchive: (d: DocumentRow) => void; askDelete: (d: DocumentRow) => void;
 };
 const FilesContext = createContext<Ctx | null>(null);
 export const useFiles = () => { const c = useContext(FilesContext); if (!c) throw new Error('FilesProvider missing'); return c; };
@@ -45,6 +46,7 @@ export function FilesProvider({ projectId, active, archived, candidates, canUplo
   const [accessBusy, setAccessBusy] = useState(false);
   const [accessError, setAccessError] = useState<string | null>(null);
   const [archiveDoc, setArchiveDoc] = useState<DocumentRow | null>(null);
+  const [deleteDoc, setDeleteDoc] = useState<DocumentRow | null>(null);
   const [archiveBusy, setArchiveBusy] = useState(false);
   const [archiveError, setArchiveError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -63,6 +65,7 @@ export function FilesProvider({ projectId, active, archived, candidates, canUplo
     openUpload: () => { setUploadError(null); setUpload({ category: pending?.category ?? category }); },
     openAccess: d => { setAccessError(null); setAccessDoc(d); },
     askArchive: d => { setArchiveError(null); setArchiveDoc(d); },
+    askDelete: d => setDeleteDoc(d),
   };
 
   // Saves every uploaded file; the ones the server refused stay in `pending` for a retry (an uploaded file can be used once).
@@ -132,6 +135,7 @@ export function FilesProvider({ projectId, active, archived, candidates, canUplo
         onConfirm={() => { void confirmArchive(); }} onCancel={() => setArchiveDoc(null)}>
         <p>{archiveDoc?.archived ? 'המסמך יחזור לרשימה, עם ההרשאות שהיו לו.' : 'המסמך יוסתר מהרשימה. שום דבר לא נמחק, ואפשר להחזיר אותו מהארכיון.'}</p>
       </ConfirmDialog>
+      {deleteDoc && <HardDeleteDialog kind="document" id={deleteDoc.id} open onClose={() => setDeleteDoc(null)} onDone={note => { setDeleteDoc(null); if (note) setToast(note); refresh(); }} />}
     </FilesContext.Provider>
   );
 }

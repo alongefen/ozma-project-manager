@@ -912,6 +912,11 @@ export type Database = {
       project_cards: { Args: { input: Json }; Returns: Json }
       project_manager_names: { Args: { input: Json }; Returns: Json }
       project_permissions: { Args: { input: Json }; Returns: Json }
+      hard_delete_document: { Args: { input: Json }; Returns: Json }
+      hard_delete_entry: { Args: { input: Json }; Returns: Json }
+      hard_delete_preview: { Args: { input: Json }; Returns: Json }
+      hard_delete_project: { Args: { input: Json }; Returns: Json }
+      hard_delete_transaction: { Args: { input: Json }; Returns: Json }
       remove_membership: { Args: { input: Json }; Returns: Json }
       revoke_user_sessions: { Args: { input: Json }; Returns: Json }
       set_document_access: { Args: { input: Json }; Returns: Json }
@@ -928,6 +933,8 @@ export type Database = {
       system_add_owner: { Args: { input: Json }; Returns: Json }
       system_bootstrap_owner: { Args: { input: Json }; Returns: Json }
       system_finish_upload: { Args: { input: Json }; Returns: Json }
+      system_storage_done: { Args: { input: Json }; Returns: Json }
+      system_storage_pending: { Args: { input: Json }; Returns: Json }
       system_owner_recovered: { Args: { input: Json }; Returns: Json }
       update_profile: { Args: { input: Json }; Returns: Json }
       update_project: { Args: { input: Json }; Returns: Json }
