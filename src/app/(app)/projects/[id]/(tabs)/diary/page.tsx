@@ -21,7 +21,7 @@ export default async function ProjectDiaryPage({ params, searchParams }: { param
   if (data.kind === 'hidden') notFound();
   if (data.kind === 'error') return <StateMessage tone="error" backHref={`/projects/${id}`} backLabel="חזרה לתיק הפרויקט">היומן אינו זמין כרגע. נסו שוב בעוד רגע.</StateMessage>;
   return (
-    <DiaryProvider screen={data.screen}>
+    <DiaryProvider screen={data.screen} startOpen={query.new === '1'} closeHref={query.new === '1' ? `/projects/${id}/diary` : undefined}>
       <DiaryMobile screen={data.screen} />
       <DiaryDesktop screen={data.screen} title="יומן" />
     </DiaryProvider>

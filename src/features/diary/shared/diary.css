@@ -58,4 +58,5 @@
 @media (min-width: 1024px) { .dr-toolbar__lead { margin-inline-start: auto; } }
 
 /* Chrome keeps the date text on the left in RTL unless told otherwise. */
-.dr-date { text-align: right; }
+.ui-field .dr-date { direction: rtl; text-align: right; }
+.ui-field .dr-date::-webkit-datetime-edit { display: block; width: 100%; text-align: right; padding-inline: 0; }
