@@ -1,14 +1,17 @@
 'use client';
 import { useState } from 'react';
 import { Badge, Button, ConfirmDialog, DeleteIcon, IconButton, Notice, TextField } from '@/components/ui';
-import { removeMembership, resetPassword, setFinanceAccess, setMembership, setUserActive } from '@/features/users/logic/actions';
+import { removeMembership, resetPassword, setFinanceAccess, setMembership, setOwnerLevel, setUserActive } from '@/features/users/logic/actions';
 import { Select } from '@/features/projects/shared/Select';
 import type { ProjectCard, ProjectRole, Result, UserAssignment, UserRow } from '@/types/contracts';
-import { ROLE_LABEL, addableProjects, errorText, statusLabel, validatePassword } from './view-model';
+import { ADMIN_LABEL, ROLE_LABEL, addableProjects, adminControls, errorText, ownerErrorText, statusLabel, validatePassword } from './view-model';
 import css from './PersonPanel.module.css';
 
 type Props = {
   user: UserRow;
+  /** Everyone in the list, to know whether this is the last active admin. */
+  users: UserRow[];
+  viewerId: string;
   projects: ProjectCard[];
   patchUser: (id: string, change: (u: UserRow) => UserRow) => void;
   say: (text: string, tone?: 'ok' | 'error') => void;
@@ -20,7 +23,7 @@ type Props = {
  * membership, not to the person), finance for managers, reset password, deactivate. The owner's own row is
  * read-only. Role and finance changes show at once and roll back with an error if the server refuses.
  */
-export function PersonPanel({ user, projects, patchUser, say, refresh }: Props) {
+export function PersonPanel({ user, users, viewerId, projects, patchUser, say, refresh }: Props) {
   const [busyKeys, setBusyKeys] = useState<Set<string>>(new Set());
   const [removing, setRemoving] = useState<UserAssignment | null>(null);
   const [deactivating, setDeactivating] = useState(false);
@@ -34,6 +37,8 @@ export function PersonPanel({ user, projects, patchUser, say, refresh }: Props) 
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState<string | undefined>();
   const [resetBusy, setResetBusy] = useState(false);
+  const [levelChange, setLevelChange] = useState<'promote' | 'demote' | null>(null);
+  const controls = adminControls(user, users, viewerId);
 
   const busy = (k: string, on: boolean) => setBusyKeys(prev => { const next = new Set(prev); if (on) next.add(k); else next.delete(k); return next; });
   const patchAssignment = (projectId: string, change: Partial<UserAssignment>) =>
@@ -88,10 +93,23 @@ export function PersonPanel({ user, projects, patchUser, say, refresh }: Props) 
     setDialogBusy(true); setDialogError(null);
     const result = await setUserActive({ id: user.id, expectedRevision: user.revision, active });
     setDialogBusy(false);
-    if (!result.ok) { if (deactivating) setDialogError(errorText(result.error.code)); else fail(result.error.code); if (result.error.code === 'CONFLICT') refresh(); return; }
-    patchUser(user.id, u => ({ ...u, isActive: active, revision: result.value.revision }));
+    if (!result.ok) { if (deactivating) setDialogError(user.isOwner ? ownerErrorText(result.error.code, 'deactivate') : errorText(result.error.code)); else fail(result.error.code); if (result.error.code === 'CONFLICT') refresh(); return; }
+    // Deactivating an admin also removes the admin level on the server (an admin is always active).
+    patchUser(user.id, u => ({ ...u, isActive: active, isOwner: active ? u.isOwner : false, revision: result.value.revision }));
     setDeactivating(false);
     say(active ? 'החשבון הופעל מחדש' : 'החשבון הושבת');
+  }
+
+  async function confirmLevel() {
+    if (!levelChange) return;
+    const enabled = levelChange === 'promote';
+    setDialogBusy(true); setDialogError(null);
+    const result = await setOwnerLevel({ userId: user.id, enabled, expectedRevision: user.revision });
+    setDialogBusy(false);
+    if (!result.ok) { setDialogError(ownerErrorText(result.error.code, levelChange)); if (result.error.code === 'CONFLICT') refresh(); return; }
+    patchUser(user.id, u => ({ ...u, isOwner: enabled, revision: result.value.revision }));
+    setLevelChange(null);
+    say(enabled ? `${user.fullName} הוא עכשיו אדמין` : `ההרשאה של ${user.fullName} כאדמין הוסרה`);
   }
 
   async function doReset(e: React.FormEvent) {
@@ -109,6 +127,36 @@ export function PersonPanel({ user, projects, patchUser, say, refresh }: Props) 
     refresh(); // the server may bump the profile revision (sessions are revoked)
   }
 
+  const accountSection = (
+    <section className={css.section} aria-labelledby="pp-account">
+      <h3 id="pp-account" className={css.h}>חשבון</h3>
+      {resetting ? (
+        <form className={css.add} onSubmit={doReset} noValidate>
+          <TextField label="סיסמה חדשה" type="password" value={password} onChange={e => setPassword(e.target.value)} error={passwordError} autoComplete="new-password" hint="הסיסמה הקודמת מפסיקה לעבוד והאדם יתחבר מחדש." />
+          <div className={css.row}>
+            <Button type="submit" disabled={resetBusy}>{resetBusy ? 'שומר…' : 'איפוס סיסמה'}</Button>
+            <Button variant="secondary" disabled={resetBusy} onClick={() => { setResetting(false); setPassword(''); setPasswordError(undefined); }}>ביטול</Button>
+          </div>
+        </form>
+      ) : (
+        <>
+          {user.isOwner && controls.isSelf && <p className={css.muted}>זה החשבון שלכם. את ההרשאות שלו משנה אדמין אחר.</p>}
+          {!(user.isOwner && controls.isSelf) && (
+            <div className={css.row}>
+              {user.isActive && <Button variant="secondary" onClick={() => setResetting(true)}>איפוס סיסמה</Button>}
+              {user.isActive
+                ? <Button variant="secondary" disabled={!!controls.lastAdminReason} aria-describedby={controls.lastAdminReason ? 'pp-last-admin' : undefined} onClick={() => { setDialogError(null); setDeactivating(true); }}>השבתת חשבון</Button>
+                : <Button disabled={dialogBusy} onClick={() => setActive(true)}>הפעלה מחדש</Button>}
+              {user.isOwner && <Button variant="secondary" disabled={!!controls.lastAdminReason} aria-describedby={controls.lastAdminReason ? 'pp-last-admin' : undefined} onClick={() => { setDialogError(null); setLevelChange('demote'); }}>הסרת הרשאת אדמין</Button>}
+              {controls.canPromote && <Button variant="secondary" onClick={() => { setDialogError(null); setLevelChange('promote'); }}>הפיכה לאדמין</Button>}
+            </div>
+          )}
+          {controls.lastAdminReason && <p id="pp-last-admin" className={css.muted}>{controls.lastAdminReason}</p>}
+        </>
+      )}
+    </section>
+  );
+
   const options = addableProjects(projects, user.assignments);
 
   return (
@@ -118,7 +166,7 @@ export function PersonPanel({ user, projects, patchUser, say, refresh }: Props) 
         <Badge tone={user.isActive ? 'active' : 'gray'}>{statusLabel(user)}</Badge>
       </div>
 
-      {user.isOwner ? <Notice>מנהל המערכת רואה את כל הפרויקטים ולא משויך לפרויקט מסוים.</Notice> : (
+      {user.isOwner ? <><Notice>{`${ADMIN_LABEL} רואה ומנהל הכול: כל הפרויקטים, הכספים והמסמכים, וגם אדמינים אחרים. הוא לא משויך לפרויקט מסוים.`}</Notice>{accountSection}</> : (
         <>
           <section className={css.section} aria-labelledby="pp-projects">
             <div className={css.sectionHead}>
@@ -166,25 +214,7 @@ export function PersonPanel({ user, projects, patchUser, say, refresh }: Props) 
             </ul>
           </section>
 
-          <section className={css.section} aria-labelledby="pp-account">
-            <h3 id="pp-account" className={css.h}>חשבון</h3>
-            {resetting ? (
-              <form className={css.add} onSubmit={doReset} noValidate>
-                <TextField label="סיסמה חדשה" type="password" value={password} onChange={e => setPassword(e.target.value)} error={passwordError} autoComplete="new-password" hint="הסיסמה הקודמת מפסיקה לעבוד והאדם יתחבר מחדש." />
-                <div className={css.row}>
-                  <Button type="submit" disabled={resetBusy}>{resetBusy ? 'שומר…' : 'איפוס סיסמה'}</Button>
-                  <Button variant="secondary" disabled={resetBusy} onClick={() => { setResetting(false); setPassword(''); setPasswordError(undefined); }}>ביטול</Button>
-                </div>
-              </form>
-            ) : (
-              <div className={css.row}>
-                <Button variant="secondary" onClick={() => setResetting(true)}>איפוס סיסמה</Button>
-                {user.isActive
-                  ? <Button variant="secondary" onClick={() => { setDialogError(null); setDeactivating(true); }}>השבתת חשבון</Button>
-                  : <Button disabled={dialogBusy} onClick={() => setActive(true)}>הפעלה מחדש</Button>}
-              </div>
-            )}
-          </section>
+          {accountSection}
         </>
       )}
 
@@ -192,9 +222,17 @@ export function PersonPanel({ user, projects, patchUser, say, refresh }: Props) 
         onConfirm={confirmRemove} onCancel={() => setRemoving(null)}>
         <p>{removing ? `להסיר את הגישה של ${user.fullName} ל${removing.projectName}? לא תהיה לו יותר גישה אליו. ההיסטוריה נשמרת ושום דבר לא נמחק.` : ''}</p>
       </ConfirmDialog>
+      <ConfirmDialog open={levelChange === 'promote'} title="הפיכה לאדמין" confirmLabel="הפיכה לאדמין" busy={dialogBusy} error={dialogError}
+        onConfirm={confirmLevel} onCancel={() => setLevelChange(null)}>
+        <p>{`להפוך את ${user.fullName} לאדמין? לאדמין יש גישה מלאה לכול: כל הפרויקטים, הכספים והמסמכים, וניהול אנשים והרשאות, כולל הוספה, הסרה והשבתה של אדמינים אחרים. אפשר להסיר את ההרשאה בכל עת. שום דבר לא נמחק.`}</p>
+      </ConfirmDialog>
+      <ConfirmDialog open={levelChange === 'demote'} danger title="הסרת הרשאת אדמין" confirmLabel="הסרת הרשאה" busy={dialogBusy} error={dialogError}
+        onConfirm={confirmLevel} onCancel={() => setLevelChange(null)}>
+        <p>{`להסיר מ${user.fullName} את ההרשאה של אדמין? הוא יאבד את הגישה המלאה, והגישה לפרויקטים ולכספים תחזור לפי השיוכים שלו (אם היו). החשבון לא נמחק ושום דבר לא נמחק.`}</p>
+      </ConfirmDialog>
       <ConfirmDialog open={deactivating} danger title="השבתת חשבון" confirmLabel="השבתת חשבון" busy={dialogBusy} error={dialogError}
         onConfirm={() => setActive(false)} onCancel={() => setDeactivating(false)}>
-        <p>{`להשבית את החשבון של ${user.fullName}? הוא יתנתק ולא יוכל להיכנס. השיוכים והדיווחים שלו נשמרים, ושום דבר לא נמחק. אפשר להפעיל מחדש בכל עת.`}</p>
+        <p>{`${user.isOwner ? 'זהו אדמין: ההשבתה מסירה גם את הרשאת האדמין שלו. ' : ''}להשבית את החשבון של ${user.fullName}? הוא יתנתק ולא יוכל להיכנס. השיוכים והדיווחים שלו נשמרים, ושום דבר לא נמחק. אפשר להפעיל מחדש בכל עת.`}</p>
       </ConfirmDialog>
     </div>
   );

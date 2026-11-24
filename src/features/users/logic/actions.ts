@@ -4,6 +4,7 @@ import { UsersApiInputSchemas } from '@/types/contracts/schemas';
 import { createPlatform } from '@/lib/auth/platform';
 import { failure } from '@/lib/db/rpc';
 import { createUsersApi } from './index';
+import { SetOwnerLevelSchema, createOwnerLevelCommand, type SetOwnerLevelInput } from './commands';
 
 type Input<K extends keyof UsersApi> = Parameters<UsersApi[K]>[1];
 type Output<K extends keyof UsersApi> = Awaited<ReturnType<UsersApi[K]>>;
@@ -29,3 +30,15 @@ export async function resetPassword(input: Input<'resetPassword'>) { return invo
 export async function setMembership(input: Input<'setMembership'>) { return invoke('setMembership', input); }
 export async function removeMembership(input: Input<'removeMembership'>) { return invoke('removeMembership', input); }
 export async function setFinanceAccess(input: Input<'setFinanceAccess'>) { return invoke('setFinanceAccess', input); }
+
+/** Promote a person to admin or demote an admin. The server decides (any admin, never yourself, never the last one). */
+export async function setOwnerLevel(input: SetOwnerLevelInput): Promise<Result<{ id: string; revision: number }>> {
+  try {
+    const platform = await createPlatform();
+    const context = await platform.auth.getContext();
+    if (!context.ok) return context;
+    const parsed = SetOwnerLevelSchema.safeParse(input);
+    if (!parsed.success) return failure('VALIDATION');
+    return await createOwnerLevelCommand(platform).setOwnerLevel(context.value, parsed.data);
+  } catch { return failure('UNAVAILABLE'); }
+}

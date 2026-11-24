@@ -7,7 +7,7 @@ import type { ProjectCard, UserRow } from '@/types/contracts';
 import { UsersMobile } from '../mobile/UsersMobile';
 import { UsersDesktop } from '../desktop/UsersDesktop';
 import { PersonPanel } from './PersonPanel';
-import { EMPTY_FILTER, NO_PROJECT, errorText, filterUsers, projectOptions, sortUsers, validateNewPerson, type NewPersonErrors, type UserFilter } from './view-model';
+import { ADMIN_LABEL, EMPTY_FILTER, NO_PROJECT, errorText, filterUsers, projectOptions, sortUsers, validateNewPerson, type NewPersonErrors, type UserFilter } from './view-model';
 import css from './UsersManager.module.css';
 
 type Toast = { text: string; tone: 'ok' | 'error'; id: number };
@@ -17,7 +17,7 @@ type Toast = { text: string; tone: 'ok' | 'error'; id: number };
  * for both layouts: the phone list and the desktop table are two views of the same rows. The list is
  * fully loaded, so search is local. Writes go through server actions only and carry the row revision.
  */
-export function UsersManager({ users: initial, projects }: { users: UserRow[]; projects: ProjectCard[] }) {
+export function UsersManager({ users: initial, projects, viewerId }: { users: UserRow[]; projects: ProjectCard[]; viewerId: string }) {
   const router = useRouter();
   const [users, setUsers] = useState(initial);
   const [seen, setSeen] = useState(initial);
@@ -65,7 +65,7 @@ export function UsersManager({ users: initial, projects }: { users: UserRow[]; p
         setSelectedId(row.id);
       }} />
       <Sheet open={!!selected} onClose={() => setSelectedId(null)} title={selected?.fullName ?? ''} menus>
-        {selected && <PersonPanel key={selected.id} user={selected} projects={projects} patchUser={patchUser} say={say} refresh={refresh} />}
+        {selected && <PersonPanel key={selected.id} user={selected} users={users} viewerId={viewerId} projects={projects} patchUser={patchUser} say={say} refresh={refresh} />}
       </Sheet>
       <div className={css.toastHost} aria-live="polite" role="status">
         {toast && <div key={toast.id} className={`${css.toast} ${toast.tone === 'error' ? css.toastError : ''}`}>{toast.text}</div>}
@@ -81,7 +81,7 @@ function FilterTools({ filter, set, projects }: { filter: UserFilter; set: (p: P
       <SelectField className={css.sel} aria-label="פרויקט" value={filter.projectId} onChange={v => set({ projectId: v })}
         options={[{ value: '', label: 'כל הפרויקטים' }, { value: NO_PROJECT, label: 'ללא פרויקט' }, ...projects.map(p => ({ value: p.id, label: p.name }))]} />
       <SelectField className={css.sel} aria-label="תפקיד" value={filter.role} onChange={v => set({ role: v as UserFilter['role'] })}
-        options={[{ value: '', label: 'כל התפקידים' }, { value: 'manager', label: 'מנהל' }, { value: 'worker', label: 'עובד' }, { value: 'owner', label: 'מנהל מערכת' }]} />
+        options={[{ value: '', label: 'כל התפקידים' }, { value: 'manager', label: 'מנהל' }, { value: 'worker', label: 'עובד' }, { value: 'owner', label: ADMIN_LABEL }]} />
       <SelectField className={css.sel} aria-label="סטטוס" value={filter.status} onChange={v => set({ status: v as UserFilter['status'] })}
         options={[{ value: '', label: 'כל הסטטוסים' }, { value: 'active', label: 'פעילים' }, { value: 'inactive', label: 'מושבתים' }]} />
     </div>

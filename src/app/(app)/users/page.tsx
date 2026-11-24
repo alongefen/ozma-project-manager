@@ -16,13 +16,13 @@ export default async function UsersPage() {
     throw new Error('context unavailable');
   }
   const ctx = context.value;
-  if (!ctx.actor.isOwner) return <StateMessage tone="error" backHref="/projects" backLabel="חזרה לפרויקטים">רק מנהל המערכת יכול לנהל אנשים והרשאות.</StateMessage>;
+  if (!ctx.actor.isOwner) return <StateMessage tone="error" backHref="/projects" backLabel="חזרה לפרויקטים">רק אדמין יכול לנהל אנשים והרשאות.</StateMessage>;
   const [users, projects] = await Promise.all([createUsersApi(platform).listUsers(ctx, {}), createProjectsApi(platform).listProjects(ctx, { archived: false })]);
   if (!users.ok || !projects.ok) throw new Error('users unavailable');
   return (
     <>
       <DesktopTitle title="עובדים והרשאות" />
-      <UsersManager users={users.value} projects={projects.value} />
+      <UsersManager users={users.value} projects={projects.value} viewerId={ctx.actor.userId} />
     </>
   );
 }

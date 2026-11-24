@@ -22,7 +22,7 @@ export function UsersDesktop({ users, onOpen }: { users: UserRow[]; onOpen: (id:
                   ? <span className={css.none}>{u.isOwner ? 'רואה את כל הפרויקטים' : 'לא משויך לפרויקט'}</span>
                   : <span className={css.projects}>{u.assignments.map(a => <span key={a.projectId} className={css.chip}>{assignmentLabel(a)}{a.role === 'manager' && a.financeAccess ? ' · כספים' : ''}</span>)}</span>}
               </td>
-              <td className={css.actions}><Button variant="secondary" size="small" onClick={() => onOpen(u.id)}>{u.isOwner ? 'פרטים' : 'ניהול גישה'}</Button></td>
+              <td className={css.actions}><Button variant="secondary" size="small" onClick={() => onOpen(u.id)}>{u.isOwner ? 'ניהול אדמין' : 'ניהול גישה'}</Button></td>
             </tr>
           ))}
         </tbody>

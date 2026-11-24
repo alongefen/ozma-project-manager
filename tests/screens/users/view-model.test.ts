@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ProjectCard, UserRow } from '@/types/contracts';
-import { addableProjects, assignmentLabel, errorText, filterUsers, sortUsers, statusLabel, validateNewPerson, validatePassword } from '@/features/users/shared/view-model';
+import { ADMIN_LABEL, LAST_ADMIN_REASON, activeAdminCount, adminControls, ownerErrorText, addableProjects, assignmentLabel, errorText, filterUsers, sortUsers, statusLabel, validateNewPerson, validatePassword } from '@/features/users/shared/view-model';
 
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const user = (n: number, over: Partial<UserRow> = {}): UserRow => ({ id: id(n), fullName: `אדם ${n}`, email: `p${n}@example.invalid`, isOwner: false, isActive: true, revision: 1, assignments: [], ...over });
@@ -21,7 +21,7 @@ describe('users view model', () => {
   it('labels role per assignment and status', () => {
     expect(assignmentLabel({ projectName: 'א', role: 'manager' })).toBe('א · מנהל');
     expect(assignmentLabel({ projectName: 'א', role: 'worker' })).toBe('א · עובד');
-    expect(statusLabel({ isOwner: true, isActive: true })).toBe('מנהל מערכת');
+    expect(statusLabel({ isOwner: true, isActive: true })).toBe('אדמין');
     expect(statusLabel({ isOwner: false, isActive: false })).toBe('מושבת');
   });
   it('offers only open, unassigned projects', () => {
@@ -60,4 +60,36 @@ describe('user filters', () => {
   it('no project excludes the owner', () => expect(ids({ projectId: NO_PROJECT })).toEqual(['c']));
   it('owner role', () => expect(ids({ role: 'owner' })).toEqual(['ben']));
   it('project options from assignments', () => expect(projectOptions(users).map(p => p.id)).toEqual(['1', '2']));
+});
+
+describe('admin (owner-level) controls', () => {
+  const ben = user(1, { isOwner: true });
+  const dev = user(2, { isOwner: true });
+  const worker = user(3);
+  const all = [ben, dev, worker];
+  it('labels owner-level people אדמין, distinct from manager and worker', () => {
+    expect(ADMIN_LABEL).toBe('אדמין');
+    expect(statusLabel(ben)).toBe('אדמין');
+    expect(filterUsers(all, { search: '', projectId: '', role: 'owner', status: '' }).map(u => u.id)).toEqual([ben.id, dev.id]);
+  });
+  it('another admin can be demoted or deactivated while two admins exist', () => {
+    expect(activeAdminCount(all)).toBe(2);
+    expect(adminControls(dev, all, ben.id)).toEqual({ canPromote: false, isSelf: false, lastAdminReason: null });
+  });
+  it('promote is offered only for an active person who is not yourself', () => {
+    expect(adminControls(worker, all, ben.id).canPromote).toBe(true);
+    expect(adminControls(user(4, { isActive: false }), all, ben.id).canPromote).toBe(false);
+    expect(adminControls(worker, all, worker.id).canPromote).toBe(false);
+  });
+  it('the last active admin gets a reason and a disabled demote', () => {
+    const solo = [ben, worker, user(5, { isOwner: true, isActive: false })];
+    expect(adminControls(ben, solo, dev.id).lastAdminReason).toBe(LAST_ADMIN_REASON);
+    expect(adminControls(ben, solo, ben.id).isSelf).toBe(true);
+  });
+  it('a server refusal is shown in Hebrew per action, never raw', () => {
+    expect(ownerErrorText('FORBIDDEN', 'demote')).toContain('אדמין פעיל אחד לפחות');
+    expect(ownerErrorText('FORBIDDEN', 'deactivate')).toContain('להשבית');
+    expect(ownerErrorText('CONFLICT', 'demote')).toBe(errorText('CONFLICT'));
+    expect(ownerErrorText('weird', 'promote')).toBe(errorText('UNAVAILABLE'));
+  });
 });

@@ -18,7 +18,7 @@ describe('/users page', () => {
   it('refuses a non-owner and reads no data', async () => {
     getContext.mockResolvedValue(ctx(false));
     const el = await UsersPage();
-    expect(JSON.stringify(el.props.children)).toContain('רק מנהל המערכת');
+    expect(JSON.stringify(el.props.children)).toContain('רק אדמין');
     expect(listUsers).not.toHaveBeenCalled();
     expect(listProjects).not.toHaveBeenCalled();
   });
