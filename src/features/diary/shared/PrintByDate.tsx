@@ -1,6 +1,6 @@
 'use client';
 import { useId, useState } from 'react';
-import { Button, Notice } from '@/components/ui';
+import { Button, DateField, Notice, SelectField } from '@/components/ui';
 import { planReport } from '@/features/reports/logic/actions';
 import { reportUrl, isDate, isUuid, type ProjectOption } from './model';
 
@@ -30,18 +30,10 @@ export function PrintByDate({ projects, fixedProjectId, today }: { projects: Pro
   return (
     <div className="dr-print">
       {!fixedProjectId && (
-        <div className="ui-field">
-          <label className="ui-field__label" htmlFor={`${idp}-project`}>פרויקט</label>
-          <select id={`${idp}-project`} className="ui-field__input" value={projectId} onChange={e => { setProjectId(e.target.value); reset(); }}>
-            <option value="">בחירת פרויקט</option>
-            {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
-        </div>
+        <SelectField id={`${idp}-project`} label="פרויקט" value={projectId} onChange={v => { setProjectId(v); reset(); }}
+          options={[{ value: '', label: 'בחירת פרויקט' }, ...projects.map(p => ({ value: p.id, label: p.name }))]} />
       )}
-      <div className="ui-field">
-        <label className="ui-field__label" htmlFor={`${idp}-date`}>תאריך</label>
-        <input id={`${idp}-date`} type="date" className="ui-field__input dr-date" value={date} onChange={e => { setDate(e.target.value); reset(); }} />
-      </div>
+      <DateField id={`${idp}-date`} label="תאריך" required value={date} onChange={v => { setDate(v); reset(); }} />
       <Button variant="secondary" block disabled={busy} onClick={prepare}>{busy ? 'מכין…' : 'הכנה'}</Button>
       {message && <Notice>{message}</Notice>}
       {parts > 0 && (

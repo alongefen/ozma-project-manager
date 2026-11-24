@@ -4,7 +4,8 @@
 - New shared components in `src/components/ui`: `DateField` (DD/MM/YYYY display, Hebrew calendar, week starts Sunday, ISO value, keyboard: arrows, PageUp/PageDown, Home/End, Enter, Escape) and `SelectField` (listbox: arrows, Home/End, type-ahead, Enter, Escape). Both use a native popover (top layer, never clipped by a scrolling sheet): a menu under the field on desktop, a bottom sheet on the phone (below 1024px). `name` submits a hidden input, so plain GET forms keep working. Pure date logic in `calendar.ts`. No new dependency (the old pickers were the browser's native controls).
 - `TextField` got `hideLabel` (screen-reader-only label for compact filter rows).
 - Replaced: project form and new-project wizard (start/end date), task form (due date), diary filter bar (project, from, to), diary entry form (project, work date), finance entry form (month, year, kind), finance filters (month, year), desktop finance filter panel (month, year).
-- Left out: `src/features/diary/shared/PrintByDate.tsx` (project select and date). It is print code that PRINT-EXPORT is editing right now; convert it after that branch merges (the guard test lists it as parked).
+- `PrintByDate.tsx` converted after PRINT-EXPORT merged. Nothing is left out.
+- Follow-up: `SelectField` has a free search box at the top of the open list (filters labels). It is not focused on open, so the phone keyboard opens only when the field is tapped; desktop type-ahead on the list still works.
 - Documents page: one filter row (search, category `SelectField`, "לארכיון" button at its end, owner only, `aria-pressed`, shows the archived count), list beneath. Desktop: the row is pinned next to the upload button, no category column. Phone: pinned upload button, then the same row. The archive checkbox and the phone category screen are gone; behaviour (toggle archive view, access rules, upload flow) unchanged.
 - `docs/UI_CONVENTIONS.md`: components table and a "Filters and search" section.
 
