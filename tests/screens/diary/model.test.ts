@@ -62,3 +62,14 @@ describe('דיווח שנשמר נכנס לרשימה מיד', () => {
     expect(matchesFilter(row('a', '2026-11-23'), { from: '2026-11-23' as never, to: '2026-11-23' as never })).toBe(true);
   });
 });
+
+describe('פרויקט מכתובת ההפניה', () => {
+  it('מזהה פרויקט מכל מסך שלו; אחרת כלום', async () => {
+    const { projectFromReferrer } = await import('@/features/diary/shared/model');
+    expect(projectFromReferrer(`https://x.app/projects/${P}/tasks`)).toBe(P);
+    expect(projectFromReferrer(`https://x.app/projects/${P}`)).toBe(P);
+    expect(projectFromReferrer('https://x.app/projects/new')).toBeNull();
+    expect(projectFromReferrer('https://x.app/diary')).toBeNull();
+    expect(projectFromReferrer(null)).toBeNull();
+  });
+});
