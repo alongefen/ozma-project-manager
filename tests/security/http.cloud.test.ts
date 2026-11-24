@@ -271,7 +271,7 @@ describe.sequential('deployed-app basics: headers, cookies, error text', () => {
   it('responses do not advertise a server version', async () => {
     for (const [name, r] of Object.entries(await sample())) expect(r.headers.get('server') ?? '', name).not.toMatch(/\d/);
   });
-  it.fails('F-HDR-6 responses do not carry X-Powered-By (set poweredByHeader: false)', async () => {
+  it('F-HDR-6 responses do not carry X-Powered-By (set poweredByHeader: false)', async () => {
     expect((await call('/sign-in', null)).headers.get('x-powered-by')).toBeNull();
   });
   it('signed-in pages and all API responses are not cacheable', async () => {
@@ -326,14 +326,13 @@ describe.sequential('deployed-app basics: headers, cookies, error text', () => {
 
 describe.sequential('security headers (deployed-app review)', () => {
   const headers = async () => (await call('/sign-in', null)).headers;
-  // Findings, kept as `it.fails`: they pass while the header is missing and start failing (so someone removes the marker)
-  // the day the header is added. See docs/qa/SECURITY.md for the proposed next.config headers() block.
-  it.fails('F-HDR-1 X-Content-Type-Options: nosniff on pages', async () => { expect((await headers()).get('x-content-type-options')).toBe('nosniff'); });
-  it.fails('F-HDR-2 clickjacking protection (frame-ancestors or X-Frame-Options)', async () => {
+  // F1/F2 fixed in next.config.ts (docs/qa/SECURITY.md).
+  it('F-HDR-1 X-Content-Type-Options: nosniff on pages', async () => { expect((await headers()).get('x-content-type-options')).toBe('nosniff'); });
+  it('F-HDR-2 clickjacking protection (frame-ancestors or X-Frame-Options)', async () => {
     const h = await headers();
     expect(/frame-ancestors/i.test(h.get('content-security-policy') ?? '') || /deny|sameorigin/i.test(h.get('x-frame-options') ?? '')).toBe(true);
   });
-  it.fails('F-HDR-3 Referrer-Policy', async () => { expect((await headers()).get('referrer-policy')).toMatch(/strict-origin|no-referrer|same-origin/); });
-  it.fails('F-HDR-4 Content-Security-Policy', async () => { expect((await headers()).get('content-security-policy')).toBeTruthy(); });
-  it.fails('F-HDR-5 Permissions-Policy', async () => { expect((await headers()).get('permissions-policy')).toBeTruthy(); });
+  it('F-HDR-3 Referrer-Policy', async () => { expect((await headers()).get('referrer-policy')).toMatch(/strict-origin|no-referrer|same-origin/); });
+  it('F-HDR-4 Content-Security-Policy', async () => { expect((await headers()).get('content-security-policy')).toBeTruthy(); });
+  it('F-HDR-5 Permissions-Policy', async () => { expect((await headers()).get('permissions-policy')).toBeTruthy(); });
 });

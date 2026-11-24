@@ -21,10 +21,17 @@ async function slot<T>(work: () => Promise<T>): Promise<T> {
   try { return await work(); } finally { running -= 1; waiting.shift()?.(); }
 }
 
+/**
+ * GHSA-hq66-cqwq-w95j (pdfjs-dist 5.6.83 to 6.2.108): a malicious PDF runs JavaScript only through the viewer's scripting
+ * (enableScripting, used by the annotation layer / PDFViewer). This code does a canvas-only render of page 1: it creates no
+ * annotation layer or scripting manager, and the API default is `enableScripting: false` (pdf.mjs: `params.enableScripting === true`).
+ * So the advisory's path is not reachable here. We pin it explicitly so a later change cannot turn it on by accident.
+ * `isEvalSupported` (the option the task named) does not exist in 5.7. The real fix is 6.2.108+ (separate proposal).
+ */
 async function render(url: string): Promise<string> {
   const pdfjs = await import('pdfjs-dist');
   if (!pdfjs.GlobalWorkerOptions.workerSrc) pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
-  const doc = await pdfjs.getDocument({ url, disableAutoFetch: true }).promise;
+  const doc = await pdfjs.getDocument({ url, disableAutoFetch: true, enableScripting: false } as Parameters<typeof pdfjs.getDocument>[0]).promise;
   try {
     const page = await doc.getPage(1);
     const base = page.getViewport({ scale: 1 });
