@@ -116,11 +116,11 @@ export function TasksProvider({ projectId, initial, canWrite, canDelete, today, 
         {error && <Notice tone="error">{error}</Notice>}
         {children}
       </div>
-      <Sheet open={form !== null} onClose={() => setForm(null)} dismissible={!formBusy} title={form?.task ? 'עריכת פתק' : 'פתק חדש'}>
+      <Sheet open={form !== null} onClose={() => setForm(null)} dismissible={!formBusy} title={form?.task ? 'עריכת משימה' : 'משימה חדשה'}>
         {form && <TaskForm task={form.task} busy={formBusy} error={formError} onSubmit={submit} onCancel={() => setForm(null)} />}
       </Sheet>
-      <ConfirmDialog open={removing !== null} title="מחיקת פתק" confirmLabel="מחיקה" busyLabel="מוחק…" busy={removeBusy} error={removeError} danger onConfirm={confirmDelete} onCancel={() => setRemoving(null)}>
-        <p>הפתק יוסר מהרשימה. הוא נשמר בהיסטוריה ולא נמחק לצמיתות.</p>
+      <ConfirmDialog open={removing !== null} title="מחיקת משימה" confirmLabel="מחיקה" busyLabel="מוחק…" busy={removeBusy} error={removeError} danger onConfirm={confirmDelete} onCancel={() => setRemoving(null)}>
+        <p>המשימה תוסר מהרשימה. הוא נשמר בהיסטוריה ולא נמחק לצמיתות.</p>
       </ConfirmDialog>
     </TasksContext.Provider>
   );

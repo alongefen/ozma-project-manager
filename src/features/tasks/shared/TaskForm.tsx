@@ -22,7 +22,7 @@ export function TaskForm({ task, busy, error, onSubmit, onCancel }: {
   return (
     <form className="tk-form" onSubmit={submit} noValidate>
       <div className="ui-field">
-        <label className="ui-field__label" htmlFor={`${id}-body`}>תוכן הפתק</label>
+        <label className="ui-field__label" htmlFor={`${id}-body`}>תוכן המשימה</label>
         <textarea id={`${id}-body`} className="ui-field__input tk-textarea" rows={5} value={draft.body} autoFocus
           aria-invalid={errors.body ? true : undefined} aria-describedby={`${id}-count`}
           onChange={e => setDraft(d => ({ ...d, body: e.target.value }))} />

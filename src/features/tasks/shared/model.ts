@@ -40,8 +40,8 @@ export type DraftResult = { ok: true; body: string; dueDate: IsoDate | null } | 
 export function parseDraft(draft: TaskDraft): DraftResult {
   const errors: { body?: string; dueDate?: string } = {};
   const body = draft.body.trim();
-  if (!body) errors.body = 'יש לכתוב את תוכן הפתק';
-  else if (body.length > MAX_BODY) errors.body = `הפתק ארוך מדי: עד ${MAX_BODY} תווים`;
+  if (!body) errors.body = 'יש לכתוב את תוכן המשימה';
+  else if (body.length > MAX_BODY) errors.body = `המשימה ארוכה מדי: עד ${MAX_BODY} תווים`;
   const due = draft.dueDate.trim();
   if (due && !/^\d{4}-\d{2}-\d{2}$/.test(due)) errors.dueDate = 'תאריך לא תקין';
   if (errors.body || errors.dueDate) return { ok: false, errors };

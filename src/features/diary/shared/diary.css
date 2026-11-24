@@ -52,7 +52,6 @@
   .dr-toolbar .ui-btn { flex: 0 0 auto; }
 }
 
-@media (min-width: 1024px) { .dr-toolbar__lead { margin-inline-start: auto; } }
 
 /* Chrome keeps the date text on the left in RTL unless told otherwise. */
 .ui-field .dr-date { direction: rtl; text-align: right; }

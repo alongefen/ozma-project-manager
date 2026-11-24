@@ -12,7 +12,7 @@ export function DiaryDesktop({ screen, title }: { screen: DiaryScreen; title?: s
     <div className="dr dr-desktop d-only">
       {title && <DesktopTitle title={title} />}
       {!screen.canReport && screen.readOnlyNote && <Notice>{screen.readOnlyNote}</Notice>}
-      <DiaryToolbar screen={screen} idp="dr-d" lead={screen.canReport ? <Button icon="add" onClick={openNew}>דיווח חדש</Button> : undefined} />
+      <DiaryToolbar screen={screen} idp="dr-d" lead={screen.canReport ? <Button className="ui-lead" icon="add" onClick={openNew}>דיווח חדש</Button> : undefined} />
       <Card panel>
         <DiaryList filter={screen.filter} showProject={!screen.fixedProjectId} />
       </Card>

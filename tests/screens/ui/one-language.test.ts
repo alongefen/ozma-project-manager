@@ -30,6 +30,11 @@ describe('shared action controls', () => {
     const plus = features.filter(f => f.endsWith('.tsx') && /<Button[^>]*>\s*\+ /.test(read(f)));
     expect(plus).toEqual([]);
   });
+  it('on desktop every create button sits at the far left of its pinned row (ui-lead)', () => {
+    const adds = features.filter(f => f.endsWith('.tsx') && !f.includes('/mobile/') && /<Button[^>]*icon="add"/.test(read(f)));
+    expect(adds.length).toBeGreaterThanOrEqual(5);
+    expect(adds.filter(f => !/<Button[^>]*ui-lead[^>]*icon="add"|<Button[^>]*icon="add"[^>]*ui-lead/.test(read(f)))).toEqual([]);
+  });
   it('an icon button always has a name and a tooltip; danger is the bin', () => {
     const out = renderToStaticMarkup(h(IconButton, { label: 'מחיקה', tone: 'danger', children: h(DeleteIcon) }));
     expect(out).toContain('aria-label="מחיקה"');
