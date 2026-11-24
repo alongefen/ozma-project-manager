@@ -2,7 +2,12 @@ import 'server-only';
 import type { Platform, UsersApi } from '@/types/contracts';
 import { UsersApiInputSchemas } from '@/types/contracts/schemas';
 import { failure } from '@/lib/db/rpc';
+import { z } from 'zod';
 import { ownerOperation } from './shared';
+
+/** Promote or demote an admin (owner-level account). Not in the shared UsersApi contract yet: kept local to this feature. */
+export const SetOwnerLevelSchema = z.strictObject({ userId: z.uuid(), enabled: z.boolean(), expectedRevision: z.number().int().positive() });
+export type SetOwnerLevelInput = z.infer<typeof SetOwnerLevelSchema>;
 
 export function createUserCommands(platform: Platform) {
   return {
@@ -24,4 +29,10 @@ export function createUserCommands(platform: Platform) {
       return result.ok ? { ok: true as const, value: { revision: result.value.revision } } : result;
     }),
   } satisfies Pick<UsersApi, 'createUser' | 'updateUser' | 'setUserActive' | 'resetPassword' | 'setMembership' | 'removeMembership' | 'setFinanceAccess'>;
+}
+
+export function createOwnerLevelCommand(platform: Platform) {
+  return {
+    setOwnerLevel: ownerOperation(platform, SetOwnerLevelSchema, (ctx, input) => platform.rpc<SetOwnerLevelInput, { id: string; revision: number }>(ctx, 'set_owner_level', input)),
+  };
 }

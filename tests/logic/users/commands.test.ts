@@ -82,3 +82,20 @@ describe('UsersApi command orchestration',()=>{
     expect(f.authAdmin.setEmail).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('setOwnerLevel command', () => {
+  it('requires an owner and calls set_owner_level with the exact input', async () => {
+    const { createOwnerLevelCommand } = await import('../../../src/features/users/logic/commands');
+    const { ctx } = fixture();
+    const rpc = vi.fn().mockResolvedValue(ok({ id, revision: 5 }));
+    const requireOwner = vi.fn<() => Promise<unknown>>(async () => ok(null));
+    const platform = { rpc, permissions: { requireOwner } } as unknown as Platform;
+    const input = { userId: id, enabled: true, expectedRevision: 4 };
+    expect(await createOwnerLevelCommand(platform).setOwnerLevel(ctx, input)).toEqual(ok({ id, revision: 5 }));
+    expect(rpc).toHaveBeenCalledWith(ctx, 'set_owner_level', input);
+    rpc.mockClear();
+    requireOwner.mockResolvedValueOnce(denied);
+    expect(await createOwnerLevelCommand(platform).setOwnerLevel(ctx, input)).toEqual(denied);
+    expect(rpc).not.toHaveBeenCalled();
+  });
+});

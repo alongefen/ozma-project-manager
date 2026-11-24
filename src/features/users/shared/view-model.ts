@@ -4,6 +4,8 @@ import type { ProjectCard, ProjectRole, UserAssignment, UserRow } from '@/types/
 
 export const ROLE_LABEL: Record<ProjectRole, string> = { manager: 'מנהל', worker: 'עובד' };
 export const MIN_PASSWORD = 8;
+/** Owner-level account, shown to everyone as "אדמין" (A-43). Distinct from project manager (מנהל) and worker (עובד). */
+export const ADMIN_LABEL = 'אדמין';
 
 const ERROR_TEXT: Record<string, string> = {
   CONFLICT: 'המידע השתנה מאז שפתחתם אותו. הנתונים נטענו מחדש, אפשר לנסות שוב.',
@@ -15,6 +17,17 @@ const ERROR_TEXT: Record<string, string> = {
   RATE_LIMITED: 'יותר מדי ניסיונות. אפשר לנסות שוב בעוד רגע.',
   UNAVAILABLE: 'לא התקבל אישור שמירה. אפשר לנסות שוב.',
 };
+export type OwnerAction = 'promote' | 'demote' | 'deactivate';
+const OWNER_REFUSAL: Record<OwnerAction, string> = {
+  promote: 'אי אפשר להפוך את החשבון הזה לאדמין. ייתכן שהוא מושבת או שזה החשבון שלכם.',
+  demote: 'אי אפשר להסיר את ההרשאה: אי אפשר להסיר אותה מעצמכם, ותמיד חייב להישאר אדמין פעיל אחד לפחות.',
+  deactivate: 'אי אפשר להשבית את החשבון: אי אפשר להשבית את עצמכם, ותמיד חייב להישאר אדמין פעיל אחד לפחות.',
+};
+/** Text for a refused admin action. The server returns one FORBIDDEN for every rule, so the screen names the likely reasons. */
+export function ownerErrorText(code: string, action: OwnerAction): string {
+  return code === 'FORBIDDEN' ? OWNER_REFUSAL[action] : errorText(code);
+}
+
 /** Server errors are always shown as plain Hebrew, never the raw message. */
 export function errorText(code: string, context?: 'create'): string {
   if (context === 'create' && code === 'CONFLICT') return 'כתובת האימייל הזו כבר רשומה במערכת.';
@@ -59,12 +72,35 @@ export function sortUsers(users: UserRow[]): UserRow[] {
   return [...users].sort((a, b) => Number(b.isOwner) - Number(a.isOwner) || Number(b.isActive) - Number(a.isActive) || a.fullName.localeCompare(b.fullName, 'he'));
 }
 
+export function activeAdminCount(users: Pick<UserRow, 'isOwner' | 'isActive'>[]): number {
+  return users.filter(u => u.isOwner && u.isActive).length;
+}
+
+export type AdminControls = {
+  /** Promote button (plain, active person). */
+  canPromote: boolean;
+  /** Demote / deactivate / reset are shown for admins other than yourself. */
+  isSelf: boolean;
+  /** Why demote and deactivate are disabled (the last active admin), or null. */
+  lastAdminReason: string | null;
+};
+export const LAST_ADMIN_REASON = 'זה האדמין האחרון במערכת. כדי להסיר אותו צריך קודם להפוך אדם אחר לאדמין.';
+/** Which admin controls the person sheet offers. The server stays the authority; this only avoids offering what it refuses. */
+export function adminControls(user: Pick<UserRow, 'id' | 'isOwner' | 'isActive'>, all: Pick<UserRow, 'isOwner' | 'isActive'>[], viewerId: string): AdminControls {
+  const isSelf = user.id === viewerId;
+  return {
+    canPromote: !user.isOwner && user.isActive && !isSelf,
+    isSelf,
+    lastAdminReason: user.isOwner && user.isActive && activeAdminCount(all) <= 1 ? LAST_ADMIN_REASON : null,
+  };
+}
+
 export function assignmentLabel(a: Pick<UserAssignment, 'projectName' | 'role'>): string {
   return `${a.projectName} · ${ROLE_LABEL[a.role]}`;
 }
 
 export function statusLabel(u: Pick<UserRow, 'isOwner' | 'isActive'>): string {
-  if (u.isOwner) return 'מנהל מערכת';
+  if (u.isOwner) return ADMIN_LABEL;
   return u.isActive ? 'פעיל' : 'מושבת';
 }
 
