@@ -125,6 +125,8 @@ button, a { touch-action: manipulation; }
 .ui-skel { display: inline-block; max-width: 100%; border-radius: 6px; background: linear-gradient(90deg, #eceff1 25%, #f6f8f9 50%, #eceff1 75%); background-size: 200% 100%; animation: ui-shimmer 1.2s linear infinite; }
 .ui-skel--block { display: block; width: 100%; }
 .ui-skel-card { display: grid; gap: 12px; }
+.ui-skel-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-width: 0; }
+.ui-skel-heading { margin: 0; font-size: 22px; font-weight: 800; }
 @keyframes ui-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .ui-skel { animation: none; } }
 

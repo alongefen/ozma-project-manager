@@ -1,5 +1,5 @@
 import { PageSkeleton } from '@/components/ui';
 
 export default function Loading() {
-  return <PageSkeleton bare cards={3} />;
+  return <PageSkeleton bare title="כספים" cards={2} />;
 }

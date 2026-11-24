@@ -1,5 +1,5 @@
-import { PageSkeleton } from '@/components/ui';
+import { InnerPageSkeleton } from '@/components/ui';
 
 export default function Loading() {
-  return <PageSkeleton cards={1} />;
+  return <InnerPageSkeleton title="הדפסה וייצוא יומן לפי תאריך" backHref="/diary" backLabel="חזרה ליומן" cards={1} />;
 }
