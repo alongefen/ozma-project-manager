@@ -26,6 +26,14 @@ Header structure: top-level routes show the phone shell header and, on desktop, 
 | 15 | Task wording | "משימה חדשה" on desktop, "פתק חדש" on phone, in windows and dialogs | Alon decided (24.11): "משימה" everywhere; user-facing "פתק" replaced | fixed |
 | 13 | Tasks desktop | Pinned bar kept `space-between` for a title that is gone | bar is the button only, at the start | fixed |
 
+### Filter popups (Alon, 24.11, second round)
+
+| # | Screen | Deviation | Fix | State |
+| --- | --- | --- | --- | --- |
+| 16 | Diary in a project | The badge counted the tab's own project (forced into the filter), so it was wrong; the date range was counted as one with the project | badge counts only chosen filters: project (general diary), date range (once) | fixed |
+| 17 | Diary vs finance | Diary filter was a centred window with a GET form (buttons "סינון" / "ניקוי", different order and look); finance desktop a popover with "החלה" / "סגירה"; finance phone a sheet with "סינון" / "איפוס", live fields; two different badge styles | one `FilterPopup` (button + badge, popover on desktop, sheet on phone, same header, grid and "החלה" / "ניקוי") used by diary, finance phone and finance desktop; `FilterBar`, `Filters`, `FilterPanel`, `fin-count`, `dr-toolbar__count` deleted | fixed |
+| 18 | Projects, documents, tasks, users | Inline filter rows, no filter button | no badge needed; documented in UI_CONVENTIONS | n/a |
+
 ## Left on purpose (listed, not open defects)
 
 - **Documents rows** use an action menu (open, download, permissions, archive) with no loose icons: five actions, decided in DOCS-ROWS. The menu words match the language.
@@ -39,6 +47,8 @@ Header structure: top-level routes show the phone shell header and, on desktop, 
 - `tsc` and `eslint` clean; `vitest --project unit tests/screens tests/shell`: all pass, including the new `tests/screens/ui/one-language.test.ts` (shared controls, title rows, not-found) and the updated users, diary and tasks screen tests.
 
 ## Not checked
+
+- Filter popups: no signed-in browser, so the popover position and the sheet at 360, 390, 1024, 1280 were not seen; tested by render tests only (badge counts, order of buttons, one shared pattern).
 
 - No signed-in browser session was available in this worktree (no credentials), so 360, 375, 390, 768, 1024 and 1280 were **not** looked at in a real browser after the change. The changes are small shared controls with the same 44px targets and logical properties; the risk is the new title row spacing on `/users` and `/diary` desktop, and icon rows wrapping in task cards on 360. Needs a quick pass by someone signed in.
 - Cloud tests were not run.

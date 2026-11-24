@@ -16,6 +16,8 @@ type Nav = {
   all: AllScope | null;
   /** Narrows the all-projects page to one project (null = all). A server round trip, like a period change. */
   goProject(project: string | null): void;
+  /** Applies a whole filter and the project in one navigation (the phone's filter window). */
+  goWith(next: FinanceFilter, project: string | null): void;
   /** The address of this screen for a filter (project page or all-projects page). */
   href(next: FinanceFilter): string;
 };
@@ -49,6 +51,12 @@ export function FinanceNavProvider({ projectId, all = null, filter: serverFilter
     start(() => { setProject(next); router.push(hrefFor(target, next)); });
   }
 
+  function goWith(next: FinanceFilter, chosen: string | null) {
+    setLocal({ day: next.day, search: next.search });
+    clearTimeout(timer.current);
+    start(() => { setPeriod(next.period); if (all) setProject(chosen); router.push(hrefFor(next, all ? chosen : null)); });
+  }
+
   function go(next: FinanceFilter) {
     const href = hrefFor(next);
     setLocal({ day: next.day, search: next.search });
@@ -61,7 +69,7 @@ export function FinanceNavProvider({ projectId, all = null, filter: serverFilter
   }
 
   return (
-    <Ctx.Provider value={{ filter: shown, go, loading, totalsReady, all: all && { ...all, project }, goProject, href: next => hrefFor(next) }}>
+    <Ctx.Provider value={{ filter: shown, go, loading, totalsReady, all: all && { ...all, project }, goProject, goWith, href: next => hrefFor(next) }}>
       <div className="fin-wrap" data-pending={loading || undefined} aria-busy={loading}>
         {loading && <div className="fin-progress" role="status"><span className="sr-only">טוען…</span></div>}
         {children}

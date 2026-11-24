@@ -3,7 +3,7 @@ import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { Button, DeleteIcon, DesktopTitle, EditIcon, IconButton } from '@/components/ui';
+import { Button, DeleteIcon, DesktopTitle, EditIcon, FilterPopup, IconButton } from '@/components/ui';
 
 // UX-AUDIT: one language for actions. These are source scans like the picker and sticky tests: a screen that
 // draws its own icon, icon button or "+ label" fails here, so the next screen cannot drift.
@@ -46,6 +46,24 @@ describe('shared action controls', () => {
   it('the add button draws the plus after its label (left of it in RTL)', () => {
     const out = renderToStaticMarkup(h(Button, { icon: 'add' }, 'הוספת אדם'));
     expect(out).toMatch(/<button[^>]*>הוספת אדם<svg class="ui-aicon"[^>]*>.*<\/svg><\/button>/);
+  });
+});
+
+describe('filter popup', () => {
+  it('one shared pattern: no screen builds its own filter popover, panel or badge', () => {
+    const own = features.filter(f => /fin-pop|fin-count|dr-toolbar__count|dr-filter|fin-filters/.test(read(f)));
+    expect(own).toEqual([]);
+    const users = features.filter(f => f.endsWith('.tsx') && read(f).includes('<FilterPopup'));
+    expect(users.map(f => f.split('/').pop()).sort()).toEqual(['DesktopFilterBar.tsx', 'DiaryToolbar.tsx', 'FinanceMobile.tsx']);
+  });
+  it('the trigger shows the count badge only when something is active, and apply comes before clear', () => {
+    const none = renderToStaticMarkup(h(FilterPopup, { count: 0, onApply: () => {}, onClear: () => {}, children: null }));
+    expect(none).not.toContain('ui-count');
+    const some = renderToStaticMarkup(h(FilterPopup, { count: 3, onApply: () => {}, onClear: () => {}, children: null }));
+    expect(some).toContain('<span class="ui-count" aria-hidden="true">3</span>');
+    expect(some).toContain('aria-label="סינון, 3 פעילים"');
+    const src = read('src/components/ui/FilterPopup.tsx');
+    expect(src.indexOf('>החלה<')).toBeLessThan(src.indexOf('>ניקוי<'));
   });
 });
 

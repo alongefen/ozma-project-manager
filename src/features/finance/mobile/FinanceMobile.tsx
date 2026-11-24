@@ -1,12 +1,11 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import type { FinanceBook, TransactionRow } from '@/types/contracts';
-import { Button, Card, DeleteIcon, EditIcon, ExcelIcon, FilterIcon, IconButton, LinkIcon, Notice, Pin, PrintIcon } from '@/components/ui';
+import type { FinanceBook, FinanceFilter, TransactionRow } from '@/types/contracts';
+import { Button, Card, DeleteIcon, EditIcon, ExcelIcon, FilterPopup, IconButton, SelectField, TextField, LinkIcon, Notice, Pin, PrintIcon } from '@/components/ui';
 import { Chevron } from '../shared/Chevron';
 import { EntryForm } from '../shared/EntryForm';
 import { ExcelLink } from '../shared/ExcelLink';
-import { Filters } from '../shared/Filters';
 import { SummaryDetails } from '../shared/Summary';
 import { useFinanceNav } from '../shared/nav';
 import { KIND_LABELS, bookRows, visibleRows, isReduction, monthLabel, monthsNewestFirst, rowAmount, rowDate, shekels } from '../shared/present';
@@ -23,15 +22,23 @@ const step = (m: { year: number; month: number }, delta: number) => {
 
 /** Phone (up to 1023): back arrow, period switch, one summary, a grouped list, an entry sheet. No table, no tab bar. */
 export function FinanceMobile({ book, filteredRows, today }: Props) {
-  const { filter, go, totalsReady, all, href } = useFinanceNav();
+  const { filter, go, goWith, totalsReady, all, href } = useFinanceNav();
   const [sheet, setSheet] = useState<{ row: TransactionRow | null } | null>(null);
   const [cancelRow, setCancelRow] = useState<TransactionRow | null>(null);
-  const [filterOpen, setFilterOpen] = useState(false);
   const [panel, setPanel] = useState<'link' | null>(null);
   const period = filter.period;
   const entryMonth = period === 'all' ? currentMonth(today) : period;
   const rows = visibleRows(bookRows(book.months), filter);
   const filtered = filter.day !== undefined || !!filter.search;
+  function applyFilter(values: FormData) {
+    const next: FinanceFilter = { period };
+    const day = String(values.get('day') ?? '').trim();
+    const d = Number(day);
+    if (day && Number.isInteger(d) && d >= 1 && d <= 31) next.day = d;
+    const search = String(values.get('search') ?? '').trim();
+    if (search) next.search = search;
+    goWith(next, all ? String(values.get('project') ?? '') || null : null);
+  }
   const toggle = (p: 'link') => setPanel(v => (v === p ? null : p));
 
   return (
@@ -65,7 +72,11 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
 
       <Pin className="fin-mactions no-print">
         {book.canWrite && <Button block icon="add" onClick={() => setSheet({ row: null })}>הוספת תנועה</Button>}
-        <Button variant="secondary" block onClick={() => setFilterOpen(true)}><FilterIcon /> סינון{filtered && <span className="fin-count">{(filter.day !== undefined ? 1 : 0) + (filter.search ? 1 : 0)}</span>}</Button>
+        <FilterPopup block count={(filter.day !== undefined ? 1 : 0) + (filter.search ? 1 : 0) + (all?.project ? 1 : 0)} onApply={applyFilter} onClear={() => goWith({ period }, null)}>
+          {all && <SelectField name="project" label="פרויקט" defaultValue={all.project ?? ''} options={[{ value: '', label: 'כל הפרויקטים' }, ...all.projects.map(p => ({ value: p.id, label: p.name }))]} />}
+          <TextField name="day" label="יום בחודש" inputMode="numeric" maxLength={2} defaultValue={filter.day === undefined ? '' : String(filter.day)} />
+          <TextField name="search" label="חיפוש ספק / פרטים" defaultValue={filter.search ?? ''} />
+        </FilterPopup>
       </Pin>
       {!book.canWrite && !all && <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}
       {panel === 'link' && <Card><ExcelLink projectId={book.projectId} link={book.excelLink} canWrite={book.canWrite} /></Card>}
@@ -124,12 +135,6 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
       )}
 
       {cancelRow && <CancelConfirm projectId={book.projectId} row={cancelRow} onClose={() => setCancelRow(null)} />}
-
-      {filterOpen && (
-        <EntrySheet title="סינון תנועות" onClose={() => setFilterOpen(false)}>
-          <Filters today={today} showMonth={false} onDone={() => setFilterOpen(false)} />
-        </EntrySheet>
-      )}
 
       {sheet && (
         <EntrySheet title={sheet.row ? 'עריכת תנועה' : 'תנועה חדשה'} onClose={() => setSheet(null)}>

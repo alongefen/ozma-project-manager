@@ -20,3 +20,4 @@ export { InnerPageSkeleton } from './InnerPageSkeleton';
 export { IconButton } from './IconButton';
 export { DesktopTitle } from './DesktopTitle';
 export { AddIcon, DeleteIcon, EditIcon, ExcelIcon, ExportIcon, FilterIcon, LinkIcon, PrintIcon } from './ActionIcons';
+export { FilterPopup } from './FilterPopup';

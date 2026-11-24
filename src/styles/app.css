@@ -62,6 +62,17 @@ button, a { touch-action: manipulation; }
 .ui-iconbtn--plain { border-color: transparent; background: transparent; color: var(--ink); }
 /* The create button of a pinned row is always the first, rightmost control of the row (the start in RTL), on every screen. */
 .ui-lead { order: -1; flex: none; }
+.ui-count { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; margin-inline-start: 6px; border-radius: 11px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 800; }
+.ui-fpop { position: relative; }
+.ui-fpop--block { display: block; width: 100%; }
+.ui-fpop__panel { position: absolute; top: calc(100% + 8px); inset-inline-start: 0; z-index: 30; width: 340px; display: grid; gap: 14px; padding: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 16px 48px #0002; }
+.ui-fpop__head { font-size: 17px; font-weight: 800; }
+.ui-fpanel { display: grid; gap: 14px; min-width: 0; }
+.ui-fpanel__fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; min-width: 0; }
+.ui-fpanel__fields > * { grid-column: 1 / -1; min-width: 0; }
+.ui-fpanel__fields > .ui-fhalf { grid-column: auto; }
+.ui-fpanel__actions { display: flex; gap: 10px; }
+.ui-fpop__panel .ui-fpanel__actions .ui-btn { flex: 1; }
 .ui-iconrow { display: inline-flex; align-items: center; gap: 8px; }
 .ui-btn .ui-aicon { flex: none; }
 .ui-btn--secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
