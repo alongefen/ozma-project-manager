@@ -1,8 +1,9 @@
 'use client';
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import type { DiaryRow } from '@/types/contracts';
 import { Sheet } from '@/components/ui';
+import { REPORT_PATH } from '@/lib/navigation';
 import { EntryForm } from './EntryForm';
 import type { DiaryScreen } from './types';
 
@@ -22,6 +23,22 @@ export function DiaryProvider({ screen, startOpen, closeHref, children }: { scre
   const close = () => { setDialog(null); if (closeHref) window.history.replaceState(null, '', closeHref); };
   const done = () => { close(); router.refresh(); };
   const value: Ctx = { openNew: () => setDialog({ row: null }), openEdit: row => setDialog({ row }) };
+  // The menu's report button points at /diary/new. While the diary is on screen it just opens the window here:
+  // no navigation, and it works after the window was closed (the router thinks it is already on that address).
+  const canReport = screen.canReport;
+  useEffect(() => {
+    if (!canReport) return;
+    const onClick = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const link = (e.target as Element | null)?.closest?.('a[href]');
+      if (!link || link.getAttribute('target') === '_blank' || new URL((link as HTMLAnchorElement).href, location.href).pathname !== REPORT_PATH) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setDialog({ row: null });
+    };
+    document.addEventListener('click', onClick, true);
+    return () => document.removeEventListener('click', onClick, true);
+  }, [canReport]);
   const row = dialog?.row ?? null;
   return (
     <DiaryContext.Provider value={value}>
