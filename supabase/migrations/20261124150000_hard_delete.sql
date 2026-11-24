@@ -70,9 +70,16 @@ create function private.queue_files(file_ids uuid[]) returns jsonb language sql 
  q as (insert into private.storage_deletions(bucket,path) select b,p from src on conflict do nothing returning id,bucket,path)
  select coalesce(jsonb_agg(jsonb_build_object('id',id,'bucket',bucket,'path',path)),'[]'::jsonb) from q
 $$;
--- Same, but every file row of a project (including pending and rejected uploads and the cover).
-create function private.queue_project_files(p uuid) returns jsonb language sql security definer set search_path='' as $$
- select private.queue_files(coalesce(array_agg(id),'{}'::uuid[])) from public.stored_files where project_id=p
+-- Every file a project delete removes: the project's own file rows (documents, cover, pending uploads) plus the attachments of the
+-- entries that currently live in the project (their files may belong to another project if the entry was moved in).
+create function private.project_file_ids(p uuid) returns uuid[] language sql stable security definer set search_path='' as $$
+ select coalesce(array_agg(distinct f),'{}'::uuid[]) from (
+  select id as f from public.stored_files where project_id=p
+  union select file_id from public.diary_attachments where entry_id in (select id from public.diary_entries where project_id=p)) x
+$$;
+-- Old versions of an entry moved OUT of the project still name the project (immutable rows). Those block the delete.
+create function private.project_has_moved_out_entries(p uuid) returns boolean language sql stable security definer set search_path='' as $$
+ select exists(select 1 from public.diary_versions v join public.diary_entries e on e.id=v.entry_id where v.project_id=p and e.project_id<>p)
 $$;
 
 -- Read-only: what a permanent delete would remove, and whether it is allowed now.
@@ -84,13 +91,14 @@ k:=input->>'kind'; target:=(input->>'id')::uuid;
 if k='project' then
  select * into p from public.projects x where x.id=target; if not found then perform private.fail('NOT_FOUND'); end if;
  return jsonb_build_object('kind',k,'name',p.name,'confirmName',p.name,'requiresName',true,
-  'eligible',(p.archived_at is not null or p.status='completed'),
+  'eligible',(p.archived_at is not null or p.status='completed') and not private.project_has_moved_out_entries(p.id),
+  'blockedByMovedEntries',private.project_has_moved_out_entries(p.id),
   'counts',jsonb_build_object('reports',(select count(*) from public.diary_entries where project_id=p.id),
    'versions',(select count(*) from public.diary_versions where project_id=p.id),
    'documents',(select count(*) from public.documents where project_id=p.id),
    'transactions',(select count(*) from public.transactions where project_id=p.id),
    'tasks',(select count(*) from public.tasks where project_id=p.id),
-   'files',(select count(*) from public.stored_files where project_id=p.id)));
+   'files',cardinality(private.project_file_ids(p.id))));
 elsif k='document' then
  select * into d from public.documents x where x.id=target; if not found then perform private.fail('NOT_FOUND'); end if;
  select * into f from public.stored_files where stored_files.id=d.file_id;
@@ -111,18 +119,20 @@ exception when invalid_text_representation then perform private.fail('VALIDATION
 end $$;
 
 create function public.hard_delete_project(input jsonb) returns jsonb language plpgsql security definer set search_path='' as $$
-declare p public.projects; queued jsonb; counts jsonb;
+declare p public.projects; queued jsonb; counts jsonb; fids uuid[];
 begin
 perform private.require_owner(); perform private.keys(input,array['id','confirmName']::text[],array['id','confirmName']::text[]);
 select * into p from public.projects where id=(input->>'id')::uuid for update;
 if not found then perform private.fail('NOT_FOUND'); end if;
 if not (p.archived_at is not null or p.status='completed') then perform private.fail('CONFLICT','not_deletable'); end if;
+if private.project_has_moved_out_entries(p.id) then perform private.fail('CONFLICT','moved_entries'); end if;
 if btrim(input->>'confirmName') is distinct from btrim(p.name) then perform private.fail('VALIDATION','confirmName'); end if;
+fids:=private.project_file_ids(p.id);
 counts:=jsonb_build_object('reports',(select count(*) from public.diary_entries where project_id=p.id),
  'documents',(select count(*) from public.documents where project_id=p.id),
  'transactions',(select count(*) from public.transactions where project_id=p.id),
- 'files',(select count(*) from public.stored_files where project_id=p.id));
-queued:=private.queue_project_files(p.id);
+ 'files',cardinality(fids));
+queued:=private.queue_files(fids);
 perform private.hard_delete_begin('project');
 delete from public.document_grants where project_id=p.id;
 delete from public.project_covers where project_id=p.id;
@@ -130,11 +140,11 @@ update public.documents set replaces_document_id=null where project_id=p.id and 
 delete from public.documents where project_id=p.id;
 delete from public.diary_version_files where entry_id in (select id from public.diary_entries where project_id=p.id);
 delete from public.diary_attachments where entry_id in (select id from public.diary_entries where project_id=p.id);
-delete from public.diary_versions where entry_id in (select id from public.diary_entries where project_id=p.id) or project_id=p.id;
+delete from public.diary_versions where entry_id in (select id from public.diary_entries where project_id=p.id);
 delete from public.diary_entries where project_id=p.id;
 delete from public.transactions where project_id=p.id;
 delete from public.tasks where project_id=p.id;
-delete from public.stored_files where project_id=p.id;
+delete from public.stored_files where id=any(fids);
 delete from public.project_finance_settings where project_id=p.id;
 delete from public.project_private where project_id=p.id;
 delete from public.project_contacts where project_id=p.id;
@@ -146,6 +156,7 @@ perform private.hard_delete_end();
 perform private.audit('project.deleted','project',p.id::text,null,null,jsonb_build_object('name',p.name,'counts',counts));
 return jsonb_build_object('deleted',counts,'storage',queued);
 exception when invalid_text_representation or check_violation or not_null_violation then perform private.fail('VALIDATION'); return null;
+when foreign_key_violation then perform private.fail('CONFLICT','references'); return null;
 end $$;
 
 create function public.hard_delete_document(input jsonb) returns jsonb language plpgsql security definer set search_path='' as $$
@@ -229,7 +240,7 @@ exception when invalid_text_representation or numeric_value_out_of_range then pe
 end $$;
 
 revoke all on function private.hard_delete_allows(text), private.hard_delete_begin(text), private.hard_delete_end(),
- private.queue_files(uuid[]), private.queue_project_files(uuid) from public,anon,authenticated,service_role;
+ private.queue_files(uuid[]), private.project_file_ids(uuid), private.project_has_moved_out_entries(uuid) from public,anon,authenticated,service_role;
 revoke all on function public.hard_delete_preview(jsonb), public.hard_delete_project(jsonb), public.hard_delete_document(jsonb),
  public.hard_delete_entry(jsonb), public.hard_delete_transaction(jsonb), public.system_storage_pending(jsonb), public.system_storage_done(jsonb)
  from public,anon,authenticated,service_role;

@@ -44,7 +44,7 @@ do $t$
 declare o uuid; m uuid; w uuid; pa uuid:=gen_random_uuid(); pb uuid:=gen_random_uuid();
  fa1 uuid; fa2 uuid; fb1 uuid; fb2 uuid; fc uuid; da uuid:=gen_random_uuid(); db uuid:=gen_random_uuid(); db2 uuid:=gen_random_uuid();
  ea uuid:=gen_random_uuid(); ec uuid:=gen_random_uuid(); en uuid:=gen_random_uuid(); ta uuid:=gen_random_uuid(); tn uuid:=gen_random_uuid(); tb uuid:=gen_random_uuid();
- att uuid:=gen_random_uuid(); r text; cnt int; t text; trg text;
+ att uuid:=gen_random_uuid(); em uuid:=gen_random_uuid(); mo uuid:=gen_random_uuid(); fm uuid; att2 uuid:=gen_random_uuid(); pc uuid:=gen_random_uuid(); r text; cnt int; t text; trg text;
 begin
  o:=pg_temp.mkuser(1); m:=pg_temp.mkuser(2); w:=pg_temp.mkuser(3);
  insert into public.profiles(id,email,full_name,is_owner) values(o,'hd1@example.invalid','בעלים בדוי',true);
@@ -75,6 +75,19 @@ begin
  perform pg_temp.ev(pa,'project',pa::text,'project.created'); perform pg_temp.ev(pa,'transaction',ta::text,'transaction.cancelled');
  perform pg_temp.ev(pb,'document',db::text,'document.created'); perform pg_temp.ev(pb,'entry',ec::text,'entry.cancelled'); perform pg_temp.ev(pb,'transaction',tb::text,'transaction.cancelled');
  perform pg_temp.ev(pb,'project',pb::text,'project.created');
+
+ -- moved entries: one moved INTO project A (its file belongs to B), one moved OUT of project C into B
+ fm:=pg_temp.file(pb,o,'diary','moved-in.png');
+ insert into public.diary_entries(id,project_id,work_date,body,reporter_id,reporter_name,request_id) values(em,pa,'2026-11-04','עבר פנימה',o,'x',gen_random_uuid());
+ insert into public.diary_versions(entry_id,version,kind,project_id,work_date,body,cancelled,reporter_name,editor_id,editor_name) values(em,1,'created',pb,'2026-11-04','עבר פנימה',false,'x',o,'x'),(em,2,'moved',pa,'2026-11-04','עבר פנימה',false,'x',o,'x');
+ insert into public.diary_attachments(id,entry_id,file_id) values(att2,em,fm);
+ insert into public.diary_version_files(entry_id,version,attachment_id,position) values(em,1,att2,1),(em,2,att2,1);
+ insert into public.projects(id,name,business_name,site_address,created_by,request_id,archived_at) values(pc,'פרויקט ג בדוי','עסק','כתובת',o,gen_random_uuid(),now());
+ insert into public.diary_entries(id,project_id,work_date,body,reporter_id,reporter_name,request_id) values(mo,pb,'2026-11-06','עבר החוצה',o,'x',gen_random_uuid());
+ insert into public.diary_versions(entry_id,version,kind,project_id,work_date,body,cancelled,reporter_name,editor_id,editor_name) values(mo,1,'created',pc,'2026-11-06','עבר החוצה',false,'x',o,'x'),(mo,2,'moved',pb,'2026-11-06','עבר החוצה',false,'x',o,'x');
+ perform pg_temp.chk('project with a moved-out entry: delete refused','err:CONFLICT',pg_temp.try('authenticated',o,'hard_delete_project',jsonb_build_object('id',pc,'confirmName','פרויקט ג בדוי')));
+ perform pg_temp.chk('moved-out entry history untouched','2',(select count(*) from public.diary_versions where entry_id=mo)::text);
+ perform pg_temp.chk('preview flags the block','t',(position('"blockedByMovedEntries": true' in pg_temp.try('authenticated',o,'hard_delete_preview',jsonb_build_object('id',pc,'kind','project')))>0)::text);
 
  -- 1. who may call: managers, workers, anonymous and service_role never; the owner is refused on active items
  foreach t in array array['hard_delete_project','hard_delete_document','hard_delete_entry','hard_delete_transaction','hard_delete_preview'] loop
@@ -119,7 +132,7 @@ begin
  perform pg_temp.chk('entry A: versions/attachments/links/file gone','0',(select (select count(*) from public.diary_versions where entry_id=ea)+(select count(*) from public.diary_attachments where entry_id=ea)+(select count(*) from public.diary_version_files where entry_id=ea)+(select count(*) from public.stored_files where id=fa2))::text);
  perform pg_temp.chk('entry audit row: name only','1',(select count(*) from public.sensitive_events where action='entry.deleted' and entity_id=ea::text and after->>'name'='01/11/2026' and not after ? 'body')::text);
  select count(*) into cnt from public.stored_files where project_id=pa;
- perform pg_temp.chk('project A files before delete (doc+cover)','2',cnt::text);
+ perform pg_temp.chk('project A own file rows before delete (doc+cover)','2',cnt::text);
  r:=pg_temp.try('authenticated',o,'hard_delete_project',jsonb_build_object('id',pa,'confirmName','פרויקט א בדוי'));
  perform pg_temp.chk('project A deleted','ok:',r);
  perform pg_temp.chk('project A: no row left in any table','0',(select
@@ -128,10 +141,12 @@ begin
   +(select count(*) from public.stored_files where project_id=pa)+(select count(*) from public.project_covers where project_id=pa)+(select count(*) from public.documents where project_id=pa)
   +(select count(*) from public.diary_entries where project_id=pa)+(select count(*) from public.diary_versions where project_id=pa)+(select count(*) from public.transactions where project_id=pa)
   +(select count(*) from public.sensitive_events where project_id=pa))::text);
- perform pg_temp.chk('project A: its storage paths are queued (doc, cover, entry file; each with a display copy)','6',(select count(*) from private.storage_deletions where path like pa||'/%')::text);
+ perform pg_temp.chk('project A: its storage paths are queued (doc, cover, entry file, moved-in file; each with a display copy)','8',(select count(*) from private.storage_deletions where path like pa||'/%' or path like pb||'/'||fm||'%')::text);
  perform pg_temp.chk('project A: one audit row, no project link, no content','1',(select count(*) from public.sensitive_events where action='project.deleted' and entity_id=pa::text and project_id is null and after->>'name'='פרויקט א בדוי' and (after-'name'-'counts')='{}'::jsonb)::text);
  perform pg_temp.chk('project A deletion counts in the audit row','1',(select (after->'counts'->>'documents')::int from public.sensitive_events where action='project.deleted' and entity_id=pa::text)::text);
  perform pg_temp.chk('project B untouched','1/1/1/1',(select (select count(*) from public.projects where id=pb)||'/'||(select count(*) from public.memberships where project_id=pb)||'/'||(select count(*) from public.tasks where project_id=pb)||'/'||(select count(*) from public.diary_entries where id=en)));
+ perform pg_temp.chk('moved-in entry, its versions and its file (project B) are gone','0',(select (select count(*) from public.diary_entries where id=em)+(select count(*) from public.diary_versions where entry_id=em)+(select count(*) from public.stored_files where id=fm))::text);
+ perform pg_temp.chk('moved-out entry in B untouched by A delete','2',(select count(*) from public.diary_versions where entry_id=mo)::text);
  perform pg_temp.chk('project B file of the active entry still there','1',(select count(*) from public.stored_files where id=fb2)::text);
 
  -- 4. immutability is intact afterwards for everybody (also after refusals and after a successful delete)

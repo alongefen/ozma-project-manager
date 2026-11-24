@@ -28,7 +28,8 @@ end $$;
 drop function private.hard_delete_allows(text);
 drop function private.hard_delete_begin(text);
 drop function private.hard_delete_end();
-drop function private.queue_project_files(uuid);
+drop function private.project_file_ids(uuid);
+drop function private.project_has_moved_out_entries(uuid);
 drop function private.queue_files(uuid[]);
 drop table private.storage_deletions;
 -- The audit action list stays wide on purpose: narrowing it fails if any '*.deleted' row exists, and those rows must stay.
