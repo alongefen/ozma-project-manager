@@ -10,7 +10,7 @@
 
 ## Next (in this order)
 
-1. **Gate G3 (Alon).** P2.8 is done ([P2.8](tasks/P2.8.md)): four roles verified on the server and in a browser at six widths. Open items for G3 are in that file: non-owner forbidden pages show the default 404 instead of `StateMessage`; DESIGN S16 archive/log screens have no task; `playwright.config.ts` needs `testMatch`.
+1. **Gate G3 (Alon).** P2.8 is done ([P2.8](tasks/P2.8.md)): four roles verified on the server and in a browser at six widths. Open items for G3 are in that file: non-owner forbidden pages show the default 404 instead of `StateMessage`; DESIGN S16 archive/log screens are waived by Alon (A-41, 24.11.2026), not built; `playwright.config.ts` needs `testMatch`.
 
 ## Open items (none blocks the next tasks)
 
