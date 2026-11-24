@@ -109,7 +109,7 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
     if (!result.ok) { setDialogError(ownerErrorText(result.error.code, levelChange)); if (result.error.code === 'CONFLICT') refresh(); return; }
     patchUser(user.id, u => ({ ...u, isOwner: enabled, revision: result.value.revision }));
     setLevelChange(null);
-    say(enabled ? `${user.fullName} הוא עכשיו אדמין` : `ההרשאה של ${user.fullName} כאדמין הוסרה`);
+    say(enabled ? `${user.fullName} הוגדר/ה כאדמין` : `ההרשאה של ${user.fullName} כאדמין הוסרה`);
   }
 
   async function doReset(e: React.FormEvent) {
@@ -228,7 +228,7 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
       </ConfirmDialog>
       <ConfirmDialog open={levelChange === 'demote'} danger title="הסרת הרשאת אדמין" confirmLabel="הסרת הרשאה" busy={dialogBusy} error={dialogError}
         onConfirm={confirmLevel} onCancel={() => setLevelChange(null)}>
-        <p>{`להסיר מ${user.fullName} את ההרשאה של אדמין? הוא יאבד את הגישה המלאה, והגישה לפרויקטים ולכספים תחזור לפי השיוכים שלו (אם היו). החשבון לא נמחק ושום דבר לא נמחק.`}</p>
+        <p>{`להסיר מ${user.fullName} את ההרשאה של אדמין? הגישה המלאה תיפסק, והגישה לפרויקטים ולכספים תחזור לפי השיוכים הקיימים (אם היו). החשבון לא נמחק ושום דבר לא נמחק.`}</p>
       </ConfirmDialog>
       <ConfirmDialog open={deactivating} danger title="השבתת חשבון" confirmLabel="השבתת חשבון" busy={dialogBusy} error={dialogError}
         onConfirm={() => setActive(false)} onCancel={() => setDeactivating(false)}>
