@@ -17,6 +17,7 @@ const ownerOnly: Record<string, () => Json> = {
   prepare_profile_update: () => ({ id: ID(), expectedRevision: 1, fullName: 'בדוי', email: `x-${ID()}@example.invalid` }),
   set_user_active: () => ({ id: ID(), active: false, expectedRevision: 1 }),
   revoke_user_sessions: () => ({ id: ID() }),
+  set_owner_level: () => ({ userId: ID(), enabled: true, expectedRevision: 1 }),
   set_membership: () => ({ userId: ID(), projectId: ID(), role: 'worker', expectedRevision: null }),
   remove_membership: () => ({ userId: ID(), projectId: ID(), expectedRevision: 1 }),
   set_finance_access: () => ({ userId: ID(), projectId: ID(), enabled: true, expectedRevision: 1 }),
@@ -31,7 +32,7 @@ const ownerOnly: Record<string, () => Json> = {
 // Callable by authorised project members; the project gate hides foreign projects (NOT_FOUND) or refuses by role.
 const projectScoped = ['update_project', 'create_task', 'update_task', 'set_task_completed', 'delete_task', 'begin_upload', 'create_document', 'create_entry', 'correct_entry', 'move_entry', 'cancel_entry', 'create_transaction', 'update_transaction', 'cancel_transaction', 'set_finance_link', 'project_permissions', 'project_access_candidates', 'project_manager_names', 'get_pending_upload', 'authorize_file', 'diary_summary', 'finance_month_totals'];
 const sessionScoped = ['get_actor', 'project_cards'];
-const serviceOnly = ['system_bootstrap_owner', 'system_owner_recovered', 'system_finish_upload'];
+const serviceOnly = ['system_add_owner', 'system_bootstrap_owner', 'system_owner_recovered', 'system_finish_upload'];
 const all = [...Object.keys(ownerOnly), ...projectScoped, ...sessionScoped, ...serviceOnly];
 
 let admin: Client, anonymous: Client, people: Record<Exclude<Role, 'anonymous'>, TestActor>, a: { id: string; revision: number };

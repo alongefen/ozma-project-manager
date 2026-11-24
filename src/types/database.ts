@@ -922,8 +922,10 @@ export type Database = {
       set_project_archived: { Args: { input: Json }; Returns: Json }
       set_project_cover: { Args: { input: Json }; Returns: Json }
       set_project_status: { Args: { input: Json }; Returns: Json }
+      set_owner_level: { Args: { input: Json }; Returns: Json }
       set_task_completed: { Args: { input: Json }; Returns: Json }
       set_user_active: { Args: { input: Json }; Returns: Json }
+      system_add_owner: { Args: { input: Json }; Returns: Json }
       system_bootstrap_owner: { Args: { input: Json }; Returns: Json }
       system_finish_upload: { Args: { input: Json }; Returns: Json }
       system_owner_recovered: { Args: { input: Json }; Returns: Json }

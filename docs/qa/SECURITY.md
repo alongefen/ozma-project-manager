@@ -44,6 +44,7 @@ npx vitest run --project cloud tests/security   # cloud: needs an approved windo
 | X11 signed link 60 seconds | `tests/storage/storage.cloud.test.ts` (61 s wait, not re-run), Sec-DA (2 s link expires, tamper, other-object token) | pass |
 | X12 upload token after removal | DB | pass |
 | X13/X14 revision and retry | DB, Core | pass |
+| X17 multiple owners (OWNERS-MIGRATION) | `tests/db/owners.test.ts`, role-matrix rows for `set_owner_level` and `system_add_owner`, transactional dry run | see docs/tasks/OWNERS-MIGRATION.md |
 | X15 no writes outside functions | Sec-DA: INSERT, UPDATE, DELETE on all 17 tables for anon, service_role, outsider, worker, manager, finance manager, owner (code 42501) | pass |
 | X16 catalog check | Depth (every function classified), `tests/db/contracts.test.ts` | pass |
 | X17 login rate limit | not run (see Not checked) | open |
