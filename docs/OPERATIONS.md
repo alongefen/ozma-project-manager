@@ -5,7 +5,7 @@ Scripts that touch the cloud database live in `scripts/ops` and `scripts/import`
 | Script | Purpose | Writes |
 |---|---|---|
 | `scripts/ops/purge-demo.mjs` | remove all demo data once, before real data | yes, once; never after real data |
-| `scripts/ops/seed-accounts.mjs` | create the owner and the developer account | yes |
+| `scripts/ops/seed-accounts.mjs` | create Ben (owner) and the developer (second owner-level account) | yes |
 | `scripts/import/load-projects.mjs` | load the approved projects | yes |
 | `scripts/import/extract-website-projects.mjs` | read public website listing pages | no (local file) |
 
@@ -17,7 +17,7 @@ Access by the developer or Supabase/Vercel dashboards to client data is recorded
 
 ## Owner recovery
 
-Unchanged: Alon verifies Ben by phone on a known number, runs `system_owner_recovered` and a password reset, and hands the password over by voice. The app has no bypass.
+Alon verifies Ben by phone on a known number, runs `system_owner_recovered` and a password reset. With more than one owner the call must name the target: `{supportId, userId}` (without `userId` it fails), and hands the password over by voice. The app has no bypass.
 
 ## Standing rules
 

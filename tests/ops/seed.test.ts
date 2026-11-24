@@ -24,10 +24,10 @@ describe('seed-accounts', () => {
     const r = await seed({args, env, log: vi.fn(), print: vi.fn(), clients: c});
     expect(r.wrote).toBe(false); expect(c.admin.auth.admin.createUser).not.toHaveBeenCalled();
   });
-  it('real run: owner via bootstrap, developer via create_profile, passwords printed once and not logged', async () => {
+  it('real run: owner via bootstrap, developer via system_add_owner, passwords printed once and not logged', async () => {
     const c = clients(); const log = vi.fn(); const print = vi.fn();
     await seed({args: {...args, confirm: true, 'project-ref': PROJECT_REF}, env, log, print, clients: c});
-    expect(c.rpcs).toEqual(['system_bootstrap_owner', 'create_profile', 'complete_profile_creation']);
+    expect(c.rpcs).toEqual(['system_bootstrap_owner', 'system_add_owner']);
     const printed = print.mock.calls.map(x => x[0]).join('\n');
     expect(printed).toMatch(/owner ben@fake.test\s+\S{24}/);
     expect(log.mock.calls.join('\n')).not.toMatch(/\S{24}/);

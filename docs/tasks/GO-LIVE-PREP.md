@@ -53,3 +53,7 @@ Private (11): 2 family-name titles (flagged), plus Beer Sheva Kalaniyot, Yavne, 
 2. Developer account: option A now (recommended) or B (migration)? Can Ben deactivate it?
 3. Placeholder contact "יש להשלים" in each project: acceptable?
 4. Who creates the Management API token (Alon, in the dashboard)?
+
+## Update after migration 20261124120000 (A-43)
+
+Alon chose owner-level accounts. `seed-accounts.mjs` now creates Ben with `system_bootstrap_owner` and the developer (alon@melo-digital.com) with `system_add_owner`, both with the service key. `load-projects.mjs` no longer grants the developer anything (owners see every project). The "Developer account" options table above is superseded. Purge still needs `--include-real-users` (one non-demo login). Nothing ran on the cloud for this follow-up; tests are mocks only.
