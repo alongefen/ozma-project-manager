@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Sheet, TextField } from '@/components/ui';
+import { Button, Pin, Sheet, TextField } from '@/components/ui';
 import { createUser } from '@/features/users/logic/actions';
 import type { ProjectCard, UserRow } from '@/types/contracts';
 import { UsersMobile } from '../mobile/UsersMobile';
@@ -43,12 +43,12 @@ export function UsersManager({ users: initial, projects }: { users: UserRow[]; p
 
   return (
     <div className={css.wrap}>
-      <div className={css.toolbar}>
+      <Pin className={css.toolbar}>
         <div className={css.search}>
           <TextField label="חיפוש" type="search" placeholder="שם, אימייל או פרויקט" value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <Button onClick={() => setAdding(true)}>הוספת אדם</Button>
-      </div>
+      </Pin>
       {shown.length === 0 && <p className={css.empty}>{users.length === 0 ? 'עוד לא נוספו אנשים' : 'לא נמצאו אנשים שמתאימים לחיפוש'}</p>}
       {shown.length > 0 && (
         <>

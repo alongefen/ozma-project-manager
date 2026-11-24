@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { FinanceBook, TransactionRow } from '@/types/contracts';
-import { Button, Card, Notice } from '@/components/ui';
+import { Button, Card, Notice, Pin } from '@/components/ui';
 import { Chevron } from '../shared/Chevron';
 import { EntryForm } from '../shared/EntryForm';
 import { ExcelLink } from '../shared/ExcelLink';
@@ -64,10 +64,10 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
         <SummaryDetails book={book} balanceLabel={period === 'all' ? 'שארית בסוף התקופה' : 'שארית חודש'} />
       </Card>
 
-      <div className="fin-mactions no-print">
+      <Pin className="fin-mactions no-print">
         {book.canWrite && <Button block onClick={() => setSheet({ row: null })}>הוספת תנועה</Button>}
         <Button variant="secondary" block onClick={() => setFilterOpen(true)}><FilterIcon /> סינון{filtered && <span className="fin-count">{(filter.day !== undefined ? 1 : 0) + (filter.search ? 1 : 0)}</span>}</Button>
-      </div>
+      </Pin>
       {!book.canWrite && <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}
       {panel === 'link' && <Card><ExcelLink projectId={book.projectId} link={book.excelLink} canWrite={book.canWrite} /></Card>}
       {filtered && (

@@ -183,3 +183,6 @@
 
 /* Export, print and link sit at the left end of the page; the add button leads the filter row */
 .fin-desktop .fin-head, .fin-desktop .fin-head__actions { justify-content: flex-end; }
+
+/* The pinned filter bar keeps its own look (Pin sets the page background). */
+.ui-pin.fin-bar { background: #fafbfc; padding: 12px 28px; }

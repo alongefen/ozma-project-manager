@@ -1,5 +1,5 @@
 'use client';
-import { Button, Card, Notice } from '@/components/ui';
+import { Button, Card, Notice, Pin } from '@/components/ui';
 import { DocList } from '../shared/DocList';
 import { DocTools } from '../shared/DocTools';
 import { useFiles } from '../shared/FilesProvider';
@@ -12,10 +12,10 @@ export function FilesDesktop() {
   const items = [{ key: null, label: 'הכל', count: total }, ...CATEGORIES.map(c => ({ key: c.key, label: c.label, count: counts[c.key] }))];
   return (
     <div className="fl fl-desktop d-only">
-      <div className="fl-bar">
+      <Pin className="fl-bar">
         <h2 className="fl-bar__title">מסמכים</h2>
         {canUpload && <Button onClick={openUpload}>+ העלאת מסמך</Button>}
-      </div>
+      </Pin>
       {!canUpload && <Notice>אין הרשאה להעלות מסמכים כאן. אפשר לפתוח ולהוריד.</Notice>}
       <div className="fl-split">
         <Card panel>

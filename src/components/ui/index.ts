@@ -12,3 +12,4 @@ export { Skeleton, PageSkeleton } from './Skeleton';
 export { FormActions } from './FormActions';
 export { ConfirmDialog } from './ConfirmDialog';
 export { Sheet } from './Sheet';
+export { Pin } from './Pin';
