@@ -6,7 +6,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'primary' | 'secondary' | 'danger';
   size?: 'normal' | 'small';
   block?: boolean;
-  /** `add` puts the plus before the label: every "create" button (new report, add movement...) uses it. */
+  /** `add` puts the plus at the left of the label (the end of the text in RTL): every "create" button (new report, add movement...) uses it. */
   icon?: 'add';
 };
 
@@ -14,5 +14,5 @@ export function Button({ variant = 'primary', size = 'normal', block, icon, clas
   const classes = ['ui-btn', variant === 'secondary' && 'ui-btn--secondary', variant === 'danger' && 'ui-btn--danger', size === 'small' && 'ui-btn--small', block && 'ui-btn--block', className]
     .filter(Boolean)
     .join(' ');
-  return <button type={type} className={classes} {...rest}>{icon === 'add' && <AddIcon size={18} />}{children}</button>;
+  return <button type={type} className={classes} {...rest}>{children}{icon === 'add' && <AddIcon size={18} />}</button>;
 }

@@ -22,7 +22,7 @@ Header structure: top-level routes show the phone shell header and, on desktop, 
 | 10 | Create buttons | "+ " typed in some labels (diary, tasks, files), none in others, no icon anywhere | `Button icon="add"` on all create buttons, phone and desktop; "+ " removed | fixed |
 | 11 | Finance desktop toolbar | Print had no icon while export had one | printer icon added | fixed |
 | 12 | Finance phone and desktop rows | Delete before edit in the DOM on finance and diary, but task cards had edit first | one row order: print, export, delete, edit | fixed |
-| 14 | Pinned rows (desktop) | The create button sat at the far left on diary and projects but at the right on users, documents, tasks and finance | `ui-lead` on every create button: far left of the row, always | fixed |
+| 14 | Pinned rows (desktop) | The create button sat at the far left on diary and projects but at the right on users, documents, tasks and finance | create button first (rightmost) in every pinned row, plus icon at the left of the label (Alon, 24.11); project creation got the plus | fixed |
 | 15 | Task wording | "משימה חדשה" on desktop, "פתק חדש" on phone, in windows and dialogs | Alon decided (24.11): "משימה" everywhere; user-facing "פתק" replaced | fixed |
 | 13 | Tasks desktop | Pinned bar kept `space-between` for a title that is gone | bar is the button only, at the start | fixed |
 

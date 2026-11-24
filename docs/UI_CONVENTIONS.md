@@ -47,7 +47,7 @@ The same action looks and sits the same on every screen. `tests/screens/ui/one-l
 
 | Action | Icon (`ActionIcons`) | Control |
 | --- | --- | --- |
-| Create / add | plus (`AddIcon`) | primary `Button icon="add"`, label "הוספת ..." / "... חדש". In the pinned action row: always the far left on desktop (class `ui-lead`, the end of the row in RTL, like the actions of an inner header), full width on phone. Never "+ " typed into the label |
+| Create / add | plus (`AddIcon`) | primary `Button icon="add"`, label "הוספת ..." / "... חדש". In the pinned action row: always the first, rightmost control of the row, on every screen and on desktop (class `ui-lead`, or first in the DOM); full width on phone. The plus sits at the left of the label. Never "+ " typed into the label |
 | Edit | pen (`EditIcon`) | in a row or card: `IconButton`. In a section header on desktop: secondary small `Button` with the pen and the words "עריכת ..." |
 | Delete, cancel an entry, remove access | bin (`DeleteIcon`) | in a row: `IconButton tone="danger"`. Always opens `ConfirmDialog` (danger confirm button, "חזרה" to back out), says what is kept, never deletes data (A-12) |
 | Print | printer (`PrintIcon`) | prints data only; `IconButton` in a row or on the phone, secondary `Button` with the printer on a desktop toolbar |
