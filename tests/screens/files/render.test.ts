@@ -33,16 +33,16 @@ describe('הרשאות במסך', () => {
     const menu = renderToStaticMarkup(h(DocActions, { doc: row('a'), isOwner: false, onDone() {}, onAccess() {}, onArchive() {} }));
     expect(menu).toContain('פתיחה');
     expect(menu).toContain('/api/storage/files/file-a?download=1');
-    expect(menu).not.toContain('>גישה<');
-    expect(menu).not.toContain('לארכיון');
+    expect(menu).not.toContain('>הרשאות<');
+    expect(menu).not.toContain('העבר לארכיון');
   });
   it('בן: גישה וארכיון', () => {
     const html = page({ canUpload: true, isOwner: true });
     expect(html).toContain('גישה: כל המשויכים');
     expect(html).toContain('לארכיון');
     const menu = renderToStaticMarkup(h(DocActions, { doc: row('a'), isOwner: true, onDone() {}, onAccess() {}, onArchive() {} }));
-    expect(menu).toContain('>גישה<');
-    expect(menu).toContain('>לארכיון<');
+    expect(menu).toContain('>הרשאות<');
+    expect(menu).toContain('>העבר לארכיון<');
     expect(renderToStaticMarkup(h(DocActions, { doc: row('a', { archived: true }), isOwner: true, onDone() {}, onAccess() {}, onArchive() {} }))).toContain('>החזרה<');
   });
   it('פרויקט שהסתיים או עובד: בלי העלאה, בלי העלאה', () => {

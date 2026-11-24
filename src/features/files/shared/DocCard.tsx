@@ -47,8 +47,8 @@ export function DocActions({ doc, isOwner, onDone, onAccess, onArchive }: { doc:
     <div className="fl-menu">
       <a className="fl-menu__item" href={fileHref(doc.file.id, false)} target="_blank" rel="noopener noreferrer" onClick={onDone}>פתיחה</a>
       <a className="fl-menu__item" href={fileHref(doc.file.id, true)} download onClick={onDone}>הורדה</a>
-      {isOwner && <button type="button" className="fl-menu__item" onClick={() => { onDone(); onAccess(); }}>גישה</button>}
-      {isOwner && <button type="button" className="fl-menu__item" onClick={() => { onDone(); onArchive(); }}>{doc.archived ? 'החזרה' : 'לארכיון'}</button>}
+      {isOwner && <button type="button" className="fl-menu__item" onClick={() => { onDone(); onAccess(); }}>הרשאות</button>}
+      {isOwner && <button type="button" className="fl-menu__item" onClick={() => { onDone(); onArchive(); }}>{doc.archived ? 'החזרה' : 'העבר לארכיון'}</button>}
     </div>
   );
 }
