@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { Avatar, Card, Icon } from '@/components/ui';
+import { Card, Icon } from '@/components/ui';
 import { moreLinks } from '@/lib/navigation';
 import { SignOutButton } from '@/features/auth/SignOutButton';
+import { AccountCard } from '@/features/account/shared/AccountCard';
 import type { Actor } from '@/types/contracts';
 
 /** Phone "more": account first, owner-only links as a plain list, sign-out at the bottom (UX-19: no tabs). */
@@ -10,13 +11,7 @@ export function MoreMobile({ actor }: { actor: Actor }) {
   return (
     <div className="more m-only">
       <Card>
-        <div className="more__account">
-          <Avatar name={actor.fullName} />
-          <div>
-            <strong>{actor.fullName}</strong>
-            <span className="more__sub ltr">{actor.email}</span>
-          </div>
-        </div>
+        <AccountCard actor={actor} />
       </Card>
       {links.length > 0 && (
         <Card>

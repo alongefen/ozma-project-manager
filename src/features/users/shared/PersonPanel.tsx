@@ -1,10 +1,10 @@
 'use client';
 import { useState } from 'react';
 import { Badge, Button, ConfirmDialog, DeleteIcon, IconButton, Notice, TextField } from '@/components/ui';
-import { removeMembership, resetPassword, setFinanceAccess, setMembership, setOwnerLevel, setUserActive } from '@/features/users/logic/actions';
+import { removeMembership, resetPassword, setFinanceAccess, setMembership, setOwnerLevel, setUserActive, updateUser } from '@/features/users/logic/actions';
 import { Select } from '@/features/projects/shared/Select';
 import type { ProjectCard, ProjectRole, Result, UserAssignment, UserRow } from '@/types/contracts';
-import { ADMIN_LABEL, ROLE_LABEL, addableProjects, adminControls, errorText, ownerErrorText, statusLabel, validatePassword } from './view-model';
+import { ADMIN_LABEL, ROLE_LABEL, addableProjects, adminControls, errorText, ownerErrorText, statusLabel, validateName, validatePassword } from './view-model';
 import css from './PersonPanel.module.css';
 
 type Props = {
@@ -37,6 +37,10 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState<string | undefined>();
   const [resetBusy, setResetBusy] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [nameValue, setNameValue] = useState(user.fullName);
+  const [nameError, setNameError] = useState<string | undefined>();
+  const [nameBusy, setNameBusy] = useState(false);
   const [levelChange, setLevelChange] = useState<'promote' | 'demote' | null>(null);
   const controls = adminControls(user, users, viewerId);
 
@@ -98,6 +102,22 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
     patchUser(user.id, u => ({ ...u, isActive: active, isOwner: active ? u.isOwner : false, revision: result.value.revision }));
     setDeactivating(false);
     say(active ? 'החשבון הופעל מחדש' : 'החשבון הושבת');
+  }
+
+  async function saveName(e: React.FormEvent) {
+    e.preventDefault();
+    if (nameBusy) return;
+    const problem = validateName(nameValue);
+    setNameError(problem);
+    if (problem) return;
+    setNameBusy(true);
+    // Same email: the profile update changes only the name and checks the row revision.
+    const result = await updateUser({ id: user.id, expectedRevision: user.revision, fullName: nameValue.trim(), email: user.email });
+    setNameBusy(false);
+    if (!result.ok) { setNameError(errorText(result.error.code)); if (result.error.code === 'CONFLICT') refresh(); return; }
+    patchUser(user.id, u => ({ ...u, fullName: nameValue.trim(), revision: result.value.revision }));
+    setRenaming(false);
+    say('השם עודכן');
   }
 
   async function confirmLevel() {
@@ -165,6 +185,15 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
         <span className={`${css.email} ltr`} dir="ltr">{user.email}</span>
         <Badge tone={user.isActive ? 'active' : 'gray'}>{statusLabel(user)}</Badge>
       </div>
+      {renaming ? (
+        <form className={css.add} onSubmit={saveName} noValidate>
+          <TextField label="שם מלא" value={nameValue} onChange={e => setNameValue(e.target.value)} error={nameError} autoComplete="off" hint="דיווחים שכבר נשמרו נשארים עם השם שהיה בעת הדיווח." />
+          <div className={css.row}>
+            <Button type="submit" disabled={nameBusy}>{nameBusy ? 'שומר…' : 'שמירה'}</Button>
+            <Button variant="secondary" disabled={nameBusy} onClick={() => { setRenaming(false); setNameValue(user.fullName); setNameError(undefined); }}>ביטול</Button>
+          </div>
+        </form>
+      ) : <div className={css.row}><Button size="small" variant="secondary" onClick={() => { setNameValue(user.fullName); setRenaming(true); }}>עריכת שם</Button></div>}
 
       {user.isOwner ? <><Notice>{`${ADMIN_LABEL} רואה ומנהל הכול: כל הפרויקטים, הכספים והמסמכים, וגם אדמינים אחרים. הוא לא משויך לפרויקט מסוים.`}</Notice>{accountSection}</> : (
         <>

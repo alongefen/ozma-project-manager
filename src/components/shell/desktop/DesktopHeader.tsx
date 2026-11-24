@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { screenTitle } from '@/lib/navigation';
@@ -10,7 +11,7 @@ export function DesktopHeader({ fullName, children }: { fullName: string; childr
     <header className="d-header d-only">
       <span>סביבת עבודה / {screenTitle(pathname)}</span>
       <div className="d-header__account">
-        <span>{fullName}</span>
+        <Link href="/more" title="החשבון שלי">{fullName}</Link>
         {children}
       </div>
     </header>

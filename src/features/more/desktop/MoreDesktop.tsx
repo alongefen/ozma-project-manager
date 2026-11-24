@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { Avatar, Card, Icon } from '@/components/ui';
+import { Card, Icon } from '@/components/ui';
 import { moreLinks } from '@/lib/navigation';
+import { AccountCard } from '@/features/account/shared/AccountCard';
 import type { Actor } from '@/types/contracts';
 
 /** Desktop "more" (direct link only): two panels. Sign-out lives in the desktop header. */
@@ -10,13 +11,7 @@ export function MoreDesktop({ actor }: { actor: Actor }) {
     <div className="more d-only">
       <Card panel>
         <h2>החשבון שלי</h2>
-        <div className="more__account" style={{ marginTop: 16 }}>
-          <Avatar name={actor.fullName} />
-          <div>
-            <strong>{actor.fullName}</strong>
-            <span className="more__sub ltr">{actor.email}</span>
-          </div>
-        </div>
+        <AccountCard actor={actor} />
       </Card>
       {links.length > 0 && (
         <Card panel>
