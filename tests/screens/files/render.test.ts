@@ -9,6 +9,7 @@ vi.mock('@/features/files/logic/actions', () => ({ createDocument: vi.fn(), setD
 import { FilesProvider } from '@/features/files/shared/FilesProvider';
 import { FilesMobile } from '@/features/files/mobile/FilesMobile';
 import { FilesDesktop } from '@/features/files/desktop/FilesDesktop';
+import { DocActions } from '@/features/files/shared/DocCard';
 
 const row = (id: string, over: Partial<DocumentRow> = {}): DocumentRow => ({
   id, projectId: '11111111-1111-4111-8111-111111111111', category: 'plans', uploadedByName: 'דנה', createdAt: '2026-11-23T08:00:00.000Z',
@@ -26,20 +27,29 @@ describe('הרשאות במסך', () => {
   it('מנהל: העלאה, פתיחה והורדה, בלי גישה וארכיון', () => {
     const html = page({ canUpload: true, isOwner: false });
     expect(html).toContain('העלאת מסמך');
-    expect(html).toContain('/api/storage/files/file-a?download=1');
-    expect(html).not.toContain('>גישה<');
+    expect(html).toContain('href="/api/storage/files/file-a"');
+    expect(html).not.toContain('גישה:');
     expect(html).not.toContain('לארכיון');
+    const menu = renderToStaticMarkup(h(DocActions, { doc: row('a'), isOwner: false, onDone() {}, onAccess() {}, onArchive() {} }));
+    expect(menu).toContain('פתיחה');
+    expect(menu).toContain('/api/storage/files/file-a?download=1');
+    expect(menu).not.toContain('>גישה<');
+    expect(menu).not.toContain('לארכיון');
   });
   it('בן: גישה וארכיון', () => {
     const html = page({ canUpload: true, isOwner: true });
-    expect(html).toContain('>גישה<');
+    expect(html).toContain('גישה: כל המשויכים');
     expect(html).toContain('לארכיון');
+    const menu = renderToStaticMarkup(h(DocActions, { doc: row('a'), isOwner: true, onDone() {}, onAccess() {}, onArchive() {} }));
+    expect(menu).toContain('>גישה<');
+    expect(menu).toContain('>לארכיון<');
+    expect(renderToStaticMarkup(h(DocActions, { doc: row('a', { archived: true }), isOwner: true, onDone() {}, onAccess() {}, onArchive() {} }))).toContain('>החזרה<');
   });
   it('פרויקט שהסתיים או עובד: בלי העלאה, בלי העלאה', () => {
     const html = page({ canUpload: false, isOwner: false });
     expect(html).not.toContain('העלאת מסמך');
     expect(html).toContain('אין הרשאה להעלות');
-    expect(html).toContain('פתיחה');
+    expect(html).toContain('href="/api/storage/files/file-a"'); // still can open
   });
   it('בטלפון: שורת סינון (חיפוש, קטגוריה) והרשימה, בלי שורת לשוניות ובלי תיבת סימון לארכיון', () => {
     const html = page({ canUpload: true, isOwner: true });
