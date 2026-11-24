@@ -11,14 +11,16 @@
 .cubeLink { min-height: 44px; display: inline-flex; align-items: center; color: var(--nav-active-ink); font-weight: 700; text-decoration: none; }
 @media (min-width: 1024px) { .cubeFigures { grid-template-columns: repeat(5, minmax(0, 1fr)); } .cube { padding: 20px 25px; } }
 .browser { display: grid; gap: 12px; }
-.tools { display: grid; gap: 10px; max-width: 520px; }
-.searchRow { display: flex; align-items: flex-end; gap: 10px; }
-.search { min-width: 0; flex: 1; }
+/* One bar, as on the diary page: search and filter at the start, "new project" at the far end of the same line. */
+.tools { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'search lead' 'seg seg'; align-items: end; gap: 10px; max-width: 520px; }
+.search { grid-area: search; }
+.seg { grid-area: seg; }
+.lead { grid-area: lead; }
 .seg { display: grid; grid-template-columns: repeat(3, 1fr); padding: 4px; gap: 4px; background: #e9edf0; border-radius: 12px; }
 .seg button { min-height: 44px; border: 0; border-radius: 9px; background: transparent; color: #55626a; font: inherit; font-weight: 700; cursor: pointer; }
 .seg button[aria-pressed='true'] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px #0002; }
 .count { margin: 0; font-size: 13px; color: var(--muted); }
-@media (min-width: 1024px) { .tools { grid-template-columns: minmax(240px, 400px) 280px; max-width: none; justify-content: start; gap: 16px; align-items: end; } }
+@media (min-width: 1024px) { .tools { display: flex; max-width: none; gap: 16px; align-items: flex-end; } .search { flex: 0 1 400px; min-width: 240px; } .seg { flex: 0 0 280px; } .lead { margin-inline-start: auto; } }
 .cubeTitle { font-size: 17px; font-weight: 800; }
 .cubeRows { margin: 0; display: grid; gap: 8px; }
 .cubeRows > div { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }

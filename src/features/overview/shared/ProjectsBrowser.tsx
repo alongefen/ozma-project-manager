@@ -15,17 +15,15 @@ export function ProjectsBrowser({ projects, isOwner }: { projects: ProjectCard[]
   return (
     <div className={css.browser}>
       <Pin className={css.tools}>
-        <div className={css.searchRow}>
-          <div className={css.search}>
-            <TextField label="חיפוש פרויקט, לקוח או כתובת" type="search" value={search} onChange={e => setSearch(e.target.value)} />
-          </div>
-          {isOwner && <span className="m-only"><NewProjectButton /></span>}
+        <div className={css.search}>
+          <TextField label="חיפוש פרויקט, לקוח או כתובת" type="search" value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <div className={css.seg} role="group" aria-label="סינון לפי סטטוס">
           {STATUS_OPTIONS.map(o => (
             <button key={o.value} type="button" aria-pressed={status === o.value} onClick={() => setStatus(o.value)}>{o.label}</button>
           ))}
         </div>
+        {isOwner && <span className={css.lead}><NewProjectButton /></span>}
       </Pin>
       <p className={css.count} aria-live="polite">{filtering ? `${shown.length} מתוך ${projects.length} פרויקטים` : `${projects.length} פרויקטים`}</p>
       {shown.length === 0 && filtering
