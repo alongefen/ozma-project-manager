@@ -147,7 +147,7 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
 
   return (
     <>
-      <span className={css.trigger}><Button onClick={() => setOpen(true)}>פרויקט חדש</Button></span>
+      <span className={css.trigger}><Button icon="add" onClick={() => setOpen(true)}>פרויקט חדש</Button></span>
       <Sheet open={open} onClose={requestClose} title="פרויקט חדש" dismissible={!busy}>
         <div className={css.wizard}>
           <div className={css.progress} aria-label={`שלב ${step + 1} מתוך ${STEPS.length}`}>

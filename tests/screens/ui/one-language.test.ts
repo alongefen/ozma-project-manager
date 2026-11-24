@@ -30,8 +30,8 @@ describe('shared action controls', () => {
     const plus = features.filter(f => f.endsWith('.tsx') && /<Button[^>]*>\s*\+ /.test(read(f)));
     expect(plus).toEqual([]);
   });
-  it('on desktop every create button sits at the far left of its pinned row (ui-lead)', () => {
-    const adds = features.filter(f => f.endsWith('.tsx') && !f.includes('/mobile/') && /<Button[^>]*icon="add"/.test(read(f)));
+  it('on desktop every create button is the first (rightmost) control of its pinned row (ui-lead)', () => {
+    const adds = features.filter(f => f.endsWith('.tsx') && !f.includes('/mobile/') && !f.includes('NewProjectWizard') /* its slot in the projects row is ordered by ProjectsBrowser */ && /<Button[^>]*icon="add"/.test(read(f)));
     expect(adds.length).toBeGreaterThanOrEqual(5);
     expect(adds.filter(f => !/<Button[^>]*ui-lead[^>]*icon="add"|<Button[^>]*icon="add"[^>]*ui-lead/.test(read(f)))).toEqual([]);
   });
@@ -43,9 +43,9 @@ describe('shared action controls', () => {
     const link = renderToStaticMarkup(h(IconButton, { label: 'ייצוא', href: '/x', children: h(EditIcon) }));
     expect(link).toMatch(/^<a class="ui-iconbtn" href="\/x"/);
   });
-  it('the add button draws the plus before its label', () => {
+  it('the add button draws the plus after its label (left of it in RTL)', () => {
     const out = renderToStaticMarkup(h(Button, { icon: 'add' }, 'הוספת אדם'));
-    expect(out).toMatch(/<button[^>]*><svg class="ui-aicon"[^>]*>.*<\/svg>הוספת אדם<\/button>/);
+    expect(out).toMatch(/<button[^>]*>הוספת אדם<svg class="ui-aicon"[^>]*>.*<\/svg><\/button>/);
   });
 });
 

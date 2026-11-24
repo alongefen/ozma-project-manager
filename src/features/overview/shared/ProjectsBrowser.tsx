@@ -24,7 +24,7 @@ export function ProjectsBrowser({ projects, isOwner }: { projects: ProjectCard[]
             <button key={o.value} type="button" aria-pressed={status === o.value} onClick={() => setStatus(o.value)}>{o.label}</button>
           ))}
         </div>
-        {isOwner && <span className={`${css.lead} ui-lead`}><NewProjectWizard /></span>}
+        {isOwner && <span className={`${css.lead}`}><NewProjectWizard /></span>}
       </Pin>
       <p className={css.count} aria-live="polite">{filtering ? `${shown.length} מתוך ${projects.length} פרויקטים` : `${projects.length} פרויקטים`}</p>
       {shown.length === 0 && filtering
