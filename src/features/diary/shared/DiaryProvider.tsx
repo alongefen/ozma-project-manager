@@ -17,8 +17,10 @@ export const useDiary = () => { const c = useContext(DiaryContext); if (!c) thro
 export function DiaryProvider({ screen, startOpen, closeHref, children }: { screen: DiaryScreen; startOpen?: boolean; closeHref?: string; children: ReactNode }) {
   const router = useRouter();
   const [dialog, setDialog] = useState<{ row: DiaryRow | null } | null>(startOpen && screen.canReport ? { row: null } : null);
-  const close = () => { setDialog(null); if (closeHref) router.replace(closeHref); };
-  const done = () => { setDialog(null); if (closeHref) router.replace(closeHref); else router.refresh(); };
+  // The list is already on screen behind the window, so closing only fixes the address bar (no navigation, no reload).
+  // Next's router follows history.replaceState, so a later refresh or link click still behaves.
+  const close = () => { setDialog(null); if (closeHref) window.history.replaceState(null, '', closeHref); };
+  const done = () => { close(); router.refresh(); };
   const value: Ctx = { openNew: () => setDialog({ row: null }), openEdit: row => setDialog({ row }) };
   const row = dialog?.row ?? null;
   return (
