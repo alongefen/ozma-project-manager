@@ -1,6 +1,6 @@
 # OWNERS-MIGRATION: several owner-level accounts
 
-**Status:** code ready; NOT applied to the cloud (D31 yes pending). Cost 0.
+**Status:** APPLIED to the cloud project on 24.11.2026 after Alon's direct yes (via the Supabase MCP `apply_migration`, name `multiple_owners`; the history version is assigned by the tool, not the file's timestamp). Cost 0.
 
 ## What changes
 - `20261124120000_multiple_owners.sql`: drops unique index `one_owner`; adds audit action `owner.demoted`;
@@ -16,7 +16,10 @@
 ## Evidence
 - Dry run in ONE cloud transaction that always ends in an exception (nothing persists), Alon's yes 24.11.2026:
   45 of 46 checks passed; the 46th was a test-setup slip (actor without a profile got UNAUTHENTICATED instead of FORBIDDEN, still refused). Script: `tests/db/support/owners-dryrun.sql` after the migration text.
-- `tests/db/owners.test.ts` (real JWTs, fake data): runs after apply.
+- After apply, read-only check: 294 profiles, 1 owner, 1611 events (unchanged); `one_owner` gone; `set_owner_level` executable by authenticated only, `system_add_owner` by service_role only; advisors show only the existing pattern (set_owner_level joins the intentional authenticated SECURITY DEFINER set, guarded by `require_owner`).
+- `tests/db/owners.test.ts` (real JWTs, fake data): 5/5 pass. With `tests/db/permissions.test.ts`, `tests/depth/role-matrix.cloud.test.ts` and `tests/security/data-api.cloud.test.ts`: 110/110 pass. `tests/security/http.cloud.test.ts` not run (needs `npm run build`).
+- The rollback SQL was reviewed against the original function text but NOT executed (a real execution would have meant a second change to a no-backup DB); the forward change was dry-run in a rolled-back transaction instead.
+- A first, failed test run left 4 fake owners; they were deactivated and demoted by hand (SQL on `p12-*@example.invalid` rows); the final DB has 1 owner.
 - Not checked: the "last owner" guard against a non-self actor (unreachable through the API, since self-targeting is refused and a deactivated owner cannot act); UI label "אדמין" (not done, UI untouched).
 
 ## Review notes (accepted)

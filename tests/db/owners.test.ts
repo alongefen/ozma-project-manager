@@ -20,7 +20,7 @@ async function newOwner(label: string): Promise<TestActor> {
   await value(admin, 'system_add_owner' as never, { userId: data.user.id, fullName: `אדמין בדיקה ${label}` });
   return login(email, password);
 }
-const revision = async (id: string) => (await admin.from('profiles').select('revision').eq('id', id).single()).data!.revision;
+const revision = async (id: string) => (await ben.client.from('profiles').select('revision').eq('id', id).single()).data!.revision;
 
 beforeAll(async () => {
   ({ admin, anonymous } = clients()); ben = await owner(admin); user = await actor(admin, ben.client, 'plain');
@@ -29,7 +29,7 @@ beforeAll(async () => {
 // Leave no owner-level account behind: deactivating also removes the owner level.
 afterAll(async () => {
   for (const id of made) {
-    const row = (await admin.from('profiles').select('is_owner,is_active,revision').eq('id', id).maybeSingle()).data;
+    const row = (await ben.client.from('profiles').select('is_owner,is_active,revision').eq('id', id).maybeSingle()).data;
     if (row?.is_active) await value(ben.client, 'set_user_active', { id, active: false, expectedRevision: row.revision });
   }
 }, 60_000);
@@ -43,7 +43,7 @@ describe.sequential('כמה בעלים (OWNERS-MIGRATION)', () => {
     const first = await value<{ id: string; revision: number }>(admin, 'system_add_owner' as never, input);
     const second = await value<{ id: string; revision: number }>(admin, 'system_add_owner' as never, input);
     expect(second).toEqual(first);
-    const events = await admin.from('sensitive_events').select('id').eq('action', 'owner.created').eq('entity_id', id);
+    const events = await ben.client.from('sensitive_events').select('id').eq('action', 'owner.created').eq('entity_id', id);
     expect(events.data).toHaveLength(1);
     await deny(admin, 'system_add_owner', { userId: randomUUID(), fullName: 'x' }, 'NOT_FOUND');
     await deny(admin, 'system_bootstrap_owner', input, 'CONFLICT');
@@ -65,7 +65,7 @@ describe.sequential('כמה בעלים (OWNERS-MIGRATION)', () => {
     await deny(peer.client, 'set_owner_level', { userId: peer.id, enabled: false, expectedRevision: await revision(peer.id) }, 'FORBIDDEN');
     await value(peer.client, 'set_owner_level' as never, { userId: ben.id, enabled: true, expectedRevision: await revision(ben.id) }); // already owner: no-op
     await value(ben.client, 'set_owner_level' as never, { userId: peer.id, enabled: false, expectedRevision: await revision(peer.id) });
-    const demoted = await admin.from('sensitive_events').select('id').eq('action', 'owner.demoted').eq('entity_id', peer.id);
+    const demoted = await ben.client.from('sensitive_events').select('id').eq('action', 'owner.demoted').eq('entity_id', peer.id);
     expect(demoted.data).toHaveLength(1);
     await deny(peer.client, 'create_profile', { requestId: randomUUID(), email: 'x@example.invalid', fullName: 'x' }, 'FORBIDDEN');
   });
@@ -74,7 +74,7 @@ describe.sequential('כמה בעלים (OWNERS-MIGRATION)', () => {
     await deny(ben.client, 'set_user_active', { id: ben.id, active: false, expectedRevision: await revision(ben.id) }, 'FORBIDDEN');
     await value(ben.client, 'set_user_active', { id: victim.id, active: false, expectedRevision: await revision(victim.id) });
     expect(await value(victim.client, 'get_actor')).toBeNull();
-    const row = (await admin.from('profiles').select('is_active,is_owner').eq('id', victim.id).single()).data!;
+    const row = (await ben.client.from('profiles').select('is_active,is_owner').eq('id', victim.id).single()).data!;
     expect(row).toEqual({ is_active: false, is_owner: false });
     await value(ben.client, 'revoke_user_sessions', { id: (await newOwner('reset')).id }); // password-reset path accepts an owner target
   });
