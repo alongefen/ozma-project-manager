@@ -1,6 +1,5 @@
 import type { TransferMonth } from '@/types/contracts';
-import { Card } from '@/components/ui';
-import { DesktopTitle } from '../shared/Parts';
+import { Card, DesktopTitle } from '@/components/ui';
 import { NO_TRANSFERS, transferViews } from '../shared/view-model';
 import css from '../shared/Overview.module.css';
 import d from './Desktop.module.css';

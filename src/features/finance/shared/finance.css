@@ -136,9 +136,6 @@
 }
 
 /* Icons, summary header, dialog */
-.fin-iconbtn { display: inline-grid; place-items: center; min-width: 44px; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--nav-active-ink); cursor: pointer; }
-.fin-iconbtn:hover { background: #f3f8fb; }
-.fin-iconbtn--excel { border-color: transparent; background: transparent; margin: -8px; }
 .fin-msum__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 6px; }
 .fin-msum__head h2 { font-size: 17px; }
 .fin-item__bottom { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -146,8 +143,6 @@
 
 /* Row actions, export, cancel confirmation */
 .fin-rowactions { display: inline-flex; gap: 8px; }
-.fin-iconbtn--danger { color: var(--err-ink); }
-.fin-iconbtn--danger:hover { background: var(--err-bg); }
 .fin-confirm { display: grid; gap: 14px; }
 .fin-confirm__row { margin: 0; display: grid; border: 1px solid var(--line); border-radius: 10px; }
 .fin-confirm__row > div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; }
@@ -175,8 +170,6 @@
 .fin-chip button { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 50%; background: transparent; color: inherit; font-size: 20px; cursor: pointer; }
 .fin-chips__clear { min-height: 36px; border: 0; background: transparent; color: var(--nav-active-ink); font-weight: 700; cursor: pointer; text-decoration: underline; }
 .fin-msum__icons { display: flex; align-items: center; gap: 2px; margin: -6px; }
-.fin-iconbtn--plain { border-color: transparent; background: transparent; color: var(--ink); }
-.fin-mobile .ui-btn .fin-icon { margin-inline-end: 2px; }
 .fin-fbar .ui-btn, .fin-fbar input { min-height: 46px; box-sizing: border-box; }
 
 /* Active-filter chips sit on the centre line of the search box and the filter button */

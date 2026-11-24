@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, ConfirmDialog, DateField, Notice, SelectField, Sheet, TextField } from '@/components/ui';
+import { Button, ConfirmDialog, DateField, DeleteIcon, IconButton, Notice, SelectField, Sheet, TextField } from '@/components/ui';
 import { listUsers, removeMembership, setFinanceAccess, setMembership } from '@/features/users/logic/actions';
 import { createProject } from '../logic/actions';
 import { CoverControl } from './CoverControl';
@@ -214,7 +214,7 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
                                 <input type="checkbox" checked={p.finance} disabled={p.role !== 'manager'} onChange={e => chooseFinance(p, e.target.checked)} />
                                 <span>גישה לכספים</span>
                               </label>
-                              <button type="button" className={css.removeBtn} onClick={() => setRemoving(p)} aria-label={`הסרת ${p.fullName} מהפרויקט`}>הסרה</button>
+                              <IconButton tone="danger" label={`הסרת ${p.fullName} מהפרויקט`} onClick={() => setRemoving(p)}><DeleteIcon /></IconButton>
                             </li>
                           ))}
                         </ul>

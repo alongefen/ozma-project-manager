@@ -32,7 +32,9 @@ describe('/users page', () => {
     listUsers.mockResolvedValue({ ok: true, value: [] });
     listProjects.mockResolvedValue({ ok: true, value: [] });
     const el = await UsersPage();
-    expect(el.props.users).toEqual([]);
+    const [title, manager] = el.props.children; // the desktop title row, then the manager
+    expect(title.props.title).toBe('עובדים והרשאות');
+    expect(manager.props.users).toEqual([]);
     expect(listProjects).toHaveBeenCalledWith(expect.anything(), { archived: false });
   });
   it('fails loudly rather than showing partial data', async () => {

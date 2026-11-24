@@ -10,7 +10,7 @@ export function TasksMobile() {
   const [showDone, setShowDone] = useState(true);
   return (
     <div className="tk tk-mobile m-only">
-      {canWrite ? <Pin><Button block onClick={openCreate}>פתק חדש</Button></Pin> : <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}
+      {canWrite ? <Pin><Button block icon="add" onClick={openCreate}>פתק חדש</Button></Pin> : <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}
       <TaskGroup headingId="tk-m-open" title="לביצוע" tasks={lists.open} empty="אין משימות לביצוע" />
       <button type="button" className="tk-toggle" aria-expanded={showDone} onClick={() => setShowDone(v => !v)}>
         {showDone ? 'הסתרת משימות שבוצעו' : `הצגת משימות שבוצעו (${lists.completed.length})`}

@@ -1,5 +1,6 @@
 import type { HomeData } from '@/types/contracts';
-import { Counters, Cube, DesktopTitle } from '../shared/Parts';
+import { DesktopTitle } from '@/components/ui';
+import { Counters, Cube } from '../shared/Parts';
 import { ProjectsBrowser } from '../shared/ProjectsBrowser';
 import d from './Desktop.module.css';
 

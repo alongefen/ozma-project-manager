@@ -1,6 +1,6 @@
 'use client';
 import type { TaskRow } from '@/types/contracts';
-import { Button } from '@/components/ui';
+import { DeleteIcon, EditIcon, IconButton } from '@/components/ui';
 import { dueInfo } from './model';
 import { useTasks } from './TasksProvider';
 
@@ -21,8 +21,8 @@ export function TaskCard({ task }: { task: TaskRow }) {
       </div>
       {canWrite && (
         <div className="tk-card__actions">
-          <Button variant="secondary" size="small" onClick={() => openEdit(task)} disabled={pending}>עריכה</Button>
-          {canDelete && <Button variant="secondary" size="small" onClick={() => askDelete(task)} disabled={pending}>מחיקה</Button>}
+          {canDelete && <IconButton tone="danger" label="מחיקה" onClick={() => askDelete(task)} disabled={pending}><DeleteIcon /></IconButton>}
+          <IconButton label="עריכה" onClick={() => openEdit(task)} disabled={pending}><EditIcon /></IconButton>
         </div>
       )}
     </li>

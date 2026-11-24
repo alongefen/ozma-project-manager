@@ -17,3 +17,6 @@ export { DateField } from './DateField';
 export { SelectField } from './SelectField';
 export type { SelectOption } from './SelectField';
 export { InnerPageSkeleton } from './InnerPageSkeleton';
+export { IconButton } from './IconButton';
+export { DesktopTitle } from './DesktopTitle';
+export { AddIcon, DeleteIcon, EditIcon, ExcelIcon, ExportIcon, FilterIcon, LinkIcon, PrintIcon } from './ActionIcons';

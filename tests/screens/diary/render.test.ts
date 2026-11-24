@@ -20,7 +20,7 @@ const row = (over: Partial<DiaryRow> = {}): DiaryRow => ({
 const screen = (over: Partial<DiaryScreen> = {}): DiaryScreen => ({
   rows: [row()], nextCursor: null, filter: {}, projects: [{ id: P, name: 'בית ספר' }], canReport: true, formProjects: [{ id: P, name: 'בית ספר' }], isOwner: false, today: '2026-11-23', basePath: '/diary', ...over,
 });
-const html = (s: DiaryScreen) => renderToStaticMarkup(h(DiaryProvider, { screen: s, children: [h(DiaryMobile, { key: 'm', screen: s }), h(DiaryDesktop, { key: 'd', screen: s, title: 'יומן עבודה' })] }));
+const html = (s: DiaryScreen) => renderToStaticMarkup(h(DiaryProvider, { screen: s, children: [h(DiaryMobile, { key: 'm', screen: s }), h(DiaryDesktop, { key: 'd', screen: s })] }));
 
 import { existsSync } from 'node:fs';
 import { readFileSync } from 'node:fs';
@@ -71,12 +71,12 @@ describe('מסכי היומן', () => {
     expect(out).not.toContain('ביטול הדיווח');
     expect(out).toContain('אפשר לצפות ולהדפיס בלבד');
     expect(out).toContain('הדפסת הדיווח');
-    expect(out).toContain('dr-iconbtn');
+    expect(out).toContain('ui-iconbtn');
   });
   it('עריכה לפי הרשאת השרת בלבד, וביטול רק למי שהשרת מתיר', () => {
     expect(html(screen({ rows: [row({ canCorrect: true })] }))).toContain('עריכת הדיווח');
     expect(html(screen({ rows: [row({ canCorrect: true })] }))).not.toContain('ביטול הדיווח');
-    expect(html(screen({ rows: [row({ canCorrect: true, canMoveOrCancel: true })] }))).toContain('dr-iconbtn dr-iconbtn--danger');
+    expect(html(screen({ rows: [row({ canCorrect: true, canMoveOrCancel: true })] }))).toContain('ui-iconbtn ui-iconbtn--danger');
   });
   it('בטאב של פרויקט: בלי בחירת פרויקט, וכפתור הדיווח פותח חלון (לא עמוד)', () => {
     const out = html(screen({ projects: null, fixedProjectId: P, basePath: `/projects/${P}/diary` }));
@@ -87,5 +87,12 @@ describe('מסכי היומן', () => {
     const out = html(screen());
     expect(out.match(/m-only/g)?.length).toBe(1);
     expect(out.match(/d-only/g)?.length).toBe(1);
+  });
+  it('הכותרת בדסקטופ זהה לשאר המסכים: רק ביומן הכללי, באותה שורת כותרת (ui-ph), ובלי כותרת בטאב של פרויקט', () => {
+    const general = renderToStaticMarkup(h(DiaryProvider, { screen: screen(), children: h(DiaryDesktop, { screen: screen(), title: 'יומן עבודה' }) }));
+    expect(general).toContain('<h1 class="ui-ph__title">יומן עבודה</h1>');
+    expect(general).not.toContain('dr-bar');
+    const tab = renderToStaticMarkup(h(DiaryProvider, { screen: screen(), children: h(DiaryDesktop, { screen: screen() }) }));
+    expect(tab).not.toContain('ui-ph__title');
   });
 });

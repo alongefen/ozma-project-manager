@@ -1,7 +1,5 @@
 /* Diary screens. Tokens come from app.css. Phone and desktop share these classes. */
 .dr { display: grid; gap: 16px; min-width: 0; }
-.dr-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.dr-bar__title { font-size: 22px; font-weight: 800; margin: 0; }
 .dr-list { display: grid; gap: 16px; min-width: 0; }
 .dr-day { display: grid; gap: 10px; min-width: 0; }
 .dr-day__title { font-size: 16px; font-weight: 800; margin: 0; color: var(--muted); }
@@ -14,10 +12,6 @@
 .dr-card__body { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 16px; line-height: 1.5; }
 .dr-card__edited { margin: 0; font-size: 13px; color: var(--muted); }
 .dr-card__actions { display: flex; gap: 8px; justify-content: flex-end; } /* flex-end is the physical left in RTL, like the finance rows */
-.dr-iconbtn { display: inline-grid; place-items: center; min-width: 44px; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--nav-active-ink); cursor: pointer; text-decoration: none; }
-.dr-iconbtn:hover { background: #f3f8fb; }
-.dr-iconbtn--danger { color: var(--err-ink); }
-.dr-iconbtn--danger:hover { background: var(--err-bg); }
 .dr-files { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; min-width: 0; }
 .dr-file { display: inline-flex; gap: 6px; align-items: center; min-height: 44px; max-width: 100%; overflow-wrap: anywhere; color: var(--nav-active-ink); }
 .dr-file-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }

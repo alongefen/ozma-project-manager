@@ -4,7 +4,7 @@ Every screen uses the shared pieces below. Don't build a local copy; extend the 
 
 ## Layout and headers
 
-- **Top-level route** (`/projects`, `/more`...): the shell shows the title (phone `MobileHeader`, desktop breadcrumb). Content starts right under it.
+- **Top-level route** (`/projects`, `/finance`, `/diary`, `/users`, `/more`): the phone shell header shows the title; on desktop the page renders `DesktopTitle` (same `ui-ph` row, size and place as an inner header; a `h1`, never a local `h2` with its own font size). Content starts right under it. Inside a project the tab is the title: a tab renders no title row.
 - **Inner route** (two or more path segments): render `PageHeader` first, on phone and desktop. It has the back arrow (right side in RTL), the title, an optional `badge`, `actions` at the far left, and `sub` for a subtitle. The phone shell header is hidden on inner routes (`isInnerRoute`), so the title appears once. Never use `<h1>` or a text back link by hand.
 - **Back target:** a section tab (details, finance, diary of a project) goes back to the list; a sub-page (edit, permissions) goes back to its parent screen. Label it in Hebrew: "חזרה ל...".
 - **Page body:** wrap in `Page` (one 16px gap on phone, 20px on desktop). `narrow` caps forms and lists at 820px. No inline `style` for spacing.
@@ -27,7 +27,8 @@ Wherever a page scrolls, the title, the project tabs and the screen's primary ac
 | Need | Use |
 | --- | --- |
 | Surface | `Card` (`panel` on desktop sections) |
-| Buttons | `Button`: `primary` once per screen area, `secondary` for the rest, `danger` only for the confirm button of a destructive action. Targets 44px+ |
+| Buttons | `Button`: `primary` once per screen area, `secondary` for the rest, `danger` only for the confirm button of a destructive action. Targets 44px+. `icon="add"` on every create button |
+| Icon-only action | `IconButton` with an icon from `ActionIcons` (see "One language for actions"). Never a local icon or icon-button class |
 | Text inputs | `TextField` (label, hint, error under the field; `hideLabel` for compact filter rows) |
 | Date | `DateField`: shows DD/MM/YYYY, opens the app's Hebrew calendar (week starts Sunday), value is an ISO string, `name` submits it from a plain form. Never `<input type="date">` or a library picker |
 | Dropdown | `SelectField` with `options` (`value`, `label`): menu under the field on desktop, bottom sheet on the phone, keyboard (arrows, Home/End, type-ahead, Enter, Escape). `name` submits the value. Never a native `<select>` |
@@ -35,10 +36,31 @@ Wherever a page scrolls, the title, the project tabs and the screen's primary ac
 | Pop-up | `Sheet` (bottom sheet on phone, centred window on desktop). Never a custom overlay |
 | Multi-step creation | `NewProjectWizard` is the pattern: one window (`Sheet`), numbered steps that slide sideways, no scrolling inside a step, back and next in the footer, the record is saved when its last form step is confirmed and later steps apply to the saved record and can be skipped |
 | Confirm | `ConfirmDialog` for every cancel, remove, finish or archive. Say what is kept ("שום דבר לא נמחק") |
-| Empty, forbidden, error page | `StateMessage` (message plus one way back). A forbidden page shows no data |
+| Empty, forbidden, error page | `StateMessage` (message plus one way back). A forbidden page shows no data. `notFound()` is fine in a page: `(app)/not-found.tsx` renders the same `StateMessage` inside the shell (status stays 404) |
 | Inline message | `Notice` (`error` for failures; shown with text, not colour alone) |
 | Status | `Badge` |
 | Loading | `loading.tsx` with `PageSkeleton` / `Skeleton` |
+
+## One language for actions (UX-AUDIT)
+
+The same action looks and sits the same on every screen. `tests/screens/ui/one-language.test.ts` fails on a local copy.
+
+| Action | Icon (`ActionIcons`) | Control |
+| --- | --- | --- |
+| Create / add | plus (`AddIcon`) | primary `Button icon="add"`, label "הוספת ..." / "... חדש". In the pinned action row: far end on desktop, full width on phone. Never "+ " typed into the label |
+| Edit | pen (`EditIcon`) | in a row or card: `IconButton`. In a section header on desktop: secondary small `Button` with the pen and the words "עריכת ..." |
+| Delete, cancel an entry, remove access | bin (`DeleteIcon`) | in a row: `IconButton tone="danger"`. Always opens `ConfirmDialog` (danger confirm button, "חזרה" to back out), says what is kept, never deletes data (A-12) |
+| Print | printer (`PrintIcon`) | prints data only; `IconButton` in a row or on the phone, secondary `Button` with the printer on a desktop toolbar |
+| Export | tray with arrow (`ExportIcon`; `ExcelIcon` for the Excel file, Alon's glyph) | downloads a file; a separate control from print, same placement rules |
+| Filter | funnel (`FilterIcon`) | secondary `Button` in the pinned row |
+| Archive, finish, reopen, restore | none (words) | secondary `Button`, confirmed. Danger only in the confirm window |
+| Open / download a document | none | items of the row's action menu (documents), not loose buttons |
+
+- **Order in a row** (right to left): print, export, delete, edit. The destructive icon is never first under the thumb on the phone's left edge.
+- **Hierarchy:** one `primary` per screen area (the create button, or the save button of a form). Everything else is `secondary`. `danger` exists only as the confirm button of a destructive `ConfirmDialog`.
+- **Phone vs desktop:** the same icon and meaning; the phone shows icons only and full-width create buttons in the pinned row, the desktop adds the words on toolbar buttons. Neither adds a control the other lacks.
+- **Forms and windows:** `FormActions` or `ui-actions--sheet`: save first, cancel second ("ביטול"). A window that only shows a result closes with "סגירה". A confirm window backs out with "חזרה".
+- **Label:** every icon-only control has a Hebrew `label` (aria-label and tooltip). Row actions name their row ("עריכת תנועה: ...").
 
 ## Rules
 

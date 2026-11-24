@@ -23,7 +23,7 @@ export default async function ProjectDiaryPage({ params, searchParams }: { param
   return (
     <DiaryProvider screen={data.screen} startOpen={query.new === '1'} closeHref={query.new === '1' ? `/projects/${id}/diary` : undefined}>
       <DiaryMobile screen={data.screen} />
-      <DiaryDesktop screen={data.screen} title="יומן" />
+      <DiaryDesktop screen={data.screen} />
     </DiaryProvider>
   );
 }

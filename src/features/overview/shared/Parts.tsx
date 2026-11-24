@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import type { ReactNode } from 'react';
 import type { HomeData, ProjectCard } from '@/types/contracts';
 import { Badge, Card } from '@/components/ui';
 import { coverSrc } from '@/features/projects/shared/view-model';
@@ -33,21 +32,6 @@ export function Cube({ cube }: { cube: NonNullable<HomeData['financeCube']> }) {
         ))}
       </dl>
     </Card>
-  );
-}
-
-/**
- * Desktop page title row, the same size and place as the inner-page header (`ui-ph`): title on the right,
- * actions at the far left. The phone shell header already shows the title, so this is desktop only.
- */
-export function DesktopTitle({ title, children }: { title: string; children?: ReactNode }) {
-  return (
-    <div className="ui-ph d-only">
-      <div className="ui-ph__row">
-        <h1 className="ui-ph__title">{title}</h1>
-        {children && <div className="ui-ph__actions">{children}</div>}
-      </div>
-    </div>
   );
 }
 

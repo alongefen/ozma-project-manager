@@ -9,7 +9,7 @@ export function FilesMobile() {
   const { canUpload, openUpload } = useFiles();
   return (
     <div className="fl fl-mobile m-only">
-      {canUpload ? <Pin><Button block onClick={openUpload}>העלאת מסמך</Button></Pin> : <Notice>אין הרשאה להעלות מסמכים כאן. אפשר לפתוח ולהוריד.</Notice>}
+      {canUpload ? <Pin><Button block icon="add" onClick={openUpload}>העלאת מסמך</Button></Pin> : <Notice>אין הרשאה להעלות מסמכים כאן. אפשר לפתוח ולהוריד.</Notice>}
       <DocTools />
       <DocList />
     </div>

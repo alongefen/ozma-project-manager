@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Badge, Button, ConfirmDialog, Notice, TextField } from '@/components/ui';
+import { Badge, Button, ConfirmDialog, DeleteIcon, IconButton, Notice, TextField } from '@/components/ui';
 import { removeMembership, resetPassword, setFinanceAccess, setMembership, setUserActive } from '@/features/users/logic/actions';
 import { Select } from '@/features/projects/shared/Select';
 import type { ProjectCard, ProjectRole, Result, UserAssignment, UserRow } from '@/types/contracts';
@@ -158,7 +158,7 @@ export function PersonPanel({ user, projects, patchUser, say, refresh }: Props) 
                         <span>גישה לכספים</span>
                         {a.role !== 'manager' && <span className="sr-only"> (זמינה למנהל בלבד)</span>}
                       </label>
-                      <Button variant="secondary" size="small" disabled={b} onClick={() => { setDialogError(null); setRemoving(a); }}>הסרת גישה</Button>
+                      <IconButton tone="danger" label={`הסרת גישה ל${a.projectName}`} disabled={b} onClick={() => { setDialogError(null); setRemoving(a); }}><DeleteIcon /></IconButton>
                     </div>
                   </li>
                 );

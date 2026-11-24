@@ -1,7 +1,6 @@
 'use client';
 import type { DiaryRow } from '@/types/contracts';
-import { Card } from '@/components/ui';
-import { DownloadIcon, PencilIcon, PrintIcon, TrashIcon } from './DiaryIcons';
+import { Card, DeleteIcon, EditIcon, ExportIcon, IconButton, PrintIcon } from '@/components/ui';
 import { format } from '@/lib/format';
 import { Attachments } from './Attachments';
 import { editedText, reportUrl } from './model';
@@ -20,10 +19,10 @@ export function EntryCard({ row, showProject, onEdit, onCancel }: { row: DiaryRo
       {edited && <p className="dr-card__edited">{edited}</p>}
       <Attachments files={row.files} />
       <div className="dr-card__actions no-print">
-        <a className="dr-iconbtn" href={reportUrl({ kind: 'entry', entryId: row.id })} target="_blank" rel="noopener noreferrer" aria-label="הדפסת הדיווח" title="הדפסה"><PrintIcon /></a>
-        <a className="dr-iconbtn" href={reportUrl({ kind: 'entry', entryId: row.id }, { download: true })} aria-label="ייצוא הדיווח ל-PDF" title="ייצוא ל-PDF"><DownloadIcon /></a>
-        {row.canMoveOrCancel && onCancel && <button type="button" className="dr-iconbtn dr-iconbtn--danger" onClick={() => onCancel(row)} aria-label="ביטול הדיווח" title="ביטול דיווח"><TrashIcon /></button>}
-        {row.canCorrect && onEdit && <button type="button" className="dr-iconbtn" onClick={() => onEdit(row)} aria-label="עריכת הדיווח" title="עריכה"><PencilIcon /></button>}
+        <IconButton label="הדפסת הדיווח" href={reportUrl({ kind: 'entry', entryId: row.id })} target="_blank" rel="noopener noreferrer"><PrintIcon /></IconButton>
+        <IconButton label="ייצוא הדיווח ל-PDF" href={reportUrl({ kind: 'entry', entryId: row.id }, { download: true })}><ExportIcon /></IconButton>
+        {row.canMoveOrCancel && onCancel && <IconButton tone="danger" label="ביטול הדיווח" onClick={() => onCancel(row)}><DeleteIcon /></IconButton>}
+        {row.canCorrect && onEdit && <IconButton label="עריכת הדיווח" onClick={() => onEdit(row)}><EditIcon /></IconButton>}
       </div>
     </Card>
   );

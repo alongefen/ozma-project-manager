@@ -2,8 +2,7 @@
 /* Notice and both layouts share one gap. */
 .tk-root { display: grid; gap: 16px; min-width: 0; }
 .tk { display: grid; gap: 16px; min-width: 0; }
-.tk-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.tk-bar__title { font-size: 22px; font-weight: 800; margin: 0; }
+.tk-bar { display: flex; align-items: center; gap: 12px; }
 .tk-group { display: grid; gap: 12px; min-width: 0; }
 .tk-group__title { font-size: 18px; font-weight: 800; margin: 0; }
 .tk-group__count { display: inline-block; min-width: 24px; padding: 1px 8px; margin-inline-start: 6px; border-radius: 12px; background: var(--gray-bg); color: var(--gray-ink); font-size: 13px; text-align: center; }

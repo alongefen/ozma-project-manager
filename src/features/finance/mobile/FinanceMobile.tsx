@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { FinanceBook, TransactionRow } from '@/types/contracts';
-import { Button, Card, Notice, Pin } from '@/components/ui';
+import { Button, Card, DeleteIcon, EditIcon, ExcelIcon, FilterIcon, IconButton, LinkIcon, Notice, Pin, PrintIcon } from '@/components/ui';
 import { Chevron } from '../shared/Chevron';
 import { EntryForm } from '../shared/EntryForm';
 import { ExcelLink } from '../shared/ExcelLink';
@@ -13,7 +13,6 @@ import { KIND_LABELS, bookRows, visibleRows, isReduction, monthLabel, monthsNewe
 import { allExportHref, currentMonth, exportHref } from '../shared/query';
 import { EntrySheet } from '../shared/EntrySheet';
 import { CancelConfirm } from '../shared/CancelConfirm';
-import { ExcelIcon, FilterIcon, LinkIcon, PencilIcon, PrintIcon, TrashIcon } from '../shared/FinIcons';
 
 type Props = { book: FinanceBook; filteredRows: FinanceBook['filteredRows']; today: string };
 
@@ -53,9 +52,9 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
         <div className="fin-msum__head">
           <h2>{period === 'all' ? 'כל התקופה' : monthLabel(period)}</h2>
           <div className="fin-msum__icons no-print">
-            <a className="fin-iconbtn fin-iconbtn--plain" href={all ? allExportHref(filter, all.project) : exportHref(book.projectId, filter)} aria-label="ייצוא ל-Excel"><ExcelIcon /></a>
-            <button type="button" className="fin-iconbtn fin-iconbtn--plain" onClick={() => window.print()} aria-label="הדפסה"><PrintIcon /></button>
-            {!all && <button type="button" className="fin-iconbtn fin-iconbtn--plain" aria-expanded={panel === 'link'} onClick={() => toggle('link')} aria-label="קישור לקובץ Excel"><LinkIcon /></button>}
+            <IconButton plain label="ייצוא ל-Excel" href={all ? allExportHref(filter, all.project) : exportHref(book.projectId, filter)}><ExcelIcon /></IconButton>
+            <IconButton plain label="הדפסה" onClick={() => window.print()}><PrintIcon /></IconButton>
+            {!all && <IconButton plain label="קישור לקובץ Excel" aria-expanded={panel === 'link'} onClick={() => toggle('link')}><LinkIcon /></IconButton>}
           </div>
         </div>
         <div className="fin-msum__row"><span>הכנסות</span><strong className="fin-num">{shekels(book.period.income)}</strong></div>
@@ -65,7 +64,7 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
       </Card>
 
       <Pin className="fin-mactions no-print">
-        {book.canWrite && <Button block onClick={() => setSheet({ row: null })}>הוספת תנועה</Button>}
+        {book.canWrite && <Button block icon="add" onClick={() => setSheet({ row: null })}>הוספת תנועה</Button>}
         <Button variant="secondary" block onClick={() => setFilterOpen(true)}><FilterIcon /> סינון{filtered && <span className="fin-count">{(filter.day !== undefined ? 1 : 0) + (filter.search ? 1 : 0)}</span>}</Button>
       </Pin>
       {!book.canWrite && !all && <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}
@@ -103,9 +102,9 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
                 <span className="fin-item__bottom">
                   <span className="fin-item__sub fin-num">{rowDate(row)}</span>
                   {book.canWrite && (
-                    <span className="fin-rowactions no-print">
-                      {book.canCancel && <button type="button" className="fin-iconbtn fin-iconbtn--danger" onClick={() => setCancelRow(row)} aria-label={`ביטול תנועה: ${row.details}`}><TrashIcon /></button>}
-                      <button type="button" className="fin-iconbtn" onClick={() => setSheet({ row })} aria-label={`עריכת תנועה: ${row.details}`}><PencilIcon /></button>
+                    <span className="ui-iconrow no-print">
+                      {book.canCancel && <IconButton tone="danger" label={`ביטול תנועה: ${row.details}`} onClick={() => setCancelRow(row)}><DeleteIcon /></IconButton>}
+                      <IconButton label={`עריכת תנועה: ${row.details}`} onClick={() => setSheet({ row })}><EditIcon /></IconButton>
                     </span>
                   )}
                 </span>
