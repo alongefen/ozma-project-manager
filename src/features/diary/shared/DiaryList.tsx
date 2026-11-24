@@ -1,22 +1,15 @@
 'use client';
-import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import type { DiaryRow } from '@/types/contracts';
 import { Button, ConfirmDialog, Notice } from '@/components/ui';
 import { cancelEntry, listEntries } from '../logic/actions';
 import { EntryCard } from './EntryCard';
 import { useDiary } from './DiaryProvider';
-import { groupByDate, mergePage, type DiaryFilter } from './model';
+import { groupByDate, type DiaryFilter } from './model';
 
 /** The list both layouts render: grouped by work date, "load more" with the server cursor, owner-only cancel with a confirm. */
-export function DiaryList({ initial, nextCursor, filter, showProject }: { initial: DiaryRow[]; nextCursor: string | null; filter: DiaryFilter; showProject: boolean }) {
-  const router = useRouter();
-  const { openEdit } = useDiary();
-  const [, startTransition] = useTransition();
-  const [seen, setSeen] = useState(initial);
-  const [rows, setRows] = useState(initial);
-  const [cursor, setCursor] = useState(nextCursor);
-  if (seen !== initial) { setSeen(initial); setRows(initial); setCursor(nextCursor); }
+export function DiaryList({ filter, showProject }: { filter: DiaryFilter; showProject: boolean }) {
+  const { openEdit, rows, cursor, appendPage, remove, reload } = useDiary();
   const [more, setMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [removing, setRemoving] = useState<DiaryRow | null>(null);
@@ -28,7 +21,7 @@ export function DiaryList({ initial, nextCursor, filter, showProject }: { initia
     setMore(true); setError(null);
     try {
       const r = await listEntries({ ...filter, cursor });
-      if (r.ok) { setRows(cur => mergePage(cur, r.value.items)); setCursor(r.value.nextCursor); }
+      if (r.ok) appendPage(r.value.items, r.value.nextCursor);
       else setError(r.error.message);
     } catch { setError('הפעולה לא הושלמה. יש לנסות שוב'); }
     setMore(false);
@@ -39,10 +32,9 @@ export function DiaryList({ initial, nextCursor, filter, showProject }: { initia
     setBusy(true); setRemoveError(null);
     try {
       const r = await cancelEntry({ id: removing.id, expectedRevision: removing.revision });
-      if (!r.ok) { setRemoveError(r.error.message); setBusy(false); if (r.error.code === 'CONFLICT') startTransition(() => router.refresh()); return; }
-      setRows(cur => cur.filter(x => x.id !== removing.id));
+      if (!r.ok) { setRemoveError(r.error.message); setBusy(false); if (r.error.code === 'CONFLICT') reload(); return; }
+      remove(removing.id);
       setRemoving(null);
-      startTransition(() => router.refresh());
     } catch { setRemoveError('הפעולה לא הושלמה. יש לנסות שוב'); }
     setBusy(false);
   }

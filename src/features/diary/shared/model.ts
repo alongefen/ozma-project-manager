@@ -77,3 +77,13 @@ export function editedText(row: Pick<DiaryRow, 'editedAt' | 'editedByName'>): st
 
 /** Whether the viewer may add a report on a project: only from the live permission the server computed. */
 export type ProjectOption = { id: string; name: string };
+
+/** Newest work date first, then newest entry: the order the server list uses. */
+export function sortRows(rows: DiaryRow[]): DiaryRow[] {
+  return [...rows].sort((a, b) => (a.workDate === b.workDate ? (a.enteredAt === b.enteredAt ? (a.id < b.id ? 1 : -1) : a.enteredAt < b.enteredAt ? 1 : -1) : a.workDate < b.workDate ? 1 : -1));
+}
+
+/** Whether a saved report belongs in the list under the current filter. */
+export function matchesFilter(row: DiaryRow, filter: DiaryFilter): boolean {
+  return (!filter.projectId || row.projectId === filter.projectId) && (!filter.from || row.workDate >= filter.from) && (!filter.to || row.workDate <= filter.to);
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { DiaryRow } from '@/types/contracts';
-import { groupByDate, mergePage, parseDraft, parseFilter, reportUrl, isDate } from '@/features/diary/shared/model';
+import { groupByDate, mergePage, parseDraft, parseFilter, reportUrl, isDate, sortRows, matchesFilter } from '@/features/diary/shared/model';
 
 const P = '11111111-1111-4111-8111-111111111111';
 const row = (id: string, workDate: string): DiaryRow => ({
@@ -47,5 +47,18 @@ describe('כתובת ה-PDF', () => {
     expect(reportUrl({ kind: 'day', projectId: P, date: '2026-11-23' })).toBe(`/api/reports/diary?kind=day&projectId=${P}&date=2026-11-23`);
     expect(reportUrl({ kind: 'day', projectId: P, date: '2026-11-23' }, { part: 2, download: true })).toContain('part=2&download=1');
     expect(reportUrl({ kind: 'entry', entryId: P })).toBe(`/api/reports/diary?kind=entry&entryId=${P}`);
+  });
+});
+
+describe('דיווח שנשמר נכנס לרשימה מיד', () => {
+  it('ממיין לפי תאריך עבודה ואז לפי זמן הזנה, החדש למעלה', () => {
+    const late = { ...row('c', '2026-11-23'), enteredAt: '2026-11-23T10:00:00.000Z' as DiaryRow['enteredAt'] };
+    expect(sortRows([row('a', '2026-11-22'), row('b', '2026-11-23'), late]).map(r => r.id)).toEqual(['c', 'b', 'a']);
+  });
+  it('נכנס רק אם מתאים לסינון הנוכחי', () => {
+    expect(matchesFilter(row('a', '2026-11-23'), {})).toBe(true);
+    expect(matchesFilter(row('a', '2026-11-23'), { projectId: '22222222-2222-4222-8222-222222222222' })).toBe(false);
+    expect(matchesFilter(row('a', '2026-11-23'), { from: '2026-11-24' as never })).toBe(false);
+    expect(matchesFilter(row('a', '2026-11-23'), { from: '2026-11-23' as never, to: '2026-11-23' as never })).toBe(true);
   });
 });

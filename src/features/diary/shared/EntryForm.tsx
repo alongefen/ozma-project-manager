@@ -14,7 +14,7 @@ type Props = {
   canMove: boolean;
   today: string;
   initialProjectId?: string;
-  onDone: () => void;
+  onDone: (id: string) => void;
   onCancel: () => void;
 };
 
@@ -60,6 +60,7 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, o
     setErrors({}); setError(null); setBusy(true);
     const fileIds = files.map(f => f.id);
     let failure: string | null = null;
+    let savedId = entry?.id ?? '';
     if (!entry) {
       const key = JSON.stringify([parsed.projectId, parsed.workDate, parsed.body, fileIds]);
       if (lastKey.current && lastKey.current !== key) requestId.current = crypto.randomUUID();
@@ -68,7 +69,7 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, o
       if (!r.ok) {
         if (r.error.code !== 'UNAVAILABLE') requestId.current = crypto.randomUUID();
         failure = r.error.message;
-      }
+      } else savedId = r.value.id;
     } else {
       const have = saved.current!;
       const changed = parsed.body !== have.body || fileIds.join() !== have.fileIds;
@@ -84,7 +85,7 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, o
     }
     setBusy(false);
     if (failure) { setError(failure); return; }
-    onDone();
+    onDone(savedId);
   }
 
   return (
@@ -104,7 +105,7 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, o
       <div className="ui-field">
         <label className="ui-field__label" htmlFor={`${id}-date`}>תאריך העבודה</label>
         {lockedProject ? <p className="dr-fixed">{workDate.split('-').reverse().join('.')}</p> : (
-          <input id={`${id}-date`} type="date" className="ui-field__input" value={workDate} aria-invalid={errors.workDate ? true : undefined} onChange={e => setWorkDate(e.target.value)} />
+          <input id={`${id}-date`} type="date" className="ui-field__input dr-date" value={workDate} aria-invalid={errors.workDate ? true : undefined} onChange={e => setWorkDate(e.target.value)} />
         )}
         {errors.workDate && <span className="ui-field__error">{errors.workDate}</span>}
         {lockedProject && <span className="ui-field__hint">רק בן יכול לשנות פרויקט או תאריך</span>}

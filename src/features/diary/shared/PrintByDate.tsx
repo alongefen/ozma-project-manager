@@ -40,7 +40,7 @@ export function PrintByDate({ projects, fixedProjectId, today }: { projects: Pro
       )}
       <div className="ui-field">
         <label className="ui-field__label" htmlFor={`${idp}-date`}>תאריך</label>
-        <input id={`${idp}-date`} type="date" className="ui-field__input" value={date} onChange={e => { setDate(e.target.value); reset(); }} />
+        <input id={`${idp}-date`} type="date" className="ui-field__input dr-date" value={date} onChange={e => { setDate(e.target.value); reset(); }} />
       </div>
       <Button variant="secondary" block disabled={busy} onClick={prepare}>{busy ? 'מכין…' : 'הכנת הדפסה / PDF'}</Button>
       {message && <Notice>{message}</Notice>}
