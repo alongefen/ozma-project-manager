@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, ConfirmDialog, Notice, Sheet, TextField } from '@/components/ui';
+import { Button, ConfirmDialog, DateField, Notice, Sheet, TextField } from '@/components/ui';
 import { listUsers, removeMembership, setFinanceAccess, setMembership } from '@/features/users/logic/actions';
 import { createProject } from '../logic/actions';
 import { CoverControl } from './CoverControl';
@@ -35,7 +35,8 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
   const dirty = useRef(false);
   const formId = useId();
 
-  const set = (key: FieldKey) => (e: { target: { value: string } }) => { dirty.current = true; setValues(v => ({ ...v, [key]: e.target.value })); };
+  const setField = (key: FieldKey, value: string) => { dirty.current = true; setValues(v => ({ ...v, [key]: value })); };
+  const set = (key: FieldKey) => (e: { target: { value: string } }) => setField(key, e.target.value);
   const focusIn = (index: number, errs: FieldErrors) => setTimeout(() => {
     const key = stepFields(index).find(k => errs[k]) ?? firstErrorField(errs);
     if (key) document.querySelector<HTMLElement>(`[data-wizard-field="${key}"]`)?.focus();
@@ -160,8 +161,8 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
                 </div>
                 {field('siteAddress')}
                 <div className={css.two}>
-                  <TextField label={FIELD_LABELS.startDate} type="date" ltr value={values.startDate} onChange={set('startDate')} error={errors.startDate} data-wizard-field="startDate" />
-                  <TextField label={FIELD_LABELS.endDate} type="date" ltr value={values.endDate} onChange={set('endDate')} error={errors.endDate} data-wizard-field="endDate" />
+                  <DateField label={FIELD_LABELS.startDate} value={values.startDate} onChange={v => setField('startDate', v)} error={errors.startDate} data-wizard-field="startDate" />
+                  <DateField label={FIELD_LABELS.endDate} value={values.endDate} onChange={v => setField('endDate', v)} error={errors.endDate} data-wizard-field="endDate" />
                 </div>
                 <div className={css.twoWide}>{field('businessNumber', { ltr: true })}</div>
                 <button type="submit" className="sr-only" tabIndex={-1}>הבא</button>

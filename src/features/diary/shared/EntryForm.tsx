@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { DiaryRow, FileRef, Result } from '@/types/contracts';
-import { Button, FormActions, Notice } from '@/components/ui';
+import { Button, DateField, FormActions, Notice, SelectField } from '@/components/ui';
 import { FileUpload } from '@/components/upload/FileUpload';
 import { correctEntry, createEntry, listVersions, moveEntry } from '../logic/actions';
 import { format } from '@/lib/format';
@@ -93,11 +93,8 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, o
       <div className="ui-field">
         <label className="ui-field__label" htmlFor={`${id}-project`}>פרויקט</label>
         {lockedProject ? <p className="dr-fixed">{projectName}</p> : (
-          <select id={`${id}-project`} className="ui-field__input" value={projectId} disabled={uploaded || uploading} aria-invalid={errors.projectId ? true : undefined} onChange={e => setProjectId(e.target.value)}>
-            <option value="">בחירת פרויקט</option>
-            {entry && !projects.some(p => p.id === entry.projectId) && <option value={entry.projectId}>{entry.projectName}</option>}
-            {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+          <SelectField id={`${id}-project`} value={projectId} disabled={uploaded || uploading} aria-invalid={errors.projectId ? true : undefined} onChange={setProjectId}
+            options={[{ value: '', label: 'בחירת פרויקט' }, ...(entry && !projects.some(p => p.id === entry.projectId) ? [{ value: entry.projectId, label: entry.projectName }] : []), ...projects.map(p => ({ value: p.id, label: p.name }))]} />
         )}
         {uploaded && <span className="ui-field__hint">אחרי העלאת קובץ אי אפשר להחליף פרויקט</span>}
         {errors.projectId && <span className="ui-field__error">{errors.projectId}</span>}
@@ -105,7 +102,7 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, o
       <div className="ui-field">
         <label className="ui-field__label" htmlFor={`${id}-date`}>תאריך העבודה</label>
         {lockedProject ? <p className="dr-fixed">{workDate.split('-').reverse().join('.')}</p> : (
-          <input id={`${id}-date`} type="date" className="ui-field__input dr-date" value={workDate} aria-invalid={errors.workDate ? true : undefined} onChange={e => setWorkDate(e.target.value)} />
+          <DateField id={`${id}-date`} value={workDate} required aria-invalid={errors.workDate ? true : undefined} onChange={setWorkDate} />
         )}
         {errors.workDate && <span className="ui-field__error">{errors.workDate}</span>}
         {lockedProject && <span className="ui-field__hint">רק בן יכול לשנות פרויקט או תאריך</span>}

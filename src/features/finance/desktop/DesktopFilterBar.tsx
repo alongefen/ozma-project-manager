@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { FinanceFilter } from '@/types/contracts';
-import { Button } from '@/components/ui';
+import { Button, SelectField } from '@/components/ui';
 import { FilterIcon } from '../shared/FinIcons';
 import { useFinanceNav } from '../shared/nav';
 import { MONTH_NAMES, monthLabel } from '../shared/present';
@@ -79,11 +79,11 @@ function FilterPanel({ today, filter, onApply, onClose }: { today: string; filte
       <div className="fin-pop__grid">
         <div className="fin-field">
           <label htmlFor={`${uid}-m`}>חודש</label>
-          <select id={`${uid}-m`} value={month} onChange={e => setMonth(e.target.value)}><option value="">הכול</option>{MONTH_NAMES.map((n, i) => <option key={n} value={i + 1}>{n}</option>)}</select>
+          <SelectField id={`${uid}-m`} value={month} onChange={setMonth} options={[{ value: '', label: 'הכול' }, ...MONTH_NAMES.map((n, i) => ({ value: String(i + 1), label: n }))]} />
         </div>
         <div className="fin-field">
           <label htmlFor={`${uid}-y`}>שנה</label>
-          <select id={`${uid}-y`} value={year} onChange={e => setYear(e.target.value)}><option value="">{month ? String(base.year) : 'הכול'}</option>{yearOptions(today, Number(year) || undefined).map(y => <option key={y} value={y}>{y}</option>)}</select>
+          <SelectField id={`${uid}-y`} value={year} onChange={setYear} options={[{ value: '', label: month ? String(base.year) : 'הכול' }, ...yearOptions(today, Number(year) || undefined).map(y => ({ value: String(y), label: String(y) }))]} />
         </div>
         <div className="fin-field">
           <label htmlFor={`${uid}-d`}>יום בחודש</label>

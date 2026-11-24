@@ -1,0 +1,50 @@
+/* DateField and SelectField: one look for every dropdown and date picker. Tokens come from app.css. */
+.control { position: relative; display: flex; min-width: 0; width: 100%; }
+.trigger {
+  width: 100%; min-height: 44px; box-sizing: border-box; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  border: 1px solid var(--field-line); border-radius: 7px; background: var(--surface); color: var(--ink); font-size: 16px; text-align: start; cursor: pointer; min-width: 0;
+}
+.trigger:hover:not(:disabled) { border-color: var(--blue); }
+.trigger[aria-expanded='true'] { border-color: var(--blue); box-shadow: 0 0 0 3px var(--nav-active-bg); }
+.trigger[data-invalid='true'] { border-color: var(--err-ink); }
+.trigger:disabled { opacity: .6; cursor: default; background: var(--gray-bg); }
+.value, .placeholder { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.placeholder { color: var(--muted); }
+.ltrValue { direction: ltr; unicode-bidi: isolate; }
+.chevron { flex: none; color: var(--muted); }
+
+.popup { margin: 0; padding: 0; border: 1px solid var(--line); background: var(--surface); color: var(--ink); box-sizing: border-box; }
+.popup:not(:popover-open) { display: none; }
+.menu { position: fixed; inset: auto; border-radius: 10px; box-shadow: 0 8px 28px rgba(30, 40, 48, .18); max-height: min(320px, 60vh); overflow-y: auto; min-width: 160px; }
+.sheet { position: fixed; inset: auto 0 0 0; width: 100%; max-width: 640px; margin-inline: auto; border: 0; border-radius: 16px 16px 0 0; max-height: 80dvh; overflow-y: auto; padding-bottom: var(--safe-bottom); animation: up .2s ease-out; }
+.sheet::backdrop { background: rgba(30, 40, 48, .5); }
+.sheetHead { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px 6px 20px; border-bottom: 1px solid var(--line); }
+.sheetClose { width: 44px; height: 44px; border: 0; background: transparent; color: var(--muted); font-size: 18px; border-radius: 8px; cursor: pointer; }
+
+.options { list-style: none; margin: 0; padding: 6px; display: grid; gap: 2px; outline: none; }
+.option { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+.option[data-active='true'] { background: var(--nav-active-bg); }
+.option[aria-selected='true'] { color: var(--nav-active-ink); font-weight: 700; }
+.option[aria-disabled='true'] { opacity: .5; cursor: default; }
+.options:focus-visible .option[data-active='true'] { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+.calendar { padding: 10px 12px 8px; }
+.menu.calendar { width: 316px; max-height: none; overflow: visible; }
+.calHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 8px; }
+.nav { width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); font-size: 24px; cursor: pointer; }
+.nav:hover { background: var(--gray-bg); }
+.days { display: grid; gap: 2px; }
+.weekRow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.weekday { text-align: center; font-size: 13px; color: var(--muted); font-weight: 700; padding: 4px 0; }
+.day { height: 40px; min-width: 0; border: 0; border-radius: 8px; background: transparent; color: var(--ink); font-size: 15px; cursor: pointer; font-variant-numeric: tabular-nums; }
+.day:hover { background: var(--nav-active-bg); }
+.outside { color: var(--muted); opacity: .6; }
+.today { box-shadow: inset 0 0 0 1.5px var(--blue); }
+.day[aria-selected='true'] { background: var(--blue); color: #fff; font-weight: 700; opacity: 1; }
+.calFoot { display: flex; justify-content: space-between; padding-top: 6px; border-top: 1px solid var(--line); margin-top: 6px; }
+.link { min-height: 44px; padding: 0 12px; border: 0; background: transparent; color: var(--nav-active-ink); font-weight: 700; font-size: 15px; cursor: pointer; border-radius: 8px; }
+.link:hover { background: var(--gray-bg); }
+.sheet.calendar .day { height: 44px; }
+
+@keyframes up { from { transform: translateY(100%); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .sheet { animation: none; } }

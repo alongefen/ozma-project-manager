@@ -7,16 +7,18 @@ type Props = Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> & {
   hint?: string;
   /** Emails, phones and similar stay left-to-right inside the RTL page. */
   ltr?: boolean;
+  /** The label stays for screen readers only (compact filter rows); use with a placeholder. */
+  hideLabel?: boolean;
 };
 
-export function TextField({ label, error, hint, ltr, type = 'text', className = '', ...rest }: Props) {
+export function TextField({ label, error, hint, ltr, hideLabel, type = 'text', className = '', ...rest }: Props) {
   const id = useId();
   const [shown, setShown] = useState(false);
   const isPassword = type === 'password';
   const describedBy = [error && `${id}-err`, hint && `${id}-hint`].filter(Boolean).join(' ') || undefined;
   return (
     <div className="ui-field">
-      <label className="ui-field__label" htmlFor={id}>{label}</label>
+      <label className={hideLabel ? 'sr-only' : 'ui-field__label'} htmlFor={id}>{label}</label>
       <div className={`ui-field__control${isPassword ? ' ui-field__control--toggle' : ''}`}>
         <input
           {...rest}

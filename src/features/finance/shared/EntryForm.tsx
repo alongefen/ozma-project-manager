@@ -1,7 +1,7 @@
 'use client';
 import { useId, useRef, useState, type KeyboardEvent } from 'react';
 import type { TransactionRow } from '@/types/contracts';
-import { Button, Notice } from '@/components/ui';
+import { Button, Notice, SelectField } from '@/components/ui';
 import { parseDraft } from './draft';
 import { KIND_OPTIONS, MONTH_NAMES, draftFromRow, type EntryDraft } from './present';
 import { useTransactions } from './useTransactions';
@@ -70,20 +70,17 @@ export function EntryForm({ projectId, today, row, defaultMonth, variant, onDone
         <div className="fin-field fin-field--date">
           <span className="fin-field__legend" id={`${uid}-date`}>חודש, שנה ויום</span>
           <div className="fin-date" role="group" aria-labelledby={`${uid}-date`}>
-            <select {...aria('month')} aria-label="חודש" value={draft.month} onChange={e => set('month', e.target.value)}>
-              {MONTH_NAMES.map((name, i) => <option key={name} value={i + 1}>{name}</option>)}
-            </select>
-            <select {...aria('year')} aria-label="שנה" value={draft.year} onChange={e => set('year', e.target.value)}>
-              {yearOptions(today, Number(draft.year)).map(y => <option key={y} value={y}>{y}</option>)}
-            </select>
+            <SelectField {...aria('month')} aria-label="חודש" value={draft.month} onChange={v => set('month', v)}
+              options={MONTH_NAMES.map((name, i) => ({ value: String(i + 1), label: name }))} />
+            <SelectField {...aria('year')} aria-label="שנה" value={draft.year} onChange={v => set('year', v)}
+              options={yearOptions(today, Number(draft.year)).map(y => ({ value: String(y), label: String(y) }))} />
             <input {...aria('day')} aria-label="יום (רשות)" placeholder="יום" inputMode="numeric" maxLength={2} value={draft.day} onChange={e => set('day', e.target.value)} />
           </div>
           {(errors.month || errors.year || errors.day) && <span className="ui-field__error" role="alert">{errors.month ?? errors.year ?? errors.day}</span>}
         </div>
         {field('kind', 'סוג', (
-          <select {...aria('kind')} value={draft.kind} onChange={e => set('kind', e.target.value as EntryDraft['kind'])}>
-            {KIND_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
+          <SelectField {...aria('kind')} value={draft.kind} onChange={v => set('kind', v as EntryDraft['kind'])}
+            options={KIND_OPTIONS.map(o => ({ value: o.value, label: o.label }))} />
         ))}
         {field('amount', 'סכום לפני מע״מ (₪)', (
           <input {...aria('amount')} inputMode="decimal" dir="ltr" autoComplete="off" value={draft.amount} onChange={e => set('amount', e.target.value)} />

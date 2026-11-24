@@ -13,3 +13,6 @@ export { FormActions } from './FormActions';
 export { ConfirmDialog } from './ConfirmDialog';
 export { Sheet } from './Sheet';
 export { Pin } from './Pin';
+export { DateField } from './DateField';
+export { SelectField } from './SelectField';
+export type { SelectOption } from './SelectField';
