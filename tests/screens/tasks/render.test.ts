@@ -24,7 +24,7 @@ function page(canWrite: boolean, canDelete: boolean) {
 describe('הרשאות במסך', () => {
   it('מי שרשאי לכתוב רואה יצירה, עריכה וסימון', () => {
     const html = page(true, false);
-    expect(html).toContain('פתק חדש');
+    expect(html).toContain('משימה חדשה');
     expect(html).toContain('עריכה');
     expect(html).not.toContain('מחיקה');
     expect(html).toContain('עבר היעד');
@@ -34,7 +34,7 @@ describe('הרשאות במסך', () => {
   });
   it('פרויקט שהסתיים: אין יצירה, עריכה, מחיקה, והסימון נעול', () => {
     const html = page(false, false);
-    expect(html).not.toContain('פתק חדש');
+    expect(html).not.toContain('משימה חדשה');
     expect(html).not.toContain('משימה חדשה');
     expect(html).not.toContain('עריכה');
     expect(html).not.toContain('מחיקה');

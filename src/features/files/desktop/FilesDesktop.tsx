@@ -10,7 +10,7 @@ export function FilesDesktop() {
   return (
     <div className="fl fl-desktop d-only">
       <Pin className="fl-bar">
-        {canUpload && <Button icon="add" onClick={openUpload}>העלאת מסמך</Button>}
+        {canUpload && <Button className="ui-lead" icon="add" onClick={openUpload}>העלאת מסמך</Button>}
         <DocTools />
       </Pin>
       {!canUpload && <Notice>אין הרשאה להעלות מסמכים כאן. אפשר לפתוח ולהוריד.</Notice>}

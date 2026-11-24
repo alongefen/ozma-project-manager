@@ -31,7 +31,7 @@ export function DesktopFilterBar({ today, onAdd }: { today: string; onAdd?: () =
 
   return (
     <div className="fin-fbar">
-      {onAdd && <Button icon="add" onClick={onAdd}>הוספת תנועה</Button>}
+      {onAdd && <Button className="ui-lead" icon="add" onClick={onAdd}>הוספת תנועה</Button>}
       <div className="fin-field fin-fbar__search">
         <label htmlFor={`${uid}-s`}>חיפוש ספק / פרטים</label>
         <input id={`${uid}-s`} type="search" value={filter.search ?? ''} onChange={e => go({ ...filter, search: e.target.value || undefined })} placeholder="הקלידו לחיפוש" />

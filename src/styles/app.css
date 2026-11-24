@@ -60,6 +60,8 @@ button, a { touch-action: manipulation; }
 .ui-iconbtn--danger { color: var(--err-ink); }
 .ui-iconbtn--danger:hover { background: var(--err-bg); }
 .ui-iconbtn--plain { border-color: transparent; background: transparent; color: var(--ink); }
+/* The create button of a pinned row sits at the far left on desktop (end of the row in RTL), on every screen, like the actions of an inner header. */
+@media (min-width: 1024px) { .ui-lead { order: 99; margin-inline-start: auto; flex: none; } }
 .ui-iconrow { display: inline-flex; align-items: center; gap: 8px; }
 .ui-btn .ui-aicon { flex: none; }
 .ui-btn--secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }

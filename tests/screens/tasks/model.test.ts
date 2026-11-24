@@ -53,7 +53,7 @@ describe('תאריך יעד', () => {
 
 describe('טופס פתק', () => {
   it('רווחים בלבד נדחים ליד השדה', () => {
-    expect(parseDraft({ body: '   ', dueDate: '' })).toEqual({ ok: false, errors: { body: 'יש לכתוב את תוכן הפתק' } });
+    expect(parseDraft({ body: '   ', dueDate: '' })).toEqual({ ok: false, errors: { body: 'יש לכתוב את תוכן המשימה' } });
   });
   it('מעל 2,000 תווים נדחה, בדיוק 2,000 עובר', () => {
     expect(parseDraft({ body: 'א'.repeat(MAX_BODY + 1), dueDate: '' }).ok).toBe(false);
