@@ -79,7 +79,21 @@ export function extensionLabel(f: { name: string; mime: string }): string {
   return (ext || (f.mime === 'application/pdf' ? 'pdf' : f.mime.split('/')[1] ?? 'file')).toUpperCase();
 }
 
+export type FileKind = 'pdf' | 'image' | 'word' | 'excel' | 'powerpoint' | 'other';
+export function fileKind(mime: string): FileKind {
+  if (mime === 'application/pdf') return 'pdf';
+  if (mime.startsWith('image/')) return 'image';
+  if (mime === 'application/msword' || mime.includes('wordprocessingml')) return 'word';
+  if (mime === 'application/vnd.ms-excel' || mime.includes('spreadsheetml')) return 'excel';
+  if (mime === 'application/vnd.ms-powerpoint' || mime.includes('presentationml')) return 'powerpoint';
+  return 'other';
+}
+
 export function kindLabel(mime: string): string {
+  const kind = fileKind(mime);
+  if (kind === 'word') return 'Word';
+  if (kind === 'excel') return 'Excel';
+  if (kind === 'powerpoint') return 'PowerPoint';
   if (mime === 'application/pdf') return 'PDF';
   return mime.startsWith('image/') ? 'תמונה' : 'קובץ';
 }

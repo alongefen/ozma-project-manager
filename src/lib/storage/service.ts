@@ -4,7 +4,9 @@ import type { Actor, Db, FileRef, StorageService, UploadCompletion } from '@/typ
 import type { Json } from '@/types/database';
 import { StorageServiceInputSchemas, UploadCompletionSchema, UuidSchema } from '@/types/contracts/schemas';
 import { failure, mapError, rpc } from '@/lib/db/rpc';
-import { detectMime, renderDisplay, validateContent } from './content';
+import { OFFICE_BINARY, OFFICE_XML, detectMime, renderDisplay, validateContent } from './content';
+
+const OFFICE_MIME = new Set([...OFFICE_BINARY, ...OFFICE_XML]);
 
 type Description = { clientId: string; fileId: string; bucket: string; path: string };
 type Authorized = { bucket: string; path: string; name: string; mime: string; sizeBytes: number };
@@ -50,17 +52,18 @@ export function createStorageService(options: Options): StorageService {
         let bytes: Uint8Array | undefined;
         if (size > 0 && size <= limit && size === file.declaredSize) {
           bytes = new Uint8Array(await downloaded.data.arrayBuffer());
-          mime = detectMime(bytes);
+          mime = detectMime(bytes, file.declaredMime);
         }
-        const valid = bytes && mime === file.declaredMime && !(file.purpose === 'cover' && mime === 'application/pdf') && await validateContent(bytes, mime!);
+        const valid = bytes && mime === file.declaredMime && !(file.purpose === 'cover' && mime === 'application/pdf') && !(file.purpose !== 'document' && OFFICE_MIME.has(mime)) && await validateContent(bytes, mime!);
         const identity = { fileId: file.fileId, actorId: actor.value.userId, sessionId: sessionId as string };
         if (!valid || !bytes || !mime) {
           const rejected = await service.rpc('system_finish_upload', { input: { ...identity, state: 'rejected' } });
           return rejected.error ? { ok: false, error: mapError(rejected.error) } : failure('VALIDATION');
         }
-        let displayState: 'none' | 'failed' | 'ready' = mime === 'application/pdf' ? 'none' : 'failed';
+        const isImage = mime.startsWith('image/');
+        let displayState: 'none' | 'failed' | 'ready' = isImage ? 'failed' : 'none';
         let displayPath: string | null = null;
-        if (mime !== 'application/pdf') {
+        if (isImage) {
           try {
             const display = await (options.renderDisplay ?? renderDisplay)(bytes, mime);
             const path = `${file.projectId}/${file.fileId}.jpg`;

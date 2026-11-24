@@ -59,12 +59,20 @@ describe('הרשאות במסך', () => {
     expect(html).not.toContain('type="checkbox"');
     expect(html).not.toContain('הצגת הארכיון');
   });
-  it('כל מסמך מציג אריח תצוגה בגודל קבוע; לתמונה מוכנה יש תמונה עצלה', () => {
-    const html = renderToStaticMarkup(h(FilesProvider, { projectId: 'p', active: [row('a'), row('b', { file: { id: 'fb', name: 'site.jpg', mime: 'image/jpeg', sizeBytes: 1, displayState: 'ready' } })], archived: [], candidates: [], canUpload: false, isOwner: false }, h(FilesMobile)));
-    expect(html).toContain('class="fl-thumb__tile is-pdf"');
-    expect(html).toContain('PDF');
+  it('כל מסמך מציג אריח תצוגה בגודל קבוע: תמונה עצלה, PDF קטן מצייר עמוד ראשון, PDF גדול ו-Word מקבלים אריח סוג', () => {
+    const file = (id: string, name: string, mime: string, sizeBytes: number, displayState: 'none' | 'ready' = 'none') => ({ id, name, mime, sizeBytes, displayState }) as DocumentRow['file'];
+    const html = renderToStaticMarkup(h(FilesProvider, { projectId: 'p', active: [
+      row('a'),
+      row('b', { file: file('fb', 'site.jpg', 'image/jpeg', 1, 'ready') }),
+      row('c', { file: file('fc', 'big.pdf', 'application/pdf', 20 * 1024 * 1024) }),
+      row('d', { file: file('fd', 'spec.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 1000) }),
+    ], archived: [], candidates: [], canUpload: false, isOwner: false }, h(FilesMobile)));
     expect(html).toContain('src="/api/storage/files/fb?variant=display"');
     expect(html).toContain('loading="lazy"');
+    expect(html).toContain('fl-thumb ui-skel'); // small PDF: first page is drawn in the browser
+    expect(html).toContain('class="fl-thumb__tile is-pdf"'); // 20MB PDF keeps the tile
+    expect(html).toContain('class="fl-thumb__tile is-word"');
+    expect(html).toContain('DOCX');
   });
   it('הארכיון הוא כפתור בסוף אותה שורה של החיפוש והסינון', () => {
     const html = page({ canUpload: true, isOwner: true });

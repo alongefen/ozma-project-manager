@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { DocumentRow } from '@/types/contracts';
-import { accessSummary, countsOf, emptyAccess, parseAccess, toggleUser, visibleDocuments, thumbUrl, extensionLabel } from '@/features/files/shared/model';
+import { accessSummary, countsOf, emptyAccess, parseAccess, toggleUser, visibleDocuments, thumbUrl, extensionLabel, fileKind, kindLabel } from '@/features/files/shared/model';
 
 const u1 = '11111111-1111-4111-8111-111111111111';
 const u2 = '22222222-2222-4222-8222-222222222222';
@@ -52,5 +52,14 @@ describe('תצוגה מקדימה', () => {
   it('תווית הסיומת על האריח', () => {
     expect(extensionLabel({ name: 'plan.final.pdf', mime: 'application/pdf' })).toBe('PDF');
     expect(extensionLabel({ name: 'noext', mime: 'image/heic' })).toBe('HEIC');
+  });
+});
+
+describe('סוגי קבצים', () => {
+  it('Word, Excel ו-PowerPoint מזוהים ומקבלים תווית', () => {
+    expect(fileKind('application/vnd.openxmlformats-officedocument.wordprocessingml.document')).toBe('word');
+    expect(fileKind('application/vnd.ms-excel')).toBe('excel');
+    expect(kindLabel('application/vnd.openxmlformats-officedocument.presentationml.presentation')).toBe('PowerPoint');
+    expect(thumbUrl({ id: 'x', mime: 'application/msword', displayState: 'none' })).toBeNull();
   });
 });
