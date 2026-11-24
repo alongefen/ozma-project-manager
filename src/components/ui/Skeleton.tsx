@@ -15,7 +15,7 @@ export function Skeleton({ height = 16, width, block }: { height?: number; width
  * - `frame`: entering a project, before its name is known: the real header (back link) with placeholders only for the name and the tabs.
  * Never draws a header row of its own: a route's real title comes from the page, `title` or `InnerPageSkeleton`.
  */
-export function PageSkeleton({ frame, cards = 2, bare, title, bar, heading }: { frame?: boolean; cards?: number; bare?: boolean; title?: string; bar?: number[]; heading?: string }) {
+export function PageSkeleton({ frame, cards = 2, title, bar, heading }: { frame?: boolean; cards?: number; bare?: boolean; title?: string; bar?: number[]; heading?: string }) {
   return (
     <div className="ui-page" role="status" aria-busy="true">
       <span className="sr-only">טוען…</span>
