@@ -21,10 +21,11 @@ export function UploadForm({ projectId, initialCategory, candidates, pending, bu
   const [draft, setDraft] = useState<AccessDraft>(emptyAccess);
   const parsed = parseAccess(draft, candidates);
   const [touched, setTouched] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const ready = category !== null && parsed.ok;
   return (
     <div className="fl-form">
-      <fieldset className="fl-access" disabled={busy || pending.length > 0}>
+      <fieldset className="fl-access" disabled={busy || uploading || pending.length > 0}>
         <legend className="ui-field__label">קטגוריה</legend>
         <div className="fl-cats">
           {CATEGORIES.map(c => (
@@ -35,7 +36,7 @@ export function UploadForm({ projectId, initialCategory, candidates, pending, bu
           ))}
         </div>
       </fieldset>
-      <AccessPicker draft={draft} candidates={candidates} disabled={busy || pending.length > 0} error={touched && !parsed.ok ? parsed.error : null}
+      <AccessPicker draft={draft} candidates={candidates} disabled={busy || uploading || pending.length > 0} error={touched && !parsed.ok ? parsed.error : null}
         onChange={next => { setTouched(true); setDraft(next); }} />
       {pending.length > 0 ? (
         <>
@@ -50,11 +51,11 @@ export function UploadForm({ projectId, initialCategory, candidates, pending, bu
         </>
       ) : (
         <>
-          {!ready && <p className="fl-lock">יש לבחור קטגוריה ולהגדיר מי רשאי לראות את המסמך לפני בחירת הקובץ.</p>}
-          <FileUpload purpose="document" projectId={projectId} label="בחירת קבצים" disabled={!ready}
+          {!ready && <p className="fl-lock">יש לבחור קטגוריה ולהגדיר מי רשאי לראות את המסמך. הקובץ יעלה ויישמר מיד כשייבחר.</p>}
+          <FileUpload purpose="document" projectId={projectId} label="בחירת קבצים" disabled={!ready} onBusyChange={setUploading}
             onUploaded={files => { if (category && parsed.ok) onUploaded(files, category, parsed.access); }} />
           {error && <Notice tone="error">{error}</Notice>}
-          <div className="ui-actions ui-actions--sheet"><Button variant="secondary" onClick={onClose}>סגירה</Button></div>
+          <div className="ui-actions ui-actions--sheet"><Button variant="secondary" disabled={uploading} onClick={onClose}>סגירה</Button></div>
         </>
       )}
     </div>

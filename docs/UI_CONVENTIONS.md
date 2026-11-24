@@ -45,6 +45,13 @@ Every screen uses the shared pieces below. Don't build a local copy; extend the 
 - No server cache across requests (`unstable_cache`, `use cache`, `revalidate`): reads depend on the actor and on per-project permissions, and finance must never reach a role without access. `tests/shell/cache-safety.test.ts` enforces it.
 - Measure with `next build && next start`, not `next dev`; compare before and after in the task file.
 
+## Uploads
+
+- Uploading starts the moment a file is picked. There is no separate "upload" button; use `FileUpload` and never build another picker.
+- Each file shows progress, success, or an error with "retry" and "remove". Only completed files are handed to the form, so a retry never attaches a duplicate.
+- A form with an upload passes `onBusyChange` and blocks submit (and a document sheet blocks close and edits to its choices) while a file is in flight.
+- If a file needs a mandatory choice (document category and access), the choice comes first and the picker stays locked until it is valid. Never default it.
+
 ## UI checklist (before "done")
 
 Back and title via `PageHeader`; shared components only; `loading.tsx` present; 360-1280 in RTL with no horizontal scroll; confirm on destructive actions; forbidden state shows no data.

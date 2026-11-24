@@ -1,11 +1,11 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Upload } from 'tus-js-client';
 import { Button, Notice } from '@/components/ui';
 import type { FilePurpose, FileRef, Result, UploadTarget } from '@/types/contracts';
 import { ACCEPTED_MIME, MAX_FILES, checkFile, formatSize } from './rules';
 
-type Status = 'ready' | 'uploading' | 'done' | 'error';
+type Status = 'uploading' | 'done' | 'error';
 type Item = { key: string; file: File; mime: string | null; status: Status; progress: number; error?: string; ref?: FileRef };
 
 export type FileUploadProps = {
@@ -17,6 +17,8 @@ export type FileUploadProps = {
   camera?: boolean;
   label?: string;
   disabled?: boolean;
+  /** True while any file is still uploading; forms use it to block submit and cancel-by-accident. */
+  onBusyChange?: (busy: boolean) => void;
 };
 
 const newId = () => crypto.randomUUID();
@@ -51,16 +53,18 @@ function sendTus(file: File, mime: string, t: Extract<UploadTarget['target'], { 
 /**
  * Shared upload control (P1.5). Consumers (P2.2 cover, P2.4 documents, P2.5 diary) only pass a purpose
  * and project and receive the stored file references; they never edit this component.
- * Flow: begin (server issues one token per file) -> resumable TUS upload -> complete (server validates).
+ * Upload starts as soon as a file is picked. Flow: begin (server issues one token per file) -> resumable TUS upload -> complete (server validates).
  * The original file is sent exactly as the phone produced it.
  */
-export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'בחירת קבצים', disabled }: FileUploadProps) {
+export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'בחירת קבצים', disabled, onBusyChange }: FileUploadProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
   const picker = useRef<HTMLInputElement>(null);
   const shooter = useRef<HTMLInputElement>(null);
   const limit = MAX_FILES[purpose];
+  // Always call the latest callback: the form may have changed while the upload was running.
+  const latest = useRef(onUploaded);
+  useEffect(() => { latest.current = onUploaded; });
 
   const patch = (key: string, change: Partial<Item>) => setItems(list => list.map(i => (i.key === key ? { ...i, ...change } : i)));
 
@@ -68,27 +72,28 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
     if (!files) return;
     setNotice(null);
     const next = [...items];
+    const fresh: Item[] = [];
     const counted = () => next.filter(i => i.mime).length;
     for (const file of Array.from(files)) {
       if (counted() >= limit) { setNotice(limit === 1 ? 'אפשר לבחור קובץ אחד בלבד' : `אפשר לבחור עד ${limit} קבצים בכל פעם`); break; }
       const check = checkFile(file, purpose);
-      next.push({ key: newId(), file, mime: check.ok ? check.mime : null, status: check.ok ? 'ready' : 'error', progress: 0, error: check.ok ? undefined : check.reason });
+      const item: Item = { key: newId(), file, mime: check.ok ? check.mime : null, status: check.ok ? 'uploading' : 'error', progress: 0, error: check.ok ? undefined : check.reason };
+      next.push(item);
+      if (check.ok) fresh.push(item);
     }
     setItems(next);
+    // Upload starts the moment a file is chosen; there is no separate upload button.
+    if (fresh.length > 0) void run(fresh);
   }
 
-  async function start() {
-    const queue = items.filter(i => (i.status === 'ready' || i.status === 'error') && i.mime);
-    if (queue.length === 0) return;
-    setBusy(true);
-    setNotice(null);
-    queue.forEach(i => patch(i.key, { status: 'uploading', progress: 0 }));
+  /** Uploads the given items. The client id only matches results to items; a retry after a failure leaves the earlier pending server row unused (never attached, never completed). */
+  async function run(queue: Item[]) {
+    queue.forEach(i => patch(i.key, { status: 'uploading', progress: 0, error: undefined }));
     const begun = await post<UploadTarget[]>('/api/storage/uploads', {
       purpose, projectId, files: queue.map(i => ({ clientId: i.key, name: i.file.name, mime: i.mime, sizeBytes: i.file.size })),
     });
     if (!begun.ok) {
       queue.forEach(i => patch(i.key, { status: 'error', error: begun.error.message }));
-      setBusy(false);
       return;
     }
     const finished: FileRef[] = [];
@@ -104,11 +109,11 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
         patch(item.key, { status: 'error', error: 'ההעלאה נכשלה. אפשר לנסות שוב' });
       }
     }));
-    setBusy(false);
-    if (finished.length > 0) onUploaded(finished);
+    if (finished.length > 0) latest.current(finished);
   }
 
-  const readyCount = items.filter(i => (i.status === 'ready' || i.status === 'error') && i.mime).length;
+  const busy = items.some(i => i.status === 'uploading');
+  useEffect(() => { onBusyChange?.(busy); }, [busy, onBusyChange]);
   const accept = ACCEPTED_MIME.join(',') + ',.heic,.heif';
   return (
     <div className="upload">
@@ -129,13 +134,15 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
                 <span className="ltr">{item.file.name}</span>
                 <div className="upload__meta">
                   {formatSize(item.file.size)} ·{' '}
-                  {item.status === 'ready' && 'ממתין להעלאה'}
                   {item.status === 'uploading' && `מעלה ${item.progress}%`}
                   {item.status === 'done' && 'הועלה'}
                   {item.status === 'error' && item.error}
                 </div>
                 {item.status === 'uploading' && <div className="upload__bar"><span style={{ width: `${item.progress}%` }} /></div>}
               </div>
+              {item.status === 'error' && item.mime && (
+                <Button variant="secondary" size="small" aria-label={`ניסיון חוזר ל${item.file.name}`} onClick={() => void run([item])}>ניסיון חוזר</Button>
+              )}
               {item.status !== 'uploading' && item.status !== 'done' && (
                 <Button variant="secondary" size="small" aria-label={`הסרת ${item.file.name}`} onClick={() => setItems(list => list.filter(i => i.key !== item.key))}>הסרה</Button>
               )}
@@ -143,7 +150,6 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
           ))}
         </ul>
       )}
-      {readyCount > 0 && <Button disabled={busy || disabled} onClick={start}>{busy ? 'מעלה…' : readyCount > 1 ? `העלאת ${readyCount} קבצים` : 'העלאה'}</Button>}
     </div>
   );
 }
