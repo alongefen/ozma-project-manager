@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import type { HomeData, ProjectCard } from '@/types/contracts';
 import { Badge, Card } from '@/components/ui';
 import { coverSrc } from '@/features/projects/shared/view-model';
-import { cubeRows, cubeTitle, counterItems, projectBadges, taskBubble, NO_PROJECTS } from './view-model';
+import { cubeRows, cubeTitle, counterItems, projectBadges, NO_PROJECTS } from './view-model';
 import css from './Overview.module.css';
 
 export function Counters({ counters }: { counters: HomeData['counters'] }) {
@@ -62,7 +62,6 @@ export function ProjectList({ projects }: { projects: ProjectCard[] }) {
     <ul className={css.list}>
       {projects.map(card => {
         const cover = coverSrc(card.coverFileId);
-        const bubble = taskBubble(card.openTaskCount);
         return (
           <li key={card.id}>
             <Link href={`/projects/${card.id}`} className={`ui-card ${css.project}`}>
@@ -73,12 +72,6 @@ export function ProjectList({ projects }: { projects: ProjectCard[] }) {
                 <span className={css.projectSub}>{card.businessName} · {card.siteAddress}</span>
                 <div className={css.badges}>{projectBadges(card).map(b => <Badge key={b.text} tone={b.tone}>{b.text}</Badge>)}</div>
               </div>
-              {bubble && (
-                <span className={css.tasks} aria-label={bubble.label}>
-                  <span className={css.tasksCount}>{bubble.text}</span>
-                  <span className={css.tasksLabel}>משימות פתוחות</span>
-                </span>
-              )}
             </Link>
           </li>
         );
