@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Avatar } from '@/components/ui';
+import { HeaderLogo } from '@/components/ui/PageHeaderLogo';
 import { screenTitle } from '@/lib/navigation';
 import { isInnerRoute } from '../inner';
 
@@ -12,11 +13,14 @@ export function MobileHeader({ fullName, showAccount }: { fullName: string; show
   return (
     <header className="m-header m-only">
       <h1>{screenTitle(pathname)}</h1>
-      {showAccount && (
-        <Link href="/more" className="m-header__account" aria-label={`החשבון של ${fullName}`}>
-          <Avatar name={fullName} />
-        </Link>
-      )}
+      <div className="m-header__end">
+        {showAccount && (
+          <Link href="/more" className="m-header__account" aria-label={`החשבון של ${fullName}`}>
+            <Avatar name={fullName} />
+          </Link>
+        )}
+        <HeaderLogo />
+      </div>
     </header>
   );
 }
