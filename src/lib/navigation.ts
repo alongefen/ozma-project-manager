@@ -40,14 +40,14 @@ export function desktopNav(isOwner: boolean): NavItem[] {
     : base;
 }
 
-/** The "more" screen links, owner only (DESIGN S03). Everyone gets the account block. */
+/**
+ * The "more" screen links, owner only (DESIGN S03). Everyone gets the account block.
+ * The archive list and the action log (DESIGN S16) have no screen yet, so they are not linked:
+ * a link must never lead to a 404 or to a page that ignores it.
+ */
 export function moreLinks(isOwner: boolean): NavItem[] {
   if (!isOwner) return [];
-  return [
-    { key: 'users', href: '/users', label: 'עובדים והרשאות', icon: 'users' },
-    { key: 'archive', href: '/projects?archive=1', label: 'ארכיון פרויקטים', icon: 'archive' },
-    { key: 'log', href: '/log', label: 'תיעוד פעולות', icon: 'log' },
-  ];
+  return [{ key: 'users', href: '/users', label: 'עובדים והרשאות', icon: 'users' }];
 }
 
 export function isActive(pathname: string, href: string): boolean {
@@ -64,11 +64,12 @@ export function activeItem(pathname: string, items: NavItem[]): NavItem | undefi
 
 const TITLES: [string, string][] = [
   ['/diary/new', 'דיווח חדש'],
+  // Reached from the "הדפסה וייצוא לפי תאריך" button on the diary (both views), not from the main navigation.
+  ['/reports/diary', 'הדפסת יומן לפי תאריך'],
   ['/diary', 'יומן עבודה'],
   ['/projects', 'פרויקטים'],
   ['/finance', 'כספים'],
   ['/users', 'עובדים והרשאות'],
-  ['/log', 'תיעוד פעולות'],
   ['/more', 'עוד'],
 ];
 
