@@ -1,5 +1,5 @@
 'use client';
-import { Button, Card, Notice, Pin } from '@/components/ui';
+import { Button, Card, Notice } from '@/components/ui';
 import { DiaryList } from '../shared/DiaryList';
 import { DiaryToolbar } from '../shared/DiaryToolbar';
 import { useDiary } from '../shared/DiaryProvider';
