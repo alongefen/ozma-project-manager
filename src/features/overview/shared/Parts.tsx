@@ -67,6 +67,7 @@ export function ProjectList({ projects }: { projects: ProjectCard[] }) {
           <li key={card.id}>
             <Link href={`/projects/${card.id}`} className={`ui-card ${css.project}`}>
               <span className={css.thumbWrap}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 {cover ? <img className={css.thumb} src={cover} alt="" /> : <span className={css.thumbEmpty} aria-hidden="true" />}
                 {bubble && <span className={css.bubble} role="img" aria-label={bubble.label}>{bubble.text}</span>}
               </span>
