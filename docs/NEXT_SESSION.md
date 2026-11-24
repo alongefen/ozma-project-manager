@@ -14,6 +14,8 @@
 
 ## Open items (none blocks the next tasks)
 
+- Vercel stays on Hobby (A-42). Code ownership transfer to the client (Maor wants the client to own it, Maor with access) is open: private org repos cannot deploy on Hobby, so options are the repo staying under Alon's account, or a personal GitHub account of the client; needs a decision from Alon and Maor. Vercel functions run in `iad1` while the DB is in Ireland: set the function region to Europe. `SUPABASE_SECRET_KEY` should be marked Sensitive; envs exist for Production only.
+
 - Vercel (Linux) PDF generation not verified after PRINT-EXPORT; the server now logs `[reports] render failed: ...`.
 
 - Not checked in a browser (no signed-in test session): P2.4, P2.5, P2.7, AUTO-UPLOAD, STICKY-HEADER at 360-1280. Needs one manual pass or P2.8.
