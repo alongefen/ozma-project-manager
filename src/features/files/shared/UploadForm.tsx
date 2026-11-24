@@ -52,8 +52,9 @@ export function UploadForm({ projectId, initialCategory, candidates, pending, bu
       ) : (
         <>
           {!ready && <p className="fl-lock">יש לבחור קטגוריה ולהגדיר מי רשאי לראות את המסמך. הקובץ יעלה ויישמר מיד כשייבחר.</p>}
-          <FileUpload purpose="document" projectId={projectId} label="בחירת קבצים" disabled={!ready} onBusyChange={setUploading}
+          <FileUpload purpose="document" projectId={projectId} label="בחירת קבצים (אפשר לבחור כמה)" disabled={!ready} onBusyChange={setUploading}
             onUploaded={files => { if (category && parsed.ok) onUploaded(files, category, parsed.access); }} />
+          {ready && <p className="fl-hint">אפשר לבחור כמה קבצים בבת אחת (עד 20). סוגים: PDF, תמונות, Word, Excel ו-PowerPoint. עד 50MB לקובץ.</p>}
           {error && <Notice tone="error">{error}</Notice>}
           <div className="ui-actions ui-actions--sheet"><Button variant="secondary" disabled={uploading} onClick={onClose}>סגירה</Button></div>
         </>

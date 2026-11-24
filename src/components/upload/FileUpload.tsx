@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Upload } from 'tus-js-client';
 import { Button, Notice } from '@/components/ui';
 import type { FilePurpose, FileRef, Result, UploadTarget } from '@/types/contracts';
-import { ACCEPTED_MIME, MAX_FILES, checkFile, formatSize } from './rules';
+import { MAX_FILES, acceptFor, checkFile, formatSize } from './rules';
 
 type Status = 'uploading' | 'done' | 'error';
 type Item = { key: string; file: File; mime: string | null; status: Status; progress: number; error?: string; ref?: FileRef };
@@ -114,7 +114,7 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
 
   const busy = items.some(i => i.status === 'uploading');
   useEffect(() => { onBusyChange?.(busy); }, [busy, onBusyChange]);
-  const accept = ACCEPTED_MIME.join(',') + ',.heic,.heif';
+  const accept = acceptFor(purpose);
   return (
     <div className="upload">
       <div className="upload__actions">
