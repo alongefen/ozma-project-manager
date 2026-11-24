@@ -1,16 +1,20 @@
 # Next session
 
-24.11.2026. `origin/main`: `c9e2be1`. Agent-facing doc, in English. Start here, then `git log --oneline -15` and `gh pr list`.
+24.11.2026. `origin/main`: `8a5e9e2`. Agent-facing doc, in English. Start here, then `git log --oneline -15` and `gh pr list`.
 
 ## State
 
-- **Depth phase is done and G2 is approved (A-40).** P1.4.1-P1.4.10 are merged; P1.4.10 also fixed `update_project` dropping `business_number`. See [P1.4.10](tasks/P1.4.10.md).
-- **Screens are being built, each phone + desktop over shared logic.** Merged: P1.5 shells and sign-in (PR #47), P2.2 project file/form/wizard (#49, #56, #66), P2.6 project finance (#48, #57, #58, #59, #62), UX-FOUNDATION (#63; rules in [UI_CONVENTIONS](UI_CONVENTIONS.md)), P2.3 tasks (#64), P2.1 workers (#65), TAB-NAV-FIX (#67).
-- **No task session is running.** P2.4 documents (#70), P2.5 diary and reports (#71) and P2.7 home and `/finance` (#73), P2.5 follow-ups (#75, #76), AUTO-UPLOAD (#78: files upload on selection), STICKY-HEADER (#79: header, project tabs and action rows pinned, shared `PinHead`), PRINT-EXPORT (#90: PDF generator now finds a local Chrome off Linux, which was the `UNAVAILABLE` cause; print hides chrome; print and export are separate actions), SELECTORS-DOCS (#92, #95: shared `DateField`/`SelectField`, documents page filters + "לארכיון" button) and SKELETON-DATA (#94: skeletons only on data) are merged. `/` redirects to `/projects`, which is the home (#77); P2.7 polish went in #86-#93, #96 (new-project wizard as a popup) may still be open. Working model is A-39: open a task with a brief from [TEMPLATE](handoffs/TEMPLATE.md); at most two task sessions at once; the PM does not write code or poll.
+- **The repo moved to the GitHub org `ozma-construction/ozma-project-manager`** (done by Alon). `gh` needs `--repo ozma-construction/ozma-project-manager` for PRs from this checkout; local `origin` still points at the old URL and redirects. Vercel (team `ozma`, Hobby, A-42) is live; production was serving the sign-in page on 24.11.2026. Whether Vercel can still build from the org repo on Hobby is **not verified**.
+- **All screens P2.1-P2.8 and the polish rounds are merged** (UX-AUDIT #109/#112, selectors #92/#95, finance-all #104, users #105, documents/previews, print/export #90, skeletons #94, sticky headers #79, auto-upload #78, new-report fix #119, icons #118). Security: P3.1 (#116, `docs/qa/SECURITY.md`) and SECURITY-FIXES (#117: headers, pdf.js pin). Open finding: X17 login rate-limit probe not run; `pdfjs-dist` 6.x upgrade not done.
+- **Multiple owner-level accounts (A-43):** migration `multiple_owners` is applied to the production DB (PR #121) and `more_document_types` too. UI: "אדמין" label and owner management in the people screen (#124). The developer account is visible, owner-level. No backup exists (Free plan).
+- **GO-LIVE-PREP is merged (#114, #122): scripts only, dry runs only, nothing written to the cloud.** Runbook: [GO_LIVE](GO_LIVE.md). Dry-run counts (24.11): 294 profiles, 193 projects, 313 auth users (312 `@example.invalid`, 1 other = the current demo owner; the purge then needs `--include-real-users`). Ben: `office@hy-ozma-ltd.com`; developer owner: `alon@melo-digital.com`.
+- **No task session is running.** Working model is A-39: a task brief per [TEMPLATE](handoffs/TEMPLATE.md); at most two task sessions at once; the PM does not write code or poll.
 
 ## Next (in this order)
 
-1. **Gate G3 (Alon).** P2.8 is done ([P2.8](tasks/P2.8.md)): four roles verified on the server and in a browser at six widths. Open items for G3 are in that file: non-owner forbidden pages show the default 404 instead of `StateMessage`; DESIGN S16 archive/log screens are waived by Alon (A-41, 24.11.2026), not built; `playwright.config.ts` needs `testMatch`.
+1. **Go live data steps, run by the GO-LIVE-PREP session, each with Alon's direct "כן" in that session's chat:** purge demo data, create Ben and the developer owner, load the approved public projects from hy-ozma-ltd.com (list approved by Alon first), smoke test per role on the live URL. After this, no demo-test runs against the production DB: fake test accounts would show in the client's people list.
+2. **P3.2 device/RTL/accessibility regression** with a signed-in session (never done in a real browser by any task session; Alon is testing on his phone), **P3.5** fixes and gate **G4**, then P4.2 acceptance with Ben and P4.3 a short guide. Alon's Supabase Pro upgrade (backup) must come before the client enters real data.
+3. Decisions waiting for Alon and Maor: code ownership transfer (the repo is already in the org; Vercel Hobby limits private org repos), who is the contact for password resets (no mail service; the sign-in page says "פנו לבן").
 
 ## Open items (none blocks the next tasks)
 
