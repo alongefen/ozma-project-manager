@@ -121,3 +121,4 @@ export function validateNewPerson(v: { fullName: string; email: string; password
 export function validatePassword(password: string): string | undefined {
   return password.length < MIN_PASSWORD ? `הסיסמה צריכה להכיל לפחות ${MIN_PASSWORD} תווים` : undefined;
 }
+export { validateName } from '@/features/account/shared/view-model';
