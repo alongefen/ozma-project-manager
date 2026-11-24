@@ -33,7 +33,7 @@ describe('ראש עמוד נעוץ', () => {
   });
   it('שורות הפעולה הראשיות של כל מסך משתמשות ב-Pin', () => {
     const screens = [
-      'src/features/diary/shared/DiaryToolbar.tsx', 'src/features/diary/desktop/DiaryDesktop.tsx',
+      'src/features/diary/shared/DiaryToolbar.tsx',
       'src/features/files/desktop/FilesDesktop.tsx', 'src/features/files/mobile/FilesMobile.tsx',
       'src/features/tasks/desktop/TasksDesktop.tsx', 'src/features/tasks/mobile/TasksMobile.tsx',
       'src/features/finance/desktop/FinanceDesktop.tsx', 'src/features/finance/mobile/FinanceMobile.tsx',

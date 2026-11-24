@@ -54,3 +54,5 @@
   .dr-thumbs { grid-template-columns: repeat(auto-fill, 120px); }
   .dr-toolbar .ui-btn { flex: 0 0 auto; }
 }
+
+@media (min-width: 1024px) { .dr-toolbar__lead { margin-inline-start: auto; } }

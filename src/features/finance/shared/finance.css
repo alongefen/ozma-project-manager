@@ -185,4 +185,4 @@
 .fin-desktop .fin-head, .fin-desktop .fin-head__actions { justify-content: flex-end; }
 
 /* The pinned filter bar keeps its own look (Pin sets the page background). */
-.ui-pin.fin-bar { background: #fafbfc; padding: 18px 28px; }
+.ui-pin.fin-bar { background: #fafbfc; padding: 12px 28px; }
