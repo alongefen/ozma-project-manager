@@ -1,7 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {describe, expect, it, vi} from 'vitest';
 import {PROJECT_REF} from '../../scripts/ops/lib.mjs';
-import {TABLES, expectedTotal, run, summarize} from '../../scripts/ops/purge-demo.mjs';
+import {PROTECTED, TABLES, enableTriggersSql, expectedTotal, run, summarize} from '../../scripts/ops/purge-demo.mjs';
 
 const env = {SUPABASE_URL: `https://${PROJECT_REF}.supabase.co`, SUPABASE_SECRET_KEY: 's', SUPABASE_ACCESS_TOKEN: 't'};
 
@@ -31,6 +31,31 @@ describe('purge-demo', () => {
     expect(alters).toHaveLength(14); // 7 off, 7 on, nothing else altered
     expect(sql.match(/^alter /gm)).toHaveLength(14);
     expect(sql).not.toMatch(/where/i); // all-or-nothing by design
+  });
+  it('purge SQL is one transaction: disables first, deletes, enables last; lists match', () => {
+    const sql = readFileSync('scripts/ops/purge-demo.sql', 'utf8');
+    const at = (re: RegExp) => sql.search(re);
+    expect(sql).toMatch(/^begin;/m); expect(sql).toMatch(/^commit;\s*$/m);
+    expect(at(/disable trigger/)).toBeLessThan(at(/^delete from/m));
+    expect(sql.lastIndexOf('delete from')).toBeLessThan(sql.indexOf('enable trigger'));
+    for (const [t, g] of PROTECTED) { expect(sql).toContain(`alter table public.${t} disable trigger ${g};`); expect(sql).toContain(`alter table public.${t} enable trigger ${g};`); }
+  });
+  it('refuses a real run when the role cannot manage triggers or triggers are already off', async () => {
+    for (const bad of [{can_alter_triggers: false, triggers_not_enabled: 0}, {can_alter_triggers: true, triggers_not_enabled: 2}]) {
+      const f = fake(); const base = f.sql.getMockImplementation()!;
+      f.sql.mockImplementation(async (q: string) => q.includes('pg_trigger') ? [{who: 'postgres', ...bad}] : base(q));
+      const total = expectedTotal(summarize({counts: {a: 3}, files: f.state.files, users: f.state.users}));
+      await expect(run({args: {confirm: true, 'project-ref': PROJECT_REF, 'expect-total': String(total), 'include-real-users': true}, env, log: vi.fn(), sqlText: 'alter table x;', clients: {admin: f.admin, sql: f.sql}})).rejects.toThrow(/Refusing: the SQL role/);
+      expect(f.state.calls).not.toContain('purge-sql');
+    }
+  });
+  it('re-enables triggers when the purge SQL fails', async () => {
+    const f = fake(); const base = f.sql.getMockImplementation()!; const seen: string[] = [];
+    f.sql.mockImplementation(async (q: string) => { seen.push(q.slice(0, 18)); if (q === 'FAIL;') throw new Error('boom'); return base(q); });
+    const total = expectedTotal(summarize({counts: {a: 3}, files: f.state.files, users: f.state.users}));
+    await expect(run({args: {confirm: true, 'project-ref': PROJECT_REF, 'expect-total': String(total), 'include-real-users': true}, env, log: vi.fn(), sqlText: 'FAIL;', clients: {admin: f.admin, sql: f.sql}})).rejects.toThrow(/re-enabled/);
+    expect(seen).toContain(enableTriggersSql().slice(0, 18));
+    expect(f.admin.auth.admin.deleteUser).not.toHaveBeenCalled();
   });
   it('dry run writes nothing and shows counts', async () => {
     const f = fake(); const log = vi.fn();

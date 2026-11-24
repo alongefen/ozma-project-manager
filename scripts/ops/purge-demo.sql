@@ -5,6 +5,7 @@
 -- The 7 immutability triggers ("nothing is physically deleted") are disabled for this transaction only and
 -- re-enabled at its end; a failure rolls back the disable too. This is the single approved exception for demo data.
 -- (session_replication_role is not available to the Management API role, so the tables' owner switches the triggers.)
+begin;
 alter table public.diary_versions disable trigger immutable_diary_versions;
 alter table public.diary_version_files disable trigger immutable_diary_version_files;
 alter table public.diary_attachments disable trigger immutable_diary_attachments;
@@ -38,3 +39,4 @@ alter table public.sensitive_events enable trigger immutable_sensitive_events;
 alter table public.diary_entries enable trigger immutable_diary_entries;
 alter table public.stored_files enable trigger immutable_stored_files;
 alter table public.transactions enable trigger immutable_transactions;
+commit;

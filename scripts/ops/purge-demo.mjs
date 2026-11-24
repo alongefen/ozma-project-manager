@@ -19,6 +19,9 @@ export const TABLES = [
 export const DEMO_DOMAIN = '@example.invalid';
 const BATCH = 100;
 
+// Safety net: if the purge request fails half way, switch every protection trigger back on before rethrowing.
+export const PROTECTED = [['diary_versions', 'immutable_diary_versions'], ['diary_version_files', 'immutable_diary_version_files'], ['diary_attachments', 'immutable_diary_attachments'], ['sensitive_events', 'immutable_sensitive_events'], ['diary_entries', 'immutable_diary_entries'], ['stored_files', 'immutable_stored_files'], ['transactions', 'immutable_transactions']];
+export const enableTriggersSql = () => PROTECTED.map(([t, g]) => `alter table public.${t} enable trigger ${g};`).join('\n');
 export const countSql = () => TABLES.map(t => `select '${t}' as t, count(*)::int as n from ${t}`).join(' union all ');
 // Every storage object (documents, display copies and orphans): the app owns all of them.
 export const filesSql = () => 'select bucket_id as bucket, name as path from storage.objects';
@@ -90,7 +93,10 @@ export async function run({args, env, log = console.log, sqlText = readFileSync(
   if (String(args['expect-total']) !== String(total)) throw new Error(`--expect-total must equal the dry-run total (${total}); the data changed or the flag is missing`);
   const {files, users} = await collect({sql, admin});
   await removeStorage(admin, files);                // 1. storage objects (needs the file list that the SQL step erases)
-  await sql(sqlText);                                // 2. database rows, one implicit transaction
+  try { await sql(sqlText); } catch (err) {          // 2. database rows, one transaction
+    await sql(enableTriggersSql()).catch(() => {});
+    throw new Error(`Purge SQL failed (${err.message}); protection triggers were re-enabled. Nothing is half-deleted if the request was atomic; check with a dry run.`);
+  }
   await removeAuthUsers(admin, users);               // 3. auth users (profiles reference them, so after step 2)
   const after = summarize(await collect({sql, admin}));
   if ((await sql(probeSql()))[0].triggers_not_enabled !== 0) throw new Error('CRITICAL: protection triggers are not enabled after the purge; re-enable them (see purge-demo.sql)');
