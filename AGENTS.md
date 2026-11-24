@@ -33,7 +33,7 @@ A project management system for the construction company "חי עוצמה בבנ
 - **Depth first (A-03):** schema, permissions and logic functions with tests, including the finance calculations. Screens come only after P1.4.10 and G2.
 - **Roles (A-06, A-09, A-13, A-14):** owner, project manager and worker.
   - Manager and worker are roles on the project membership, not on the user. Every permission check is against the project.
-  - Only Ben adds or removes access.
+  - Only owner-level accounts (Ben and the visible developer account, A-43) add or remove access.
   - A manager sees finance only if Ben opened it to them on that project.
   - On a finished project, managers and workers can only view and print.
 - **Sign-in (A-09, A-34, A-35):** the email is the username, and there is no two-factor authentication. Don't set up an email or SMTP service, and don't wire up a blocking hook. Email confirmation is off on purpose.
@@ -57,7 +57,7 @@ A project management system for the construction company "חי עוצמה בבנ
 
 - Next.js, cloud Supabase and Vercel. No local Supabase, no Docker.
 - Reads go through RLS; writes happen only in database functions. Only `actions.ts` is marked `'use server'`; `queries.ts` and `commands.ts` are `server-only`. Identity and context come from the server.
-- 50MB per project document; 25MB per report attachment and cover image. Keep the original file the phone sent. Whoever uploads a document sets its access, and after that only Ben edits it.
+- 50MB per project document; 25MB per report attachment and cover image. Keep the original file the phone sent. Whoever uploads a document sets its access, and after that only owner-level accounts edit it.
 - Backups are deferred; go back to Alon before there is real data.
 
 ## D31: migrations, costs and services
