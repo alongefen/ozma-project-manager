@@ -1,10 +1,9 @@
 import { notFound, redirect } from 'next/navigation';
 import { getContext, getPlatform } from '@/components/shell/request';
 import { SIGN_IN_PATH } from '@/lib/navigation';
-import { StateMessage } from '@/components/ui';
+import { DesktopTitle, StateMessage } from '@/components/ui';
 import { loadFinanceAll, loadTransfer } from '@/features/overview/shared/load';
 import { FINANCE_ERROR } from '@/features/overview/shared/view-model';
-import { DesktopTitle } from '@/features/overview/shared/Parts';
 import { TransferMobile } from '@/features/overview/mobile/TransferMobile';
 import { TransferDesktop } from '@/features/overview/desktop/TransferDesktop';
 import { parseFilter, type FinanceQuery } from '@/features/finance/shared/query';

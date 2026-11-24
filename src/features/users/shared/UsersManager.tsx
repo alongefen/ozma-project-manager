@@ -47,7 +47,7 @@ export function UsersManager({ users: initial, projects }: { users: UserRow[]; p
   return (
     <div className={css.wrap}>
       <Pin className={css.bar}>
-        <Button className={css.add} onClick={() => setAdding(true)}>הוספת אדם</Button>
+        <Button className={css.add} icon="add" onClick={() => setAdding(true)}>הוספת אדם</Button>
         <div className={`${css.tools} d-only`}><FilterTools filter={filter} set={set} projects={projectChoices} /></div>
       </Pin>
       <div className={`${css.tools} m-only`}><FilterTools filter={filter} set={set} projects={projectChoices} /></div>

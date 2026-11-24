@@ -1,8 +1,7 @@
 'use client';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { FinanceFilter } from '@/types/contracts';
-import { Button, SelectField } from '@/components/ui';
-import { FilterIcon } from '../shared/FinIcons';
+import { Button, FilterIcon, SelectField } from '@/components/ui';
 import { useFinanceNav } from '../shared/nav';
 import { MONTH_NAMES, monthLabel } from '../shared/present';
 import { currentMonth, yearOptions } from '../shared/query';
@@ -32,7 +31,7 @@ export function DesktopFilterBar({ today, onAdd }: { today: string; onAdd?: () =
 
   return (
     <div className="fin-fbar">
-      {onAdd && <Button onClick={onAdd}>הוספת תנועה</Button>}
+      {onAdd && <Button icon="add" onClick={onAdd}>הוספת תנועה</Button>}
       <div className="fin-field fin-fbar__search">
         <label htmlFor={`${uid}-s`}>חיפוש ספק / פרטים</label>
         <input id={`${uid}-s`} type="search" value={filter.search ?? ''} onChange={e => go({ ...filter, search: e.target.value || undefined })} placeholder="הקלידו לחיפוש" />

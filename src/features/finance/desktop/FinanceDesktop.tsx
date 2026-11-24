@@ -2,13 +2,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { FinanceBook, TransactionRow } from '@/types/contracts';
-import { Button, Card, Notice, Pin } from '@/components/ui';
+import { Button, Card, DeleteIcon, EditIcon, ExcelIcon, IconButton, Notice, Pin, PrintIcon } from '@/components/ui';
 import { EntryForm } from '../shared/EntryForm';
 import { ExcelLink } from '../shared/ExcelLink';
 import { DesktopFilterBar } from './DesktopFilterBar';
 import { EntrySheet } from '../shared/EntrySheet';
 import { CancelConfirm } from '../shared/CancelConfirm';
-import { ExcelIcon, PencilIcon, TrashIcon } from '../shared/FinIcons';
 import { SummaryDetails } from '../shared/Summary';
 import { useFinanceNav } from '../shared/nav';
 import { KIND_LABELS, bookRows, visibleRows, isIncomeKind, monthLabel, monthsNewestFirst, rowAmount, rowDate, shekels } from '../shared/present';
@@ -33,7 +32,7 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
       <div className="fin-head">
         <div className="fin-head__actions">
           <a className="ui-btn ui-btn--secondary ui-btn--small" href={all ? allExportHref(filter, all.project) : exportHref(book.projectId, filter)}><ExcelIcon size={20} /> ייצוא ל-Excel</a>
-          <Button variant="secondary" size="small" onClick={() => window.print()}>הדפסה</Button>
+          <Button variant="secondary" size="small" onClick={() => window.print()}><PrintIcon size={20} /> הדפסה</Button>
           {!all && <ExcelLink projectId={book.projectId} link={book.excelLink} canWrite={book.canWrite} />}
         </div>
       </div>
@@ -74,9 +73,9 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
                   <td className="fin-num">{isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
                   <td className="fin-num">{!isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
                   <td className="no-print">{book.canWrite && (
-                    <span className="fin-rowactions">
-                      {book.canCancel && <button type="button" className="fin-iconbtn fin-iconbtn--danger" onClick={() => setCancelRow(row)} aria-label={`ביטול תנועה: ${row.details}`}><TrashIcon /></button>}
-                      <button type="button" className="fin-iconbtn" onClick={() => setDialog({ row })} aria-label={`עריכת תנועה: ${row.details}`}><PencilIcon /></button>
+                    <span className="ui-iconrow">
+                      {book.canCancel && <IconButton tone="danger" label={`ביטול תנועה: ${row.details}`} onClick={() => setCancelRow(row)}><DeleteIcon /></IconButton>}
+                      <IconButton label={`עריכת תנועה: ${row.details}`} onClick={() => setDialog({ row })}><EditIcon /></IconButton>
                     </span>
                   )}</td>
                 </tr>

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Card, ConfirmDialog, Sheet } from '@/components/ui';
+import { Button, Card, ConfirmDialog, DeleteIcon, IconButton, Sheet } from '@/components/ui';
 import { removeMembership, setFinanceAccess, setMembership } from '@/features/users/logic/actions';
 import type { MemberRow, ProjectRole, Result } from '@/types/contracts';
 import { errorText } from './view-model';
@@ -129,7 +129,7 @@ export function AccessManager({ projectId, members: initial, candidates: initial
                       <span>גישה לכספים</span>
                       {m.role !== 'manager' && <span className="sr-only"> (זמינה למנהל בלבד)</span>}
                     </label>
-                    <Button variant="secondary" size="small" disabled={busy} onClick={() => setRemoving(m.userId)}>הסרת גישה</Button>
+                    <IconButton tone="danger" label={`הסרת גישה של ${m.fullName}`} disabled={busy} onClick={() => setRemoving(m.userId)}><DeleteIcon /></IconButton>
                 </div>
               </li>
             );
