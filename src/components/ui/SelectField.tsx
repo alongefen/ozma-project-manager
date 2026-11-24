@@ -28,25 +28,32 @@ type Props = {
 };
 
 /** The app's dropdown (replaces the native select): a menu under the field on desktop, a bottom sheet on the phone. */
-export function SelectField({ options, value, defaultValue = '', onChange, label, hint, error, name, id, placeholder = 'בחירה', disabled, className = '', 'aria-label': ariaLabel, 'aria-invalid': ariaInvalid, 'aria-describedby': ariaDescribedBy, ...rest }: Props) {
+export function SelectField({ options: optionsProp, value, defaultValue = '', onChange, label, hint, error, name, id, placeholder = 'בחירה', disabled, className = '', 'aria-label': ariaLabel, 'aria-invalid': ariaInvalid, 'aria-describedby': ariaDescribedBy, ...rest }: Props) {
   const auto = useId();
   const uid = id ?? auto;
+  let options = optionsProp;
   const [inner, setInner] = useState(defaultValue);
   const current = value ?? inner;
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
+  const [query, setQuery] = useState('');
   const trigger = useRef<HTMLButtonElement>(null);
   const list = useRef<HTMLUListElement>(null);
   const closedAt = useRef(0);
   const typed = useRef({ text: '', at: 0 });
-  const selected = options.find(o => o.value === current);
+  const selected = optionsProp.find(o => o.value === current);
+  // Free search over the labels; the filtered list is what keyboard and clicks work on.
+  const q = query.trim().toLowerCase();
+  const all = options;
+  options = q ? all.filter(o => o.label.toLowerCase().includes(q)) : all;
   const data = Object.fromEntries(Object.entries(rest).filter(([k]) => k.startsWith('data-')));
 
   const enabled = (i: number) => i >= 0 && i < options.length && !options[i].disabled;
   const openMenu = () => {
     if (disabled) return;
-    const at = options.findIndex(o => o.value === current && !o.disabled);
-    setActive(at >= 0 ? at : options.findIndex(o => !o.disabled));
+    setQuery('');
+    const at = optionsProp.findIndex(o => o.value === current && !o.disabled);
+    setActive(at >= 0 ? at : optionsProp.findIndex(o => !o.disabled));
     setOpen(true);
   };
   const close = () => { setOpen(false); trigger.current?.focus(); };
@@ -54,6 +61,7 @@ export function SelectField({ options, value, defaultValue = '', onChange, label
     if (!enabled(i)) return;
     if (value === undefined) setInner(options[i].value);
     onChange?.(options[i].value);
+    setQuery('');
     close();
   };
   const move = (from: number, step: 1 | -1) => {
@@ -66,6 +74,18 @@ export function SelectField({ options, value, defaultValue = '', onChange, label
 
   const onTriggerKey = (e: KeyboardEvent) => {
     if (['ArrowDown', 'ArrowUp'].includes(e.key)) { e.preventDefault(); openMenu(); }
+  };
+  const onSearchChange = (text: string) => {
+    setQuery(text);
+    const t = text.trim().toLowerCase();
+    const next = (t ? all.filter(o => o.label.toLowerCase().includes(t)) : all).findIndex(o => !o.disabled);
+    setActive(next);
+  };
+  const onSearchKey = (e: KeyboardEvent) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActive(a => move(a, 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(a => move(a, -1)); }
+    else if (e.key === 'Enter') { e.preventDefault(); choose(active); }
+    e.stopPropagation();
   };
   const onListKey = (e: KeyboardEvent) => {
     if (e.key === 'ArrowDown') { e.preventDefault(); setActive(a => move(a, 1)); }
@@ -94,7 +114,12 @@ export function SelectField({ options, value, defaultValue = '', onChange, label
       </button>
       {name && <input type="hidden" name={name} value={current} />}
       <Popup open={open} onClose={() => { closedAt.current = performance.now(); setOpen(false); }} anchor={trigger} title={label ?? ariaLabel ?? placeholder}>
-        <ul ref={list} role="listbox" tabIndex={-1} className={css.options} aria-label={label ?? ariaLabel} aria-activedescendant={active >= 0 ? `${uid}-o${active}` : undefined} onKeyDown={onListKey}>
+        <div className={css.search}>
+          <input type="search" className={css.searchInput} aria-label="חיפוש ברשימה" placeholder="חיפוש" autoComplete="off" enterKeyHint="search"
+            value={query} onChange={e => onSearchChange(e.target.value)} onKeyDown={onSearchKey} aria-controls={`${uid}-list`} />
+        </div>
+        {options.length === 0 && <p className={css.none}>לא נמצאו תוצאות</p>}
+        <ul id={`${uid}-list`} ref={list} role="listbox" tabIndex={-1} className={css.options} aria-label={label ?? ariaLabel} aria-activedescendant={active >= 0 ? `${uid}-o${active}` : undefined} onKeyDown={onListKey}>
           {options.map((o, i) => (
             <li key={o.value} id={`${uid}-o${i}`} role="option" aria-selected={o.value === current} aria-disabled={o.disabled || undefined}
               data-active={i === active} className={css.option} onPointerMove={() => { if (enabled(i) && i !== active) setActive(i); }} onClick={() => choose(i)}>

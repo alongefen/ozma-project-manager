@@ -43,8 +43,12 @@ describe('DateField / SelectField markup', () => {
 
 describe('no native date or select left in screens', () => {
   const walk = (dir: string): string[] => readdirSync(dir).flatMap(n => { const p = join(dir, n); return statSync(p).isDirectory() ? walk(p) : [p]; });
-  // PrintByDate belongs to PRINT-EXPORT for now; remove from the list when it is converted.
-  const parked = ['src/features/diary/shared/PrintByDate.tsx'];
+  const parked: string[] = [];
+  it('select field has a free search box that is not auto-focused', () => {
+    const src = readFileSync('src/components/ui/SelectField.tsx', 'utf8');
+    expect(src).toContain('חיפוש ברשימה');
+    expect(src).not.toMatch(/autoFocus/);
+  });
   it('uses DateField / SelectField everywhere', () => {
     const offenders = walk('src').filter(p => /\.tsx$/.test(p) && !parked.includes(p) && /<select[\s>]|type="date"/.test(readFileSync(p, 'utf8')));
     expect(offenders).toEqual([]);

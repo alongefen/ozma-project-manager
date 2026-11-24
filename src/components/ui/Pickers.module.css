@@ -21,6 +21,9 @@
 .sheetHead { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px 6px 20px; border-bottom: 1px solid var(--line); }
 .sheetClose { width: 44px; height: 44px; border: 0; background: transparent; color: var(--muted); font-size: 18px; border-radius: 8px; cursor: pointer; }
 
+.search { padding: 8px 8px 0; }
+.searchInput { width: 100%; min-height: 44px; box-sizing: border-box; padding: 8px 12px; border: 1px solid var(--field-line); border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 16px; }
+.none { margin: 0; padding: 12px 16px; color: var(--muted); }
 .options { list-style: none; margin: 0; padding: 6px; display: grid; gap: 2px; outline: none; }
 .option { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 16px; }
 .option[data-active='true'] { background: var(--nav-active-bg); }
