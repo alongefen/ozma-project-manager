@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, DateField, FilterPopup, Pin, SelectField, Sheet } from '@/components/ui';
 import { PrintByDate } from './PrintByDate';
+import { filterHref } from './model';
 import type { DiaryScreen } from './types';
 
 /**
@@ -17,15 +18,7 @@ export function DiaryToolbar({ screen, idp, lead }: { screen: DiaryScreen; idp: 
   const chosenProject = screen.fixedProjectId ? undefined : filter.projectId;
   const count = (chosenProject ? 1 : 0) + (filter.from || filter.to ? 1 : 0);
 
-  function apply(values: FormData) {
-    const params = new URLSearchParams();
-    for (const key of ['project', 'from', 'to']) {
-      const v = values.get(key);
-      if (typeof v === 'string' && v) params.set(key, v);
-    }
-    const query = params.toString();
-    router.push(query ? `${basePath}?${query}` : basePath);
-  }
+  const apply = (values: FormData) => router.push(filterHref(basePath, values));
 
   return (
     <>

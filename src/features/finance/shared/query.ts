@@ -69,3 +69,26 @@ export function yearOptions(today: IsoDate, selected?: number): number[] {
   if (selected) years.add(selected);
   return [...years].sort((a, b) => b - a);
 }
+
+/** Desktop filter popup values (month, year, day) to a filter; the live search stays. An empty month means the whole period. */
+export function periodFilterFromValues(values: FormData, base: Month, search?: string): FinanceFilter {
+  const month = String(values.get('month') ?? '');
+  const year = String(values.get('year') ?? '');
+  const day = String(values.get('day') ?? '').trim();
+  const d = Number(day);
+  const next: FinanceFilter = { period: month ? { year: Number(year || base.year), month: Number(month) } : 'all' };
+  if (day && Number.isInteger(d) && d >= 1 && d <= 31) next.day = d;
+  if (search) next.search = search;
+  return next;
+}
+
+/** Phone filter popup values (project, day, search) to a filter (the period has its own switch) and the chosen project. */
+export function phoneFilterFromValues(values: FormData, period: FinanceFilter['period']): { filter: FinanceFilter; project: string | null } {
+  const filter: FinanceFilter = { period };
+  const day = String(values.get('day') ?? '').trim();
+  const d = Number(day);
+  if (day && Number.isInteger(d) && d >= 1 && d <= 31) filter.day = d;
+  const search = String(values.get('search') ?? '').trim();
+  if (search) filter.search = search;
+  return { filter, project: String(values.get('project') ?? '') || null };
+}

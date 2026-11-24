@@ -4,11 +4,11 @@ import type { FinanceFilter } from '@/types/contracts';
 import { Button, FilterPopup, SelectField, TextField } from '@/components/ui';
 import { useFinanceNav } from '../shared/nav';
 import { MONTH_NAMES, monthLabel } from '../shared/present';
-import { currentMonth, yearOptions } from '../shared/query';
+import { currentMonth, periodFilterFromValues, yearOptions } from '../shared/query';
 
 /** Desktop filter bar: live search always visible, a popover under the button for period and day, chips for what is active. */
 export function DesktopFilterBar({ today, onAdd }: { today: string; onAdd?: () => void }) {
-  const { filter, go, all, goProject } = useFinanceNav();
+  const { filter, go, goWith, all, goProject } = useFinanceNav();
   const uid = useId();
   const period = filter.period;
   const nonDefaultPeriod = period !== 'all';
@@ -17,17 +17,7 @@ export function DesktopFilterBar({ today, onAdd }: { today: string; onAdd?: () =
   if (filter.day !== undefined) chips.push({ key: 'day', label: `יום ${filter.day}`, remove: () => go({ ...filter, day: undefined }) });
   const activeCount = chips.length + (filter.search ? 1 : 0) + (all?.project ? 1 : 0);
 
-  const base = currentMonth(today);
-  function apply(values: FormData) {
-    const month = String(values.get('month') ?? '');
-    const year = String(values.get('year') ?? '');
-    const day = String(values.get('day') ?? '').trim();
-    const d = Number(day);
-    const next: FinanceFilter = { period: month ? { year: Number(year || base.year), month: Number(month) } : 'all' };
-    if (day && Number.isInteger(d) && d >= 1 && d <= 31) next.day = d;
-    if (filter.search) next.search = filter.search;
-    go(next);
-  }
+  const apply = (values: FormData) => go(periodFilterFromValues(values, currentMonth(today), filter.search));
 
   return (
     <div className="fin-fbar">
@@ -43,7 +33,7 @@ export function DesktopFilterBar({ today, onAdd }: { today: string; onAdd?: () =
             options={[{ value: '', label: 'כל הפרויקטים' }, ...all.projects.map(p => ({ value: p.id, label: p.name }))]} />
         </div>
       )}
-      <FilterPopup title="סינון" count={activeCount} onApply={apply} onClear={() => go({ period: 'all', ...(filter.search ? { search: filter.search } : {}) })}>
+      <FilterPopup title="סינון" count={activeCount} onApply={apply} onClear={() => goWith({ period: 'all' }, null)}>
         <PeriodFields today={today} filter={filter} />
       </FilterPopup>
       <div className="fin-chips" aria-label="סינון פעיל">

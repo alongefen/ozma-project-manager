@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import type { FinanceBook, FinanceFilter, TransactionRow } from '@/types/contracts';
+import type { FinanceBook, TransactionRow } from '@/types/contracts';
 import { Button, Card, DeleteIcon, EditIcon, ExcelIcon, FilterPopup, IconButton, SelectField, TextField, LinkIcon, Notice, Pin, PrintIcon } from '@/components/ui';
 import { Chevron } from '../shared/Chevron';
 import { EntryForm } from '../shared/EntryForm';
@@ -9,7 +9,7 @@ import { ExcelLink } from '../shared/ExcelLink';
 import { SummaryDetails } from '../shared/Summary';
 import { useFinanceNav } from '../shared/nav';
 import { KIND_LABELS, bookRows, visibleRows, isReduction, monthLabel, monthsNewestFirst, rowAmount, rowDate, shekels } from '../shared/present';
-import { allExportHref, currentMonth, exportHref } from '../shared/query';
+import { allExportHref, currentMonth, exportHref, phoneFilterFromValues } from '../shared/query';
 import { EntrySheet } from '../shared/EntrySheet';
 import { CancelConfirm } from '../shared/CancelConfirm';
 
@@ -31,13 +31,8 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
   const rows = visibleRows(bookRows(book.months), filter);
   const filtered = filter.day !== undefined || !!filter.search;
   function applyFilter(values: FormData) {
-    const next: FinanceFilter = { period };
-    const day = String(values.get('day') ?? '').trim();
-    const d = Number(day);
-    if (day && Number.isInteger(d) && d >= 1 && d <= 31) next.day = d;
-    const search = String(values.get('search') ?? '').trim();
-    if (search) next.search = search;
-    goWith(next, all ? String(values.get('project') ?? '') || null : null);
+    const { filter: next, project } = phoneFilterFromValues(values, period);
+    goWith(next, all ? project : null);
   }
   const toggle = (p: 'link') => setPanel(v => (v === p ? null : p));
 
