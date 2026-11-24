@@ -18,8 +18,8 @@ export default async function ProjectsPage() {
   if (home.kind === 'error') return <StateMessage tone="error" backHref="/more" backLabel="למסך עוד">{HOME_ERROR}</StateMessage>;
   return (
     <>
-      <HomeMobile data={home.data} />
-      <HomeDesktop data={home.data} />
+      <HomeMobile data={home.data} isOwner={context.value.actor.isOwner} />
+      <HomeDesktop data={home.data} isOwner={context.value.actor.isOwner} />
     </>
   );
 }

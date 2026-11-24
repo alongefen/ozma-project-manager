@@ -13,10 +13,15 @@ export function counterItems(counters: HomeData['counters']): CounterItem[] {
   ];
 }
 
+/** Notification-style count on the card; null when there is nothing open. */
+export function taskBubble(count: number): { text: string; label: string } | null {
+  if (count <= 0) return null;
+  return { text: count > 99 ? '99+' : String(count), label: `${count} משימות פתוחות` };
+}
+
 export type CardBadge = { text: string; tone: 'active' | 'gray' };
 export function projectBadges(card: ProjectCard): CardBadge[] {
   const badges: CardBadge[] = [card.status === 'active' ? { text: 'פעיל', tone: 'active' } : { text: 'הסתיים', tone: 'gray' }];
-  if (card.openTaskCount > 0) badges.push({ text: `${card.openTaskCount} משימות פתוחות`, tone: 'gray' });
   if (card.reportCount > 0) badges.push({ text: `${card.reportCount} דיווחים`, tone: 'gray' });
   return badges;
 }
