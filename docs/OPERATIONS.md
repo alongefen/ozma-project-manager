@@ -17,7 +17,7 @@ Access by the developer or Supabase/Vercel dashboards to client data is recorded
 
 ## Owner recovery
 
-Alon verifies Ben by phone on a known number, runs `system_owner_recovered` and a password reset. With more than one owner the call must name the target: `{supportId, userId}` (without `userId` it fails), and hands the password over by voice. The app has no bypass.
+Alon verifies Ben by phone on a known number, runs `system_owner_recovered` and a password reset. With more than one owner the call must name the target: `{supportId, userId}` (without `userId` it fails). Alon hands the password over by voice. The app has no bypass.
 
 ## Standing rules
 

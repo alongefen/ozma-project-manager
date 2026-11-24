@@ -17,7 +17,7 @@
 3. Storage objects are removed through the Storage API (direct SQL delete on `storage.objects` is blocked by Supabase). The file list comes from `storage.objects`, so orphans go too.
 4. Auth users are deleted last (`profiles.id` references `auth.users` with restrict).
 
-## Developer account: design (no migration needed for the recommended option)
+## Developer account: design (superseded by A-43, see the update at the end)
 
 The database allows **exactly one owner** (`create unique index one_owner on profiles(is_owner) where is_owner`), `system_bootstrap_owner` refuses when an owner exists, `set_membership` refuses owners, and `set_user_active` refuses deactivating an owner. So a second owner needs a migration.
 

@@ -48,10 +48,10 @@ The real run refuses when any non-demo login exists (a guard against running it 
 
 ```bash
 node --env-file=<env> scripts/ops/seed-accounts.mjs --owner-email=<ben> --owner-name=<name> --developer-email=<alon>            # dry run
-node --env-file=<env> scripts/ops/seed-accounts.mjs --owner-email=... --owner-name=... --confirm --project-ref=izjmvyguzbampoasvnru
+node --env-file=<env> scripts/ops/seed-accounts.mjs --owner-email=... --owner-name=... --developer-email=... --confirm --project-ref=izjmvyguzbampoasvnru
 ```
 
-Ben becomes the first owner through `system_bootstrap_owner` (works only while no owner exists). The developer account (alon@melo-digital.com) is added as a second owner-level ("אדמין") account through `system_add_owner`, a service-role function. Each one-time password is printed once to the terminal right after its login is created (so a half-finished run never loses one); Alon hands Ben's over himself and keeps his own. Neither is stored. The script never overwrites an existing login; if a run stops half way, nothing real exists yet, so run the purge again and repeat.
+Ben becomes the first owner through `system_bootstrap_owner` (works only while no owner exists). The developer account (<alon>) is added as a second owner-level ("אדמין") account through `system_add_owner`, a service-role function. Each one-time password is printed once to the terminal right after its login is created (so a half-finished run never loses one); Alon hands Ben's over himself and keeps his own. Neither is stored. The script never overwrites an existing login; if a run stops half way, nothing real exists yet, so run the purge again and repeat.
 
 The developer is a visible owner-level account named `Alon (Developer & Support)` (A-43). Any owner can deactivate or demote another owner; the last owner cannot be removed. It needs no membership: an owner sees every project.
 
@@ -63,7 +63,7 @@ node --env-file=<env> scripts/import/load-projects.mjs --owner-email=<ben>    # 
 GO_LIVE_OWNER_PASSWORD=<pasted by Alon> node --env-file=<env> scripts/import/load-projects.mjs --owner-email=... --confirm --project-ref=izjmvyguzbampoasvnru
 ```
 
-Alon approves the list first. Rows are created with `create_project` as Ben, with a fixed request id each, so a retry reuses them. Finished projects are marked completed; "coming soon" stay active.  See [DATA_IMPORT](DATA_IMPORT.md).
+Alon approves the list first. Rows are created with `create_project` as Ben, with a fixed request id each, so a retry reuses them. Finished projects are marked completed; "coming soon" stay active. See [DATA_IMPORT](DATA_IMPORT.md).
 
 ## f. Smoke test per role
 
