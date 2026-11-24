@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { HomeData, ProjectCard } from '@/types/contracts';
 import { Badge, Card } from '@/components/ui';
 import { coverSrc } from '@/features/projects/shared/view-model';
-import { cubeRows, cubeTitle, counterItems, projectBadges, NO_PROJECTS } from './view-model';
+import { cubeRows, cubeTitle, counterItems, projectBadges, taskBubble, NO_PROJECTS } from './view-model';
 import css from './Overview.module.css';
 
 export function Counters({ counters }: { counters: HomeData['counters'] }) {
@@ -51,10 +51,14 @@ export function ProjectList({ projects }: { projects: ProjectCard[] }) {
     <ul className={css.list}>
       {projects.map(card => {
         const cover = coverSrc(card.coverFileId);
+        const bubble = taskBubble(card.openTaskCount);
         return (
           <li key={card.id}>
             <Link href={`/projects/${card.id}`} className={`ui-card ${css.project}`}>
-              {cover ? <img className={css.thumb} src={cover} alt="" /> : <span className={css.thumbEmpty} aria-hidden="true" />}
+              <span className={css.thumbWrap}>
+                {cover ? <img className={css.thumb} src={cover} alt="" /> : <span className={css.thumbEmpty} aria-hidden="true" />}
+                {bubble && <span className={css.bubble} role="img" aria-label={bubble.label}>{bubble.text}</span>}
+              </span>
               <div className={css.projectBody}>
                 <span className={css.projectName}>{card.name}</span>
                 <span className={css.projectSub}>{card.businessName} · {card.siteAddress}</span>

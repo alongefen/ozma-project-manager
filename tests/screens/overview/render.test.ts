@@ -10,7 +10,7 @@ import { TransferMobile } from '@/features/overview/mobile/TransferMobile';
 import { TransferDesktop } from '@/features/overview/desktop/TransferDesktop';
 import { loadTransfer } from '@/features/overview/shared/load';
 import { filterProjects } from '@/features/overview/shared/filter';
-import { projectBadges, transferViews } from '@/features/overview/shared/view-model';
+import { projectBadges, taskBubble, transferViews } from '@/features/overview/shared/view-model';
 
 const card = { id: 'p1', name: 'בניין בדוי', businessName: 'חברה בדויה', siteAddress: 'רחוב 1', status: 'active' as const, archived: false, coverFileId: null, reportCount: 3, openTaskCount: 2 };
 const cube = { month: { year: 2026, month: 11 }, income: 1_000_000, expense: 400_000, tax: 100_000, totalExpense: 500_000, netProfit: 500_000, profitPercentTenths: 500 };
@@ -37,7 +37,7 @@ describe('מסך הבית', () => {
     expect(html).toContain('בניין בדוי');
   });
   it('תגים: סטטוס, משימות ודיווחים; נעלמים כשאין', () => {
-    expect(projectBadges(card).map(b => b.text)).toEqual(['פעיל', '2 משימות פתוחות', '3 דיווחים']);
+    expect(projectBadges(card).map(b => b.text)).toEqual(['פעיל', '3 דיווחים']);
     expect(projectBadges({ ...card, status: 'completed', openTaskCount: 0, reportCount: 0 }).map(b => b.text)).toEqual(['הסתיים']);
   });
   it('כפתור פרויקט חדש רק לבעלים, וחיפוש וסינון מופיעים', () => {
@@ -55,6 +55,13 @@ describe('מסך הבית', () => {
     expect(filterProjects(all, 'הנמל', 'all').map(c => c.id)).toEqual(['p2']);
     expect(filterProjects(all, '', 'completed').map(c => c.id)).toEqual(['p2']);
     expect(filterProjects(all, 'בדוי', 'completed')).toEqual([]);
+  });
+  it('בועת משימות פתוחות על הכרטיס: מספר, 99+, ושום דבר כשאין', () => {
+    expect(taskBubble(0)).toBeNull();
+    expect(taskBubble(2)).toEqual({ text: '2', label: '2 משימות פתוחות' });
+    expect(taskBubble(150)?.text).toBe('99+');
+    expect(both(home(null))).toContain('aria-label="2 משימות פתוחות"');
+    expect(both({ ...home(null), projects: [{ ...card, openTaskCount: 0 }] })).not.toContain('משימות פתוחות"');
   });
   it('רשימה ריקה: הודעה', () => {
     expect(both({ ...home(null), projects: [] })).toContain('אין פרויקטים להצגה');
