@@ -1,7 +1,7 @@
 'use client';
 import { useId, useState } from 'react';
 import type { FinanceFilter } from '@/types/contracts';
-import { Button } from '@/components/ui';
+import { Button, SelectField } from '@/components/ui';
 import { MONTH_NAMES } from './present';
 import { currentMonth, yearOptions } from './query';
 import { useFinanceNav } from './nav';
@@ -40,17 +40,13 @@ export function Filters({ today, showMonth = true, onDone }: Props) {
         <>
           <div className="fin-field">
             <label htmlFor={`${uid}-m`}>חודש</label>
-            <select id={`${uid}-m`} value={period === 'all' ? 'all' : selMonth} onChange={e => setPeriod(e.target.value, selYear)}>
-              <option value="all">כל התקופה</option>
-              {MONTH_NAMES.map((name, i) => <option key={name} value={i + 1}>{name}</option>)}
-            </select>
+            <SelectField id={`${uid}-m`} value={period === 'all' ? 'all' : selMonth} onChange={v => setPeriod(v, selYear)}
+              options={[{ value: 'all', label: 'כל התקופה' }, ...MONTH_NAMES.map((name, i) => ({ value: String(i + 1), label: name }))]} />
           </div>
           <div className="fin-field">
             <label htmlFor={`${uid}-y`}>שנה</label>
-            <select id={`${uid}-y`} value={selYear} disabled={period === 'all'} onChange={e => setPeriod(selMonth, e.target.value)}>
-              {period === 'all' && <option value="">—</option>}
-              {yearOptions(today, period === 'all' ? undefined : period.year).map(y => <option key={y} value={y}>{y}</option>)}
-            </select>
+            <SelectField id={`${uid}-y`} value={selYear} disabled={period === 'all'} onChange={v => setPeriod(selMonth, v)}
+              options={[...(period === 'all' ? [{ value: '', label: '—' }] : []), ...yearOptions(today, period === 'all' ? undefined : period.year).map(y => ({ value: String(y), label: String(y) }))]} />
           </div>
         </>
       )}

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useId, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, FormActions, Notice, TextField } from '@/components/ui';
+import { Card, DateField, FormActions, Notice, TextField } from '@/components/ui';
 import { createProject, updateProject } from '../logic/actions';
 import { FIELD_LABELS, emptyValues, firstErrorField, mapServerErrors, toFields, validateValues, type FieldErrors, type FieldKey, type FormValues } from './form-model';
 import { errorText } from './view-model';
@@ -43,7 +43,8 @@ export function ProjectForm(props: ProjectFormProps) {
     return () => window.removeEventListener('beforeunload', warn);
   }, [dirty]);
 
-  const set = (key: FieldKey) => (e: { target: { value: string } }) => { setValues(v => ({ ...v, [key]: e.target.value })); setDirty(true); };
+  const setField = (key: FieldKey, value: string) => { setValues(v => ({ ...v, [key]: value })); setDirty(true); };
+  const set = (key: FieldKey) => (e: { target: { value: string } }) => setField(key, e.target.value);
   const focusFirst = (errs: FieldErrors) => { const k = firstErrorField(errs); if (k) document.querySelector<HTMLElement>(`[data-field="${k}"]`)?.focus(); };
 
   async function submit(e: FormEvent) {
@@ -108,8 +109,8 @@ export function ProjectForm(props: ProjectFormProps) {
           {field('businessName', { required: true })}
           {field('siteAddress', { required: true, full: true })}
           <div className={`${css.dates} ${css.full}`}>
-            <TextField label={LABELS.startDate} type="date" ltr value={values.startDate} onChange={set('startDate')} error={errors.startDate} data-field="startDate" />
-            <TextField label={LABELS.endDate} type="date" ltr value={values.endDate} onChange={set('endDate')} error={errors.endDate} data-field="endDate" />
+            <DateField label={LABELS.startDate} value={values.startDate} onChange={v => setField('startDate', v)} error={errors.startDate} data-field="startDate" />
+            <DateField label={LABELS.endDate} value={values.endDate} onChange={v => setField('endDate', v)} error={errors.endDate} data-field="endDate" />
           </div>
           {isOwner && field('businessNumber', { ltr: true, hint: 'מוצג לבן בלבד' })}
         </div>

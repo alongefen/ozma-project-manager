@@ -1,7 +1,7 @@
 'use client';
 import { useId, useState } from 'react';
 import type { TaskRow } from '@/types/contracts';
-import { FormActions, Notice, TextField } from '@/components/ui';
+import { DateField, FormActions, Notice } from '@/components/ui';
 import { MAX_BODY, draftOf, parseDraft, type TaskDraft } from './model';
 
 /** Note and optional due date, one form for both layouts (inside the shared sheet). No assignee, no reminder. */
@@ -29,8 +29,8 @@ export function TaskForm({ task, busy, error, onSubmit, onCancel }: {
         <span id={`${id}-count`} className="ui-field__hint tk-count" aria-live="polite">{draft.body.length} / {MAX_BODY}</span>
         {errors.body && <span className="ui-field__error">{errors.body}</span>}
       </div>
-      <TextField label="תאריך יעד (רשות)" type="date" ltr value={draft.dueDate} error={errors.dueDate}
-        onChange={e => setDraft(d => ({ ...d, dueDate: e.target.value }))} />
+      <DateField label="תאריך יעד (רשות)" value={draft.dueDate} error={errors.dueDate}
+        onChange={v => setDraft(d => ({ ...d, dueDate: v }))} />
       {error && <Notice tone="error">{error}</Notice>}
       <FormActions placement="sheet" submitLabel={busy ? 'שומר…' : 'שמירה'} busy={busy} onCancel={onCancel} />
     </form>

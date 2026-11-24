@@ -1,15 +1,17 @@
 /* Document screens. Tokens come from app.css. One card style, two layouts. */
 .fl-root, .fl { display: grid; gap: 16px; min-width: 0; }
-.fl-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.fl-bar__title { font-size: 22px; font-weight: 800; margin: 0; }
-.fl-group { display: grid; gap: 12px; min-width: 0; }
-.fl-group__title { font-size: 18px; font-weight: 800; margin: 0; }
+.fl-bar { display: flex; align-items: center; gap: 12px; }
 .fl-count { display: inline-block; min-width: 24px; padding: 1px 8px; border-radius: 12px; background: var(--gray-bg); color: var(--gray-ink); font-size: 13px; text-align: center; }
-.fl-catlist, .fl-list, .fl-people { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
-.fl-cat { width: 100%; min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; font: inherit; font-weight: 700; color: inherit; cursor: pointer; text-align: start; }
-.fl-cat[aria-pressed='true'] { border-color: var(--blue); background: var(--nav-active-bg, var(--surface)); color: var(--nav-active-ink); }
+.fl-list, .fl-people { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
 .fl-empty, .fl-lock { color: var(--muted); margin: 0; padding: 12px 0; }
-.fl-tools { display: grid; gap: 10px; margin-bottom: 12px; }
+.fl-tools { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1 1 auto; }
+.fl-tools__search { flex: 1 1 0; min-width: 0; }
+.fl-tools__category { flex: 0 0 150px; width: 150px; }
+.fl-tools__archive { flex: none; gap: 6px; padding-inline: 12px; white-space: nowrap; }
+.fl-tools__archive.is-on { background: var(--nav-active-bg); border-color: var(--blue); color: var(--nav-active-ink); }
+.fl-tools__archive .fl-count { min-width: 20px; padding: 0 6px; }
+@media (max-width: 1023.98px) { .fl-tools__category { flex-basis: 100px; width: 100px; } .fl-tools__archive { padding-inline: 10px; font-size: 14px; } }
+@media (max-width: 479.98px) { .fl-tools__archive .fl-count { display: none; } }
 .fl-card { display: grid; gap: 10px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; min-width: 0; }
 .fl-card__main { min-width: 0; }
 .fl-card__name { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
@@ -27,7 +29,6 @@
 .fl-cats { display: flex; flex-wrap: wrap; gap: 8px; }
 .fl-pill { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: 22px; cursor: pointer; }
 .fl-people { max-height: 220px; overflow-y: auto; }
-.fl-split { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 20px; align-items: start; }
 @media (min-width: 1024px) {
   .fl-list { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 }

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { DateField, SelectField } from '@/components/ui';
 import type { DiaryFilter, ProjectOption } from './model';
 
 /** Plain GET form: the filter lives in the URL, so the server list, back button and sharing all just work. */
@@ -6,22 +7,11 @@ export function FilterBar({ filter, projects, action, idp }: { filter: DiaryFilt
   return (
     <form className="dr-filter" method="get" action={action}>
       {projects && (
-        <div className="ui-field">
-          <label className="ui-field__label" htmlFor={`${idp}-project`}>פרויקט</label>
-          <select id={`${idp}-project`} name="project" className="ui-field__input" defaultValue={filter.projectId ?? ''}>
-            <option value="">כל הפרויקטים</option>
-            {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
-        </div>
+        <SelectField id={`${idp}-project`} name="project" label="פרויקט" defaultValue={filter.projectId ?? ''}
+          options={[{ value: '', label: 'כל הפרויקטים' }, ...projects.map(p => ({ value: p.id, label: p.name }))]} />
       )}
-      <div className="ui-field">
-        <label className="ui-field__label" htmlFor={`${idp}-from`}>מתאריך</label>
-        <input id={`${idp}-from`} name="from" type="date" className="ui-field__input dr-date" defaultValue={filter.from ?? ''} />
-      </div>
-      <div className="ui-field">
-        <label className="ui-field__label" htmlFor={`${idp}-to`}>עד תאריך</label>
-        <input id={`${idp}-to`} name="to" type="date" className="ui-field__input dr-date" defaultValue={filter.to ?? ''} />
-      </div>
+      <DateField id={`${idp}-from`} name="from" label="מתאריך" defaultValue={filter.from ?? ''} />
+      <DateField id={`${idp}-to`} name="to" label="עד תאריך" defaultValue={filter.to ?? ''} />
       <div className="dr-filter__actions">
         <button type="submit" className="ui-btn ui-btn--secondary">סינון</button>
         {(filter.projectId || filter.from || filter.to) && <Link href={action} className="ui-btn ui-btn--secondary">ניקוי</Link>}

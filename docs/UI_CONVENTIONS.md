@@ -10,6 +10,10 @@ Every screen uses the shared pieces below. Don't build a local copy; extend the 
 - **Page body:** wrap in `Page` (one 16px gap on phone, 20px on desktop). `narrow` caps forms and lists at 820px. No inline `style` for spacing.
 - **Project sections:** `ProjectTabs` (phone) and `ProjectInnerNav` (desktop) under the header, on every project screen.
 
+## Filters and search
+
+Every list screen has the same order: the filter row on top (search, dropdowns, date fields; an "archive"-style toggle is a button at the end of that same row, never a checkbox), the data beneath. Filter dropdowns are `SelectField`, dates are `DateField`. `tests/screens/ui/pickers.test.ts` fails if a screen uses a native `<select>` or `type="date"`.
+
 ## Pinned top (sticky rule)
 
 Wherever a page scrolls, the title, the project tabs and the screen's primary action row stay pinned to the top, phone and desktop, so nobody scrolls up to act.
@@ -24,7 +28,9 @@ Wherever a page scrolls, the title, the project tabs and the screen's primary ac
 | --- | --- |
 | Surface | `Card` (`panel` on desktop sections) |
 | Buttons | `Button`: `primary` once per screen area, `secondary` for the rest, `danger` only for the confirm button of a destructive action. Targets 44px+ |
-| Text inputs | `TextField` (label, hint, error under the field) |
+| Text inputs | `TextField` (label, hint, error under the field; `hideLabel` for compact filter rows) |
+| Date | `DateField`: shows DD/MM/YYYY, opens the app's Hebrew calendar (week starts Sunday), value is an ISO string, `name` submits it from a plain form. Never `<input type="date">` or a library picker |
+| Dropdown | `SelectField` with `options` (`value`, `label`): menu under the field on desktop, bottom sheet on the phone, keyboard (arrows, Home/End, type-ahead, Enter, Escape). `name` submits the value. Never a native `<select>` |
 | Form save bar | `FormActions`: save first, cancel second. `placement="page"` (fixed above the bottom nav on phone, inline on desktop) or `"sheet"` |
 | Pop-up | `Sheet` (bottom sheet on phone, centred window on desktop). Never a custom overlay |
 | Multi-step creation | `NewProjectWizard` is the pattern: one window (`Sheet`), numbered steps that slide sideways, no scrolling inside a step, back and next in the footer, the record is saved when its last form step is confirmed and later steps apply to the saved record and can be skipped |

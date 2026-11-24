@@ -41,9 +41,19 @@ describe('הרשאות במסך', () => {
     expect(html).toContain('אין הרשאה להעלות');
     expect(html).toContain('פתיחה');
   });
-  it('בטלפון מוצגים מסך קטגוריות בלי שורת לשוניות', () => {
-    const html = page({ canUpload: true, isOwner: false });
-    expect(html).toContain('קטגוריות');
+  it('בטלפון: שורת סינון (חיפוש, קטגוריה) והרשימה, בלי שורת לשוניות ובלי תיבת סימון לארכיון', () => {
+    const html = page({ canUpload: true, isOwner: true });
+    expect(html).toContain('role="search"');
+    expect(html).toContain('הכל (1)');
     expect(html).not.toContain('role="tablist"');
+    expect(html).not.toContain('type="checkbox"');
+    expect(html).not.toContain('הצגת הארכיון');
+  });
+  it('הארכיון הוא כפתור בסוף אותה שורה של החיפוש והסינון', () => {
+    const html = page({ canUpload: true, isOwner: true });
+    const row = html.slice(html.indexOf('class="fl-tools"'));
+    expect(row.indexOf('type="search"')).toBeLessThan(row.indexOf('aria-haspopup="listbox"'));
+    expect(row.indexOf('aria-haspopup="listbox"')).toBeLessThan(row.indexOf('aria-pressed="false"'));
+    expect(row).toMatch(/<button[^>]*fl-tools__archive[^>]*>לארכיון/);
   });
 });
