@@ -18,18 +18,30 @@ export function Counters({ counters }: { counters: HomeData['counters'] }) {
   );
 }
 
-/** The finance cube. Rendered only when the server sent one (the owner); never an empty frame for anyone else. */
-export function Cube({ cube, panel }: { cube: NonNullable<HomeData['financeCube']>; panel?: boolean }) {
+/** The finance cube: one wide card with the same top-level cards as the counters. Only when the server sent one (the owner). */
+export function Cube({ cube }: { cube: NonNullable<HomeData['financeCube']> }) {
   return (
-    <Card panel={panel} className={css.cube}>
-      <h2 className={css.cubeTitle}>{cubeTitle(cube)}</h2>
-      <dl className={css.cubeRows}>
+    <Card className={css.cube}>
+      <div className={css.cubeHead}>
+        <h2 className={css.cubeTitle}>{cubeTitle(cube)}</h2>
+        <Link href="/finance" className={css.cubeLink}>סכום העברה ופירוט לפי חודשים</Link>
+      </div>
+      <dl className={css.cubeFigures}>
         {cubeRows(cube).map(row => (
           <div key={row.key}><dt>{row.label}</dt><dd className={css.num}>{row.value}</dd></div>
         ))}
       </dl>
-      <Link href="/finance" className={css.link}>סכום העברה ופירוט לפי חודשים</Link>
     </Card>
+  );
+}
+
+/** Section title with the owner-only "new project" entry (the wizard lives at /projects/new). */
+export function ProjectsHead({ isOwner }: { isOwner: boolean }) {
+  return (
+    <div className={css.head}>
+      <h2 className={css.sectionTitle}>פרויקטים</h2>
+      {isOwner && <Link href="/projects/new" className="ui-btn ui-btn--small">פרויקט חדש</Link>}
+    </div>
   );
 }
 
