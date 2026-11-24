@@ -104,7 +104,7 @@ export function EntryForm({ entry, projects, canMove, today, initialProjectId, o
       <div className="ui-field">
         <label className="ui-field__label" htmlFor={`${id}-date`}>תאריך העבודה</label>
         {lockedProject ? <p className="dr-fixed">{workDate.split('-').reverse().join('.')}</p> : (
-          <input id={`${id}-date`} type="date" dir="ltr" className="ui-field__input" value={workDate} aria-invalid={errors.workDate ? true : undefined} onChange={e => setWorkDate(e.target.value)} />
+          <input id={`${id}-date`} type="date" className="ui-field__input" value={workDate} aria-invalid={errors.workDate ? true : undefined} onChange={e => setWorkDate(e.target.value)} />
         )}
         {errors.workDate && <span className="ui-field__error">{errors.workDate}</span>}
         {lockedProject && <span className="ui-field__hint">רק בן יכול לשנות פרויקט או תאריך</span>}
