@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// Creates the client's owner (Ben) and the visible developer/support account.
+// Creates the client's owner (Ben) and the visible developer/support account (also owner-level, A-43).
 //   node --env-file=<env> scripts/ops/seed-accounts.mjs --owner-email=<ben> --owner-name=<name> --developer-email=<alon> [--dry-run default]
 //   add: --confirm --project-ref=<ref>   for a real run
-// Env: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY.
+// Env: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY (both accounts are created with the service key).
 // One-time passwords are generated here, printed ONCE to the terminal, and never written anywhere.
 import {fileURLToPath} from 'node:url';
 import {createClient} from '@supabase/supabase-js';
-import {generatePassword, parseArgs, requireEnv, resolveMode, stableUuid} from './lib.mjs';
+import {generatePassword, parseArgs, requireEnv, resolveMode} from './lib.mjs';
 
 export const DEVELOPER_NAME = 'Alon (Developer & Support)';
 const noSession = {auth: {persistSession: false, autoRefreshToken: false}};
@@ -32,11 +32,10 @@ async function must(promise, what) {
 export async function seed({args, env, log = console.log, print = console.log, clients}) {
   const mode = resolveMode(args, env);
   const input = validate(args);
-  const e = requireEnv(env, ['SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SECRET_KEY']);
-  log(JSON.stringify({mode: mode.write ? 'REAL RUN' : 'DRY RUN', willCreate: ['owner (Ben)', 'developer/support account (manager role + finance on every project, visible in the people list)']}, null, 2));
+  const e = requireEnv(env, ['SUPABASE_URL', 'SUPABASE_SECRET_KEY']);
+  log(JSON.stringify({mode: mode.write ? 'REAL RUN' : 'DRY RUN', willCreate: ['owner (Ben)', 'developer/support account (owner level "אדמין", visible in the people list)']}, null, 2));
   if (!mode.write) { log('Dry run only. Nothing was changed.'); return {wrote: false}; }
   const admin = clients?.admin ?? createClient(e.SUPABASE_URL, e.SUPABASE_SECRET_KEY, noSession);
-  const pub = clients?.pub ?? createClient(e.SUPABASE_URL, e.SUPABASE_PUBLISHABLE_KEY, noSession);
   const ownerPassword = generatePassword();
   const developerPassword = generatePassword();
 
@@ -46,15 +45,10 @@ export async function seed({args, env, log = console.log, print = console.log, c
   showOnce('owner', input.ownerEmail, ownerPassword);
   await must(admin.rpc('system_bootstrap_owner', {input: {userId: ownerUser.user.id, fullName: input.ownerName}}), 'Bootstrapping the owner (an owner may already exist)');
 
-  // 2. Developer: the same path the app uses for "create person", executed with Ben's own session.
-  const signed = await must(pub.auth.signInWithPassword({email: input.ownerEmail, password: ownerPassword}), 'Signing in as the owner');
-  void signed;
-  const requestId = stableUuid(`developer:${input.developerEmail}`);
+  // 2. Developer: an owner-level account added through system_add_owner (service role; needs an existing owner).
   const devUser = await must(admin.auth.admin.createUser({email: input.developerEmail, password: developerPassword, email_confirm: true}), 'Creating the developer login');
   showOnce('developer', input.developerEmail, developerPassword);
-  await must(pub.rpc('create_profile', {input: {requestId, email: input.developerEmail, fullName: input.developerName}}), 'Creating the developer profile');
-  await must(pub.rpc('complete_profile_creation', {input: {requestId, userId: devUser.user.id}}), 'Completing the developer profile');
-
+  await must(admin.rpc('system_add_owner', {input: {userId: devUser.user.id, fullName: input.developerName}}), 'Adding the developer as an owner');
   return {wrote: true, ownerId: ownerUser.user.id, developerId: devUser.user.id};
 }
 

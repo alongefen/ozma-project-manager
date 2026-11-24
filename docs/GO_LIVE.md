@@ -51,23 +51,23 @@ node --env-file=<env> scripts/ops/seed-accounts.mjs --owner-email=<ben> --owner-
 node --env-file=<env> scripts/ops/seed-accounts.mjs --owner-email=... --owner-name=... --developer-email=... --confirm --project-ref=izjmvyguzbampoasvnru
 ```
 
-Ben becomes the owner through `system_bootstrap_owner` (works only while no owner exists). The developer account is created through the app's own `create_profile` flow with Ben's session. Each one-time password is printed once to the terminal right after its login is created (so a half-finished run never loses one); Alon hands Ben's over himself and keeps the developer's. Neither is stored. The script never overwrites an existing login; if a run stops half way, nothing real exists yet, so run the purge again and repeat.
+Ben becomes the first owner through `system_bootstrap_owner` (works only while no owner exists). The developer account (<alon>) is added as a second owner-level ("אדמין") account through `system_add_owner`, a service-role function. Each one-time password is printed once to the terminal right after its login is created (so a half-finished run never loses one); Alon hands Ben's over himself and keeps his own. Neither is stored. The script never overwrites an existing login; if a run stops half way, nothing real exists yet, so run the purge again and repeat.
 
-Developer account design: see "Developer account" in [tasks/GO-LIVE-PREP](tasks/GO-LIVE-PREP.md). In the current model it is a regular, visible person (`Alon (Developer & Support)`) with the manager role and finance access on every project loaded by the load script (projects Ben creates later need the developer added by Ben). It is not an owner: the database allows exactly one owner (`one_owner` unique index).
+The developer is a visible owner-level account named `Alon (Developer & Support)` (A-43). Any owner can deactivate or demote another owner; the last owner cannot be removed. It needs no membership: an owner sees every project.
 
 ## e. Project load
 
 ```bash
 node scripts/import/extract-website-projects.mjs                       # public pages only -> scripts/import/out/projects.local.json (git-ignored)
-node --env-file=<env> scripts/import/load-projects.mjs --owner-email=<ben> --developer-email=<alon>    # dry run
-GO_LIVE_OWNER_PASSWORD=<pasted by Alon> node --env-file=<env> scripts/import/load-projects.mjs --owner-email=... --developer-email=... --confirm --project-ref=izjmvyguzbampoasvnru
+node --env-file=<env> scripts/import/load-projects.mjs --owner-email=<ben>    # dry run
+GO_LIVE_OWNER_PASSWORD=<pasted by Alon> node --env-file=<env> scripts/import/load-projects.mjs --owner-email=... --confirm --project-ref=izjmvyguzbampoasvnru
 ```
 
-Alon approves the list first. Rows are created with `create_project` as Ben, with a fixed request id each, so a retry reuses them. Finished projects are marked completed; "coming soon" stay active. The developer is added to each project with finance open. See [DATA_IMPORT](DATA_IMPORT.md).
+Alon approves the list first. Rows are created with `create_project` as Ben, with a fixed request id each, so a retry reuses them. Finished projects are marked completed; "coming soon" stay active. See [DATA_IMPORT](DATA_IMPORT.md).
 
 ## f. Smoke test per role
 
-Sign in on the live URL as Ben, as the developer, and (with a fake account Ben creates and then deactivates) as a worker: Ben sees all projects and the people list including the developer account; the developer sees every project and its finance but not the people screen; the worker sees only assigned projects and no finance. Create and cancel one diary entry on a throwaway active project only if Ben agrees; otherwise verify read-only.
+Sign in on the live URL as Ben, as the developer, and (with a fake account Ben creates and then deactivates) as a worker: Ben and the developer each see all projects, finance and the people list (both owner-level accounts); the worker sees only assigned projects and no finance. Create and cancel one diary entry on a throwaway active project only if Ben agrees; otherwise verify read-only.
 
 ## g. Rollback
 
