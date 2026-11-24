@@ -32,7 +32,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   if (rawProject && !UUID.test(rawProject)) notFound();
   const [all, transfer] = await Promise.all([
     loadFinanceAll(platform, context.value, filter, rawProject || undefined),
-    filter.period === 'all' && !rawProject ? loadTransfer(platform, context.value) : Promise.resolve(null),
+    filter.period === 'all' && !rawProject && filter.day === undefined && !filter.search ? loadTransfer(platform, context.value) : Promise.resolve(null),
   ]);
   if (all.kind === 'hidden') notFound();
   if (all.kind === 'signed-out') redirect(SIGN_IN_PATH);
