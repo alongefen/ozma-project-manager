@@ -31,6 +31,12 @@
 @media (prefers-reduced-motion: reduce) { .track { transition: none; } }
 @media (min-width: 1024px) {
   .twoWide { grid-template-columns: 1fr 1fr; gap: 14px; }
-  .person { grid-template-columns: 1fr 210px auto; align-items: center; }
+  .person { grid-template-columns: 1fr 160px auto auto; align-items: center; }
   .people { max-height: 280px; }
 }
+
+.removeBtn { justify-self: start; min-height: 44px; padding: 0 12px; border: 0; background: transparent; color: var(--err-ink); font: inherit; font-weight: 700; cursor: pointer; border-radius: 8px; }
+.removeBtn:hover { background: var(--err-bg); }
+/* "הקודם" sits at the left end of the footer, opposite the primary button. */
+.backSlot { margin-inline-start: auto; display: flex; }
+.backSlot > * { flex: 1; }
