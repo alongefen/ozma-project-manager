@@ -32,6 +32,20 @@ describe('טופס הדיווח הוא חלון, לא עמוד', () => {
   });
 });
 
+describe('תג הסינון', () => {
+  const badge = (s: DiaryScreen) => html(s).match(/class="ui-count"[^>]*>(\d+)</)?.[1] ?? null;
+  it('אין תג כשאין סינון, גם בטאב של פרויקט (הפרויקט עצמו אינו סינון)', () => {
+    expect(badge(screen())).toBeNull();
+    expect(badge(screen({ fixedProjectId: P, projects: null, filter: { projectId: P } }))).toBeNull();
+  });
+  it('בטאב של פרויקט, טווח תאריכים נספר כסינון אחד', () => {
+    expect(badge(screen({ fixedProjectId: P, projects: null, filter: { projectId: P, from: '2026-11-01' } }))).toBe('1');
+  });
+  it('ביומן הכללי נספרים הפרויקט וטווח התאריכים', () => {
+    expect(badge(screen({ filter: { projectId: P, from: '2026-11-01', to: '2026-11-20' } }))).toBe('2');
+  });
+});
+
 describe('טלפון ותצוגה מקדימה', () => {
   it('בטלפון אין כפתור דיווח חדש בראש היומן (יש בשורה התחתונה); בדסקטופ יש', () => {
     const mobile = renderToStaticMarkup(h(DiaryProvider, { screen: screen(), children: h(DiaryMobile, { screen: screen() }) }));

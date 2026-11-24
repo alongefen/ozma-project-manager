@@ -12,7 +12,9 @@ Every screen uses the shared pieces below. Don't build a local copy; extend the 
 
 ## Filters and search
 
-Every list screen has the same order: the filter row on top (search, dropdowns, date fields; an "archive"-style toggle is a button at the end of that same row, never a checkbox), the data beneath. Filter dropdowns are `SelectField`, dates are `DateField`. `tests/screens/ui/pickers.test.ts` fails if a screen uses a native `<select>` or `type="date"`.
+Every list screen has the same order: the filter row on top (search, dropdowns, date fields; an "archive"-style toggle is a button at the end of that same row, never a checkbox), the data beneath. Filter dropdowns are `SelectField`, dates are `DateField`.
+
+**Filter popup (one pattern).** A screen whose filters don't fit one row uses `FilterPopup` (finance phone and desktop, diary general and project tab): a secondary "סינון" button with the funnel and a blue count badge (`ui-count`) of the active filters, shown only when the count is above 0 and announced in the button's label. It opens a popover under the button on desktop and a bottom sheet on the phone, with the same title, a two-column field grid (`ui-fhalf` pairs two fields), and the same two buttons: "החלה" (primary) then "ניקוי" (secondary). Fields are `SelectField`, `DateField`, `TextField` with `name` and `defaultValue`; `onApply` reads them from the `FormData`, `onClear` resets. The count is the number of active filters of that screen: a period, a day, a search text, a chosen project, a date range (counts once). A project tab's own project is not a filter. Screens with a single inline filter row (projects, documents, tasks, users) have no filter button and so no badge. Never build a local popover, panel or badge; a source test fails on it. `tests/screens/ui/pickers.test.ts` fails if a screen uses a native `<select>` or `type="date"`.
 
 ## Pinned top (sticky rule)
 

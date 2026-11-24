@@ -96,3 +96,14 @@ export function projectFromReferrer(referrer: string | null): string | null {
     return m && isUuid(m[1]) ? m[1] : null;
   } catch { return null; }
 }
+
+/** The address of the diary for the filter popup's values: only chosen values go in the URL; none gives the bare path. */
+export function filterHref(basePath: string, values: FormData): string {
+  const params = new URLSearchParams();
+  for (const key of ['project', 'from', 'to']) {
+    const v = values.get(key);
+    if (typeof v === 'string' && v) params.set(key, v);
+  }
+  const query = params.toString();
+  return query ? `${basePath}?${query}` : basePath;
+}
