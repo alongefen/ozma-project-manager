@@ -4,6 +4,9 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import type { HomeData, Platform, RequestContext, TransferMonth } from '@/types/contracts';
 
 vi.mock('server-only', () => ({}));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: () => {}, refresh: () => {} }) }));
+vi.mock('@/features/users/logic/actions', () => ({ listUsers: vi.fn(), removeMembership: vi.fn(), setFinanceAccess: vi.fn(), setMembership: vi.fn() }));
+vi.mock('@/features/projects/logic/actions', () => ({ createProject: vi.fn() }));
 import { HomeMobile } from '@/features/overview/mobile/HomeMobile';
 import { HomeDesktop } from '@/features/overview/desktop/HomeDesktop';
 import { TransferMobile } from '@/features/overview/mobile/TransferMobile';
@@ -41,8 +44,8 @@ describe('מסך הבית', () => {
     expect(projectBadges({ ...card, status: 'completed', openTaskCount: 0, reportCount: 0 }).map(b => b.text)).toEqual(['הסתיים']);
   });
   it('כפתור פרויקט חדש רק לבעלים, וחיפוש וסינון מופיעים', () => {
-    expect(both(home(cube), true)).toContain('href="/projects/new"');
-    expect(both(home(null), false)).not.toContain('/projects/new');
+    expect(both(home(cube), true)).toContain('פרויקט חדש');
+    expect(both(home(null), false)).not.toContain('פרויקט חדש');
     expect(both(home(null), false)).toContain('חיפוש פרויקט');
     expect(both(home(null), false)).toContain('הסתיימו');
   });

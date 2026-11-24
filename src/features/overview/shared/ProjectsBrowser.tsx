@@ -2,7 +2,8 @@
 import { useMemo, useState } from 'react';
 import type { ProjectCard } from '@/types/contracts';
 import { Pin, TextField } from '@/components/ui';
-import { NewProjectButton, ProjectList } from './Parts';
+import { NewProjectWizard } from '@/features/projects/shared/NewProjectWizard';
+import { ProjectList } from './Parts';
 import { filterProjects, STATUS_OPTIONS, type StatusFilter } from './filter';
 import css from './Overview.module.css';
 
@@ -23,7 +24,7 @@ export function ProjectsBrowser({ projects, isOwner }: { projects: ProjectCard[]
             <button key={o.value} type="button" aria-pressed={status === o.value} onClick={() => setStatus(o.value)}>{o.label}</button>
           ))}
         </div>
-        {isOwner && <span className={css.lead}><NewProjectButton /></span>}
+        {isOwner && <span className={css.lead}><NewProjectWizard /></span>}
       </Pin>
       <p className={css.count} aria-live="polite">{filtering ? `${shown.length} מתוך ${projects.length} פרויקטים` : `${projects.length} פרויקטים`}</p>
       {shown.length === 0 && filtering

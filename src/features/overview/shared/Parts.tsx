@@ -36,11 +36,6 @@ export function Cube({ cube }: { cube: NonNullable<HomeData['financeCube']> }) {
   );
 }
 
-/** Owner-only "new project" entry (the wizard lives at /projects/new). */
-export function NewProjectButton() {
-  return <Link href="/projects/new" className="ui-btn">פרויקט חדש</Link>;
-}
-
 /**
  * Desktop page title row, the same size and place as the inner-page header (`ui-ph`): title on the right,
  * actions at the far left. The phone shell header already shows the title, so this is desktop only.
