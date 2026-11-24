@@ -49,6 +49,13 @@ describe('הרשאות במסך', () => {
     expect(html).not.toContain('type="checkbox"');
     expect(html).not.toContain('הצגת הארכיון');
   });
+  it('כל מסמך מציג אריח תצוגה בגודל קבוע; לתמונה מוכנה יש תמונה עצלה', () => {
+    const html = renderToStaticMarkup(h(FilesProvider, { projectId: 'p', active: [row('a'), row('b', { file: { id: 'fb', name: 'site.jpg', mime: 'image/jpeg', sizeBytes: 1, displayState: 'ready' } })], archived: [], candidates: [], canUpload: false, isOwner: false }, h(FilesMobile)));
+    expect(html).toContain('class="fl-thumb__tile is-pdf"');
+    expect(html).toContain('PDF');
+    expect(html).toContain('src="/api/storage/files/fb?variant=display"');
+    expect(html).toContain('loading="lazy"');
+  });
   it('הארכיון הוא כפתור בסוף אותה שורה של החיפוש והסינון', () => {
     const html = page({ canUpload: true, isOwner: true });
     const row = html.slice(html.indexOf('class="fl-tools"'));
