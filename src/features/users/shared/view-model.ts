@@ -23,11 +23,36 @@ export function errorText(code: string, context?: 'create'): string {
 
 const key = (s: string) => s.normalize('NFKC').toLowerCase().replace(/\s+/g, ' ').trim();
 
-/** Client-side search over the fully loaded list (name, email, project names). */
-export function filterUsers(users: UserRow[], search: string): UserRow[] {
-  const q = key(search);
-  if (!q) return users;
-  return users.filter(u => key(`${u.fullName} ${u.email} ${u.assignments.map(a => a.projectName).join(' ')}`).includes(q));
+export type UserFilter = { search: string; projectId: string; role: '' | ProjectRole | 'owner'; status: '' | 'active' | 'inactive' };
+export const EMPTY_FILTER: UserFilter = { search: '', projectId: '', role: '', status: '' };
+export const NO_PROJECT = 'none';
+
+/**
+ * Client-side search and filters over the fully loaded list (no round trip). Project: people with access to it
+ * (`none`: people with no project). Role: the role on that project, or on any project when none is chosen
+ * (`owner`: the system owner). Status: active or deactivated.
+ */
+export function filterUsers(users: UserRow[], f: UserFilter | string): UserRow[] {
+  const filter = typeof f === 'string' ? { ...EMPTY_FILTER, search: f } : f;
+  const q = key(filter.search);
+  return users.filter(u => {
+    if (q && !key(`${u.fullName} ${u.email} ${u.assignments.map(a => a.projectName).join(' ')}`).includes(q)) return false;
+    if (filter.status === 'active' && !u.isActive) return false;
+    if (filter.status === 'inactive' && u.isActive) return false;
+    if (filter.projectId === NO_PROJECT && (u.assignments.length > 0 || u.isOwner)) return false;
+    const inProject = filter.projectId && filter.projectId !== NO_PROJECT ? u.assignments.filter(a => a.projectId === filter.projectId) : u.assignments;
+    if (filter.projectId && filter.projectId !== NO_PROJECT && inProject.length === 0) return false;
+    if (filter.role === 'owner') return u.isOwner;
+    if (filter.role && !inProject.some(a => a.role === filter.role)) return false;
+    return true;
+  });
+}
+
+/** Projects any listed person has access to, for the project filter (names come with the assignments). */
+export function projectOptions(users: UserRow[], projects: Pick<ProjectCard, 'id' | 'name'>[] = []): { id: string; name: string }[] {
+  const map = new Map<string, string>(projects.map(p => [p.id, p.name]));
+  for (const u of users) for (const a of u.assignments) map.set(a.projectId, a.projectName);
+  return [...map].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name, 'he'));
 }
 
 export function sortUsers(users: UserRow[]): UserRow[] {
