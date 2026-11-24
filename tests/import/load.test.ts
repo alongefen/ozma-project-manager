@@ -45,10 +45,10 @@ describe('load-projects', () => {
 
 describe('website extractor', () => {
   it('parses listing cards (status, place, title) and ignores everything else', () => {
-    const html = `<a class="elementor-element x" href="/a/"><p>COMPLETED</p><h3>רמלה</h3><h3>אושי אושי</h3></a><a class="elementor-element x" href="#"><p>COMING SOON</p><h3>קרית אונו</h3><h3>MUCHA</h3></a><a class="elementor-element" href="/n/"><p>menu</p></a>`;
+    const html = `<a class="elementor-element elementor-element-aaa1111 x" href="/a/"><p>COMPLETED</p><h3>רמלה</h3><h3>אושי אושי</h3></a><a class="elementor-element elementor-element-bbb2222 x" href="#"><p>COMING SOON</p><h3>קרית אונו</h3><h3>MUCHA</h3></a><a class="elementor-element elementor-element-ccc3333" href="/n/"><p>menu</p></a>`;
     expect(parseListing(html, 'restaurants')).toEqual([
-      {category: 'restaurants', place: 'רמלה', title: 'אושי אושי', status: 'completed', sourceUrl: 'https://hy-ozma-ltd.com/a/'},
-      {category: 'restaurants', place: 'קרית אונו', title: 'MUCHA', status: 'coming_soon', sourceUrl: null},
+      {category: 'restaurants', place: 'רמלה', title: 'אושי אושי', status: 'completed', sourceUrl: 'https://hy-ozma-ltd.com/a/', imageUrl: null},
+      {category: 'restaurants', place: 'קרית אונו', title: 'MUCHA', status: 'coming_soon', sourceUrl: null, imageUrl: null},
     ]);
   });
 });

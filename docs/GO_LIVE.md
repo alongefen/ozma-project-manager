@@ -65,6 +65,10 @@ GO_LIVE_OWNER_PASSWORD=<pasted by Alon> node --env-file=<env> scripts/import/loa
 
 Alon approves the list first. Rows are created with `create_project` as Ben, with a fixed request id each, so a retry reuses them. Finished projects are marked completed; "coming soon" stay active. See [DATA_IMPORT](DATA_IMPORT.md).
 
+## e2. Covers
+
+After the project load: `node --env-file=<env> scripts/import/load-covers.mjs --owner-email=<ben>` (dry run), add `--confirm --project-ref=...` for the real run. See [DATA_IMPORT](DATA_IMPORT.md).
+
 ## f. Smoke test per role
 
 Sign in on the live URL as Ben, as the developer, and (with a fake account Ben creates and then deactivates) as a worker: Ben and the developer each see all projects, finance and the people list (both owner-level accounts); the worker sees only assigned projects and no finance. Create and cancel one diary entry on a throwaway active project only if Ben agrees; otherwise verify read-only.
