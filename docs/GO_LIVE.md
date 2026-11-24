@@ -33,7 +33,7 @@ Node 24 (`engines`: `>=24 <25`). Set the Vercel project's Node version to 24.x. 
 
 What it deletes: every row in the 19 application tables listed in `scripts/ops/purge-demo.mjs` (`TABLES`), every object in storage, every auth user. What it keeps: schema, migrations, functions, policies, enum types, buckets. There is no other reference data to keep (the categories are enum types).
 
-Diary versions, entries, transactions, files and the action log are protected by immutability triggers ("nothing is physically deleted"). For demo data this is the single approved exception: the purge SQL switches the triggers off with `session_replication_role = replica` for its own transaction only. Nothing else in the system ever does this.
+Diary versions, entries, transactions, files and the action log are protected by immutability triggers ("nothing is physically deleted"). For demo data this is the single approved exception: the purge SQL disables exactly those seven triggers inside its own all-or-nothing transaction and re-enables them at its end (the Management API role may not use `session_replication_role`, but it owns the tables). The run verifies afterwards that all triggers are on again. Nothing else in the system ever does this.
 
 ```bash
 # 1. dry run (read-only): counts per table, storage objects, accounts (non-demo emails masked)
