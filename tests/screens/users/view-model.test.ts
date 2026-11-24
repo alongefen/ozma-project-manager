@@ -40,3 +40,24 @@ describe('users view model', () => {
     expect(errorText('WHATEVER')).toBe(errorText('UNAVAILABLE'));
   });
 });
+
+import { filterUsers as filterAll, projectOptions, EMPTY_FILTER, NO_PROJECT } from '@/features/users/shared/view-model';
+
+const mk = (id: string, p: Partial<UserRow>): UserRow => ({ id, fullName: id, email: `${id}@x.test`, isOwner: false, isActive: true, revision: 1, assignments: [], ...p });
+const asg = (projectId: string, role: 'manager' | 'worker') => ({ projectId, projectName: `P${projectId}`, role, financeAccess: false, revision: 1 });
+describe('user filters', () => {
+  const users = [
+    mk('ben', { isOwner: true }),
+    mk('a', { assignments: [asg('1', 'manager'), asg('2', 'worker')] }),
+    mk('b', { assignments: [asg('1', 'worker')], isActive: false }),
+    mk('c', {}),
+  ];
+  const ids = (f: Partial<typeof EMPTY_FILTER>) => filterAll(users, { ...EMPTY_FILTER, ...f }).map(u => u.id);
+  it('by project', () => expect(ids({ projectId: '1' })).toEqual(['a', 'b']));
+  it('role is checked on the chosen project', () => { expect(ids({ projectId: '2', role: 'manager' })).toEqual([]); expect(ids({ projectId: '1', role: 'manager' })).toEqual(['a']); });
+  it('role on any project', () => expect(ids({ role: 'worker' })).toEqual(['a', 'b']));
+  it('status', () => { expect(ids({ status: 'inactive' })).toEqual(['b']); expect(ids({ status: 'active' })).toEqual(['ben', 'a', 'c']); });
+  it('no project excludes the owner', () => expect(ids({ projectId: NO_PROJECT })).toEqual(['c']));
+  it('owner role', () => expect(ids({ role: 'owner' })).toEqual(['ben']));
+  it('project options from assignments', () => expect(projectOptions(users).map(p => p.id)).toEqual(['1', '2']));
+});

@@ -1,13 +1,13 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Pin, Sheet, TextField } from '@/components/ui';
+import { Button, Pin, SelectField, Sheet, TextField } from '@/components/ui';
 import { createUser } from '@/features/users/logic/actions';
 import type { ProjectCard, UserRow } from '@/types/contracts';
 import { UsersMobile } from '../mobile/UsersMobile';
 import { UsersDesktop } from '../desktop/UsersDesktop';
 import { PersonPanel } from './PersonPanel';
-import { errorText, filterUsers, sortUsers, validateNewPerson, type NewPersonErrors } from './view-model';
+import { EMPTY_FILTER, NO_PROJECT, errorText, filterUsers, projectOptions, sortUsers, validateNewPerson, type NewPersonErrors, type UserFilter } from './view-model';
 import css from './UsersManager.module.css';
 
 type Toast = { text: string; tone: 'ok' | 'error'; id: number };
@@ -22,7 +22,8 @@ export function UsersManager({ users: initial, projects }: { users: UserRow[]; p
   const [users, setUsers] = useState(initial);
   const [seen, setSeen] = useState(initial);
   if (seen !== initial) { setSeen(initial); setUsers(initial); } // fresh server rows after a conflict
-  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<UserFilter>(EMPTY_FILTER);
+  const set = (patch: Partial<UserFilter>) => setFilter(f => ({ ...f, ...patch }));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
@@ -38,18 +39,19 @@ export function UsersManager({ users: initial, projects }: { users: UserRow[]; p
   const patchUser = (id: string, change: (u: UserRow) => UserRow) => setUsers(list => list.map(u => (u.id === id ? change(u) : u)));
   const refresh = () => router.refresh();
 
-  const shown = useMemo(() => sortUsers(filterUsers(users, search)), [users, search]);
+  const shown = useMemo(() => sortUsers(filterUsers(users, filter)), [users, filter]);
+  const projectChoices = useMemo(() => projectOptions(users), [users]);
+  const filtered = JSON.stringify(filter) !== JSON.stringify(EMPTY_FILTER);
   const selected = users.find(u => u.id === selectedId) ?? null;
 
   return (
     <div className={css.wrap}>
-      <Pin className={css.toolbar}>
-        <div className={css.search}>
-          <TextField label="חיפוש" type="search" placeholder="שם, אימייל או פרויקט" value={search} onChange={e => setSearch(e.target.value)} />
-        </div>
-        <Button onClick={() => setAdding(true)}>הוספת אדם</Button>
+      <Pin className={css.bar}>
+        <Button className={css.add} onClick={() => setAdding(true)}>הוספת אדם</Button>
+        <div className={`${css.tools} d-only`}><FilterTools filter={filter} set={set} projects={projectChoices} /></div>
       </Pin>
-      {shown.length === 0 && <p className={css.empty}>{users.length === 0 ? 'עוד לא נוספו אנשים' : 'לא נמצאו אנשים שמתאימים לחיפוש'}</p>}
+      <div className={`${css.tools} m-only`}><FilterTools filter={filter} set={set} projects={projectChoices} /></div>
+      {shown.length === 0 && <p className={css.empty}>{!filtered ? 'עוד לא נוספו אנשים' : 'לא נמצאו אנשים שמתאימים לסינון'}</p>}
       {shown.length > 0 && (
         <>
           <div className="m-only"><UsersMobile users={shown} onOpen={setSelectedId} /></div>
@@ -68,6 +70,20 @@ export function UsersManager({ users: initial, projects }: { users: UserRow[]; p
       <div className={css.toastHost} aria-live="polite" role="status">
         {toast && <div key={toast.id} className={`${css.toast} ${toast.tone === 'error' ? css.toastError : ''}`}>{toast.text}</div>}
       </div>
+    </div>
+  );
+}
+
+function FilterTools({ filter, set, projects }: { filter: UserFilter; set: (p: Partial<UserFilter>) => void; projects: { id: string; name: string }[] }) {
+  return (
+    <div className={css.filters} role="search" aria-label="סינון אנשים">
+      <div className={css.search}><TextField label="חיפוש" hideLabel type="search" placeholder="שם, אימייל או פרויקט" value={filter.search} onChange={e => set({ search: e.target.value })} /></div>
+      <SelectField className={css.sel} aria-label="פרויקט" value={filter.projectId} onChange={v => set({ projectId: v })}
+        options={[{ value: '', label: 'כל הפרויקטים' }, { value: NO_PROJECT, label: 'ללא פרויקט' }, ...projects.map(p => ({ value: p.id, label: p.name }))]} />
+      <SelectField className={css.sel} aria-label="תפקיד" value={filter.role} onChange={v => set({ role: v as UserFilter['role'] })}
+        options={[{ value: '', label: 'כל התפקידים' }, { value: 'manager', label: 'מנהל' }, { value: 'worker', label: 'עובד' }, { value: 'owner', label: 'מנהל מערכת' }]} />
+      <SelectField className={css.sel} aria-label="סטטוס" value={filter.status} onChange={v => set({ status: v as UserFilter['status'] })}
+        options={[{ value: '', label: 'כל הסטטוסים' }, { value: 'active', label: 'פעילים' }, { value: 'inactive', label: 'מושבתים' }]} />
     </div>
   );
 }
