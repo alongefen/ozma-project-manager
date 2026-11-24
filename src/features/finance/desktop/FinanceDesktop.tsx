@@ -12,13 +12,14 @@ import { ExcelIcon, PencilIcon, TrashIcon } from '../shared/FinIcons';
 import { SummaryDetails } from '../shared/Summary';
 import { useFinanceNav } from '../shared/nav';
 import { KIND_LABELS, bookRows, visibleRows, isIncomeKind, monthLabel, monthsNewestFirst, rowAmount, rowDate, shekels } from '../shared/present';
-import { currentMonth, exportHref, financeHref } from '../shared/query';
+import { allExportHref, currentMonth, exportHref } from '../shared/query';
 
 type Props = { book: FinanceBook; filteredRows: FinanceBook['filteredRows']; today: string };
 
 /** Desktop (from 1024): the demo's content in one panel: summary on top, filters, quick entry, table. */
 export function FinanceDesktop({ book, filteredRows, today }: Props) {
-  const { filter, totalsReady } = useFinanceNav();
+  const { filter, totalsReady, all, href } = useFinanceNav();
+  const cols = all ? 6 : 5;
   const [dialog, setDialog] = useState<{ row: TransactionRow | null } | null>(null);
   const [cancelRow, setCancelRow] = useState<TransactionRow | null>(null);
   const rows = visibleRows(bookRows(book.months), filter);
@@ -31,9 +32,9 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
     <div className="fin fin-desktop d-only">
       <div className="fin-head">
         <div className="fin-head__actions">
-          <a className="ui-btn ui-btn--secondary ui-btn--small" href={exportHref(book.projectId, filter)}><ExcelIcon size={20} /> ייצוא ל-Excel</a>
+          <a className="ui-btn ui-btn--secondary ui-btn--small" href={all ? allExportHref(filter, all.project) : exportHref(book.projectId, filter)}><ExcelIcon size={20} /> ייצוא ל-Excel</a>
           <Button variant="secondary" size="small" onClick={() => window.print()}>הדפסה</Button>
-          <ExcelLink projectId={book.projectId} link={book.excelLink} canWrite={book.canWrite} />
+          {!all && <ExcelLink projectId={book.projectId} link={book.excelLink} canWrite={book.canWrite} />}
         </div>
       </div>
 
@@ -50,24 +51,25 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
 
         <Pin className="fin-bar"><DesktopFilterBar today={today} onAdd={book.canWrite ? () => setDialog({ row: null }) : undefined} /></Pin>
 
-        {!book.canWrite && <div className="fin-bar"><Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice></div>}
+        {!book.canWrite && !all && <div className="fin-bar"><Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice></div>}
 
         <div className="fin-tablewrap">
           <table className="fin-table">
             <caption className="sr-only">תנועות כספיות</caption>
             <thead>
-              <tr><th scope="col">תאריך</th><th scope="col">פרטים / ספק</th><th scope="col">הכנסה</th><th scope="col">הוצאה</th><th scope="col" className="no-print">פעולות</th></tr>
+              <tr><th scope="col">תאריך</th>{all && <th scope="col">פרויקט</th>}<th scope="col">פרטים / ספק</th><th scope="col">הכנסה</th><th scope="col">הוצאה</th><th scope="col" className="no-print">פעולות</th></tr>
             </thead>
             <tbody>
               {rows.length === 0 && (
-                <tr><td colSpan={5} className="fin-empty">
+                <tr><td colSpan={cols} className="fin-empty">
                   {filtered ? 'לא נמצאו תנועות' : 'אין תנועות בתקופה'}
-                  {filtered && <> · <Link href={financeHref(book.projectId, { period })}>איפוס סינון</Link></>}
+                  {filtered && <> · <Link href={href({ period })}>איפוס סינון</Link></>}
                 </td></tr>
               )}
               {rows.map((row: TransactionRow) => (
                 <tr key={row.id}>
                   <td className="fin-num">{rowDate(row)}</td>
+                  {all && <td className="fin-project">{all.projectOf[row.id]}</td>}
                   <td className="fin-details">{row.details}{row.kind !== 'income' && row.kind !== 'expense' && <span className="fin-kind">{KIND_LABELS[row.kind]}</span>}</td>
                   <td className="fin-num">{isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
                   <td className="fin-num">{!isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
@@ -81,7 +83,7 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
               ))}
             </tbody>
             <tfoot>
-              <tr><th scope="row" colSpan={2}>סיכום התנועות המוצגות</th><td className="fin-num" aria-busy={!totalsReady}>{totalsReady ? shekels(filteredRows.income) : '…'}</td><td className="fin-num">{totalsReady ? shekels(filteredRows.expense) : '…'}</td><td className="no-print" /></tr>
+              <tr><th scope="row" colSpan={all ? 3 : 2}>סיכום התנועות המוצגות</th><td className="fin-num" aria-busy={!totalsReady}>{totalsReady ? shekels(filteredRows.income) : '…'}</td><td className="fin-num">{totalsReady ? shekels(filteredRows.expense) : '…'}</td><td className="no-print" /></tr>
             </tfoot>
           </table>
         </div>
@@ -103,7 +105,7 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
             <tbody>
               {monthsNewestFirst(book).map(({ summary: s }) => (
                 <tr key={`${s.year}-${s.month}`}>
-                  <th scope="row"><Link href={financeHref(book.projectId, { period: { year: s.year, month: s.month } })}>{monthLabel(s)}</Link></th>
+                  <th scope="row"><Link href={href({ period: { year: s.year, month: s.month } })}>{monthLabel(s)}</Link></th>
                   <td className="fin-num">{shekels(s.income)}</td><td className="fin-num">{shekels(s.totalExpense)}</td>
                   <td className="fin-num">{shekels(s.netProfit)}</td><td className="fin-num">{shekels(s.balance)}</td>
                 </tr>

@@ -10,7 +10,7 @@ type Props = { today: string; showMonth?: boolean; onDone?: () => void };
 
 /** Period, day and text filters. Changes show instantly; the server recomputes the book. */
 export function Filters({ today, showMonth = true, onDone }: Props) {
-  const { filter, go } = useFinanceNav();
+  const { filter, go, all, goProject } = useFinanceNav();
   const uid = useId();
   const [search, setSearch] = useState(filter.search ?? '');
   const [day, setDay] = useState(filter.day === undefined ? '' : String(filter.day));
@@ -36,6 +36,13 @@ export function Filters({ today, showMonth = true, onDone }: Props) {
 
   return (
     <form className="fin-filters" onSubmit={apply} role="search" aria-label="סינון תנועות">
+      {all && (
+        <div className="fin-field">
+          <label htmlFor={`${uid}-p`}>פרויקט</label>
+          <SelectField id={`${uid}-p`} value={all.project ?? ''} onChange={v => { goProject(v || null); onDone?.(); }}
+            options={[{ value: '', label: 'כל הפרויקטים' }, ...all.projects.map(p => ({ value: p.id, label: p.name }))]} />
+        </div>
+      )}
       {showMonth && (
         <>
           <div className="fin-field">

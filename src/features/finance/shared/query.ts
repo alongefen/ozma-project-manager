@@ -46,6 +46,21 @@ export function exportHref(projectId: string, filter: FinanceFilter): string {
   return `/api/exports/finance?${params}`;
 }
 
+/** The all-projects page: same filter params plus an optional `project`. */
+export const ALL_FINANCE_PATH = '/finance';
+
+export function allFinanceHref(filter: FinanceFilter, project?: string | null): string {
+  const params = filterParams(filter);
+  if (project) params.set('project', project);
+  return `${ALL_FINANCE_PATH}?${params}`;
+}
+
+export function allExportHref(filter: FinanceFilter, project?: string | null): string {
+  const params = filterParams(filter);
+  if (project) params.set('project', project);
+  return `${ALL_FINANCE_PATH}/export?${params}`;
+}
+
 /** Year choices around the current one, always including the selected year. */
 export function yearOptions(today: IsoDate, selected?: number): number[] {
   const current = Number(today.slice(0, 4));

@@ -1,9 +1,10 @@
 import 'server-only';
-import type { HomeData, Platform, RequestContext, TransferMonth } from '@/types/contracts';
+import type { FinanceFilter, HomeData, Platform, RequestContext, TransferMonth } from '@/types/contracts';
 import { createProjectsApi } from '@/features/projects/logic';
 import { createDiaryApi } from '@/features/diary/logic';
 import { createFinanceApi } from '@/features/finance/logic';
 import { createOverviewApi } from '../logic';
+import { getAllFinance, type AllFinanceData } from '../logic/finance-all';
 
 const api = (platform: Platform) =>
   createOverviewApi(platform, { projects: createProjectsApi(platform), diary: createDiaryApi(platform), finance: createFinanceApi(platform) });
@@ -24,4 +25,15 @@ export async function loadTransfer(platform: Platform, ctx: RequestContext): Pro
   const code = result.error.code;
   if (code === 'UNAUTHENTICATED') return { kind: 'signed-out' };
   return code === 'FORBIDDEN' || code === 'NOT_FOUND' ? { kind: 'hidden' } : { kind: 'error' };
+}
+
+/** The all-projects finance book (owner only). `hidden` for everyone else and for an unknown project. */
+export type FinanceAllLoad = { kind: 'ok'; data: AllFinanceData } | { kind: 'hidden' } | { kind: 'signed-out' } | { kind: 'error' };
+export async function loadFinanceAll(platform: Platform, ctx: RequestContext, filter: FinanceFilter, projectId?: string): Promise<FinanceAllLoad> {
+  if (!ctx.actor.isOwner) return { kind: 'hidden' };
+  const result = await getAllFinance(platform, ctx, { filter, ...(projectId ? { projectId } : {}) });
+  if (result.ok) return { kind: 'ok', data: result.value };
+  const code = result.error.code;
+  if (code === 'UNAUTHENTICATED') return { kind: 'signed-out' };
+  return code === 'FORBIDDEN' || code === 'NOT_FOUND' || code === 'VALIDATION' ? { kind: 'hidden' } : { kind: 'error' };
 }

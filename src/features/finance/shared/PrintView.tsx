@@ -10,7 +10,8 @@ import { KIND_LABELS, bookRows, isIncomeKind, monthLabel, rowAmount, rowDate, sh
  * Amounts and totals are the ones calculated by the finance logic.
  */
 export function PrintView({ book, filteredRows }: { book: FinanceBook; filteredRows: FinanceBook['filteredRows'] }) {
-  const { filter, totalsReady } = useFinanceNav();
+  const { filter, totalsReady, all } = useFinanceNav();
+  const cols = all ? 5 : 4;
   const period = filter.period;
   const narrowed = filter.day !== undefined || !!filter.search;
   const blocks = [...book.months]
@@ -35,11 +36,11 @@ export function PrintView({ book, filteredRows }: { book: FinanceBook; filteredR
       <h2>פירוט תנועות</h2>
       {blocks.length === 0 ? <p>אין תנועות בתקופה</p> : (
         <table className="fin-table">
-          <thead><tr><th scope="col">תאריך</th><th scope="col">פרטים / ספק</th><th scope="col">הכנסה</th><th scope="col">הוצאה</th></tr></thead>
+          <thead><tr><th scope="col">תאריך</th>{all && <th scope="col">פרויקט</th>}<th scope="col">פרטים / ספק</th><th scope="col">הכנסה</th><th scope="col">הוצאה</th></tr></thead>
           {blocks.map(({ block, rows }) => (
             <tbody key={`${block.summary.year}-${block.summary.month}`}>
               <tr className="fin-print__month">
-                <th colSpan={4} scope="colgroup">
+                <th colSpan={cols} scope="colgroup">
                   {monthLabel(block.summary)}
                   {!narrowed && <span> · הכנסות {shekels(block.summary.income)} · סה״כ הוצאה {shekels(block.summary.totalExpense)} · שארית חודש {shekels(block.summary.balance)}</span>}
                 </th>
@@ -47,6 +48,7 @@ export function PrintView({ book, filteredRows }: { book: FinanceBook; filteredR
               {rows.map(row => (
                 <tr key={row.id}>
                   <td className="fin-num">{rowDate(row)}</td>
+                  {all && <td>{all.projectOf[row.id]}</td>}
                   <td>{row.details}{row.kind !== 'income' && row.kind !== 'expense' && ` (${KIND_LABELS[row.kind]})`}</td>
                   <td className="fin-num">{isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
                   <td className="fin-num">{!isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
@@ -55,7 +57,7 @@ export function PrintView({ book, filteredRows }: { book: FinanceBook; filteredR
             </tbody>
           ))}
           <tfoot>
-            <tr><th scope="row" colSpan={2}>{narrowed ? 'סיכום התנועות המוצגות' : 'סיכום התנועות'}</th><td className="fin-num">{totalsReady ? shekels(filteredRows.income) : ''}</td><td className="fin-num">{totalsReady ? shekels(filteredRows.expense) : ''}</td></tr>
+            <tr><th scope="row" colSpan={all ? 3 : 2}>{narrowed ? 'סיכום התנועות המוצגות' : 'סיכום התנועות'}</th><td className="fin-num">{totalsReady ? shekels(filteredRows.income) : ''}</td><td className="fin-num">{totalsReady ? shekels(filteredRows.expense) : ''}</td></tr>
           </tfoot>
         </table>
       )}

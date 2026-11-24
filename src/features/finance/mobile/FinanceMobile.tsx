@@ -10,7 +10,7 @@ import { Filters } from '../shared/Filters';
 import { SummaryDetails } from '../shared/Summary';
 import { useFinanceNav } from '../shared/nav';
 import { KIND_LABELS, bookRows, visibleRows, isReduction, monthLabel, monthsNewestFirst, rowAmount, rowDate, shekels } from '../shared/present';
-import { currentMonth, exportHref, financeHref } from '../shared/query';
+import { allExportHref, currentMonth, exportHref } from '../shared/query';
 import { EntrySheet } from '../shared/EntrySheet';
 import { CancelConfirm } from '../shared/CancelConfirm';
 import { ExcelIcon, FilterIcon, LinkIcon, PencilIcon, PrintIcon, TrashIcon } from '../shared/FinIcons';
@@ -24,7 +24,7 @@ const step = (m: { year: number; month: number }, delta: number) => {
 
 /** Phone (up to 1023): back arrow, period switch, one summary, a grouped list, an entry sheet. No table, no tab bar. */
 export function FinanceMobile({ book, filteredRows, today }: Props) {
-  const { filter, go, totalsReady } = useFinanceNav();
+  const { filter, go, totalsReady, all, href } = useFinanceNav();
   const [sheet, setSheet] = useState<{ row: TransactionRow | null } | null>(null);
   const [cancelRow, setCancelRow] = useState<TransactionRow | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -53,9 +53,9 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
         <div className="fin-msum__head">
           <h2>{period === 'all' ? 'כל התקופה' : monthLabel(period)}</h2>
           <div className="fin-msum__icons no-print">
-            <a className="fin-iconbtn fin-iconbtn--plain" href={exportHref(book.projectId, filter)} aria-label="ייצוא ל-Excel"><ExcelIcon /></a>
+            <a className="fin-iconbtn fin-iconbtn--plain" href={all ? allExportHref(filter, all.project) : exportHref(book.projectId, filter)} aria-label="ייצוא ל-Excel"><ExcelIcon /></a>
             <button type="button" className="fin-iconbtn fin-iconbtn--plain" onClick={() => window.print()} aria-label="הדפסה"><PrintIcon /></button>
-            <button type="button" className="fin-iconbtn fin-iconbtn--plain" aria-expanded={panel === 'link'} onClick={() => toggle('link')} aria-label="קישור לקובץ Excel"><LinkIcon /></button>
+            {!all && <button type="button" className="fin-iconbtn fin-iconbtn--plain" aria-expanded={panel === 'link'} onClick={() => toggle('link')} aria-label="קישור לקובץ Excel"><LinkIcon /></button>}
           </div>
         </div>
         <div className="fin-msum__row"><span>הכנסות</span><strong className="fin-num">{shekels(book.period.income)}</strong></div>
@@ -68,7 +68,7 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
         {book.canWrite && <Button block onClick={() => setSheet({ row: null })}>הוספת תנועה</Button>}
         <Button variant="secondary" block onClick={() => setFilterOpen(true)}><FilterIcon /> סינון{filtered && <span className="fin-count">{(filter.day !== undefined ? 1 : 0) + (filter.search ? 1 : 0)}</span>}</Button>
       </Pin>
-      {!book.canWrite && <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}
+      {!book.canWrite && !all && <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}
       {panel === 'link' && <Card><ExcelLink projectId={book.projectId} link={book.excelLink} canWrite={book.canWrite} /></Card>}
       {filtered && (
         <div className="fin-chips" aria-label="סינון פעיל">
@@ -81,7 +81,7 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
         <ul className="fin-list" aria-label="חודשים">
           {monthsNewestFirst(book).map(({ summary: s }) => (
             <li key={`${s.year}-${s.month}`}>
-              <Link className="fin-item" href={financeHref(book.projectId, { period: { year: s.year, month: s.month } })}>
+              <Link className="fin-item" href={href({ period: { year: s.year, month: s.month } })}>
                 <span className="fin-item__top"><strong>{monthLabel(s)}</strong><span className="fin-num">רווח נקי {shekels(s.netProfit)}</span></span>
                 <span className="fin-item__sub">הכנסות <span className="fin-num">{shekels(s.income)}</span> · הוצאה <span className="fin-num">{shekels(s.totalExpense)}</span></span>
               </Link>
@@ -99,6 +99,7 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
                   <strong className={`fin-num${isReduction(row.kind) ? ' fin-neg' : ''}`}>{rowAmount(row)}</strong>
                 </span>
                 <span className="fin-item__details">{row.details}</span>
+                {all && <span className="fin-item__project">{all.projectOf[row.id]}</span>}
                 <span className="fin-item__bottom">
                   <span className="fin-item__sub fin-num">{rowDate(row)}</span>
                   {book.canWrite && (
@@ -113,7 +114,7 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
             {rows.length === 0 && (
               <li className="fin-empty">
                 {filtered ? 'לא נמצאו תנועות' : 'אין תנועות בחודש הזה'}
-                {filtered && <> · <Link href={financeHref(book.projectId, { period })}>איפוס סינון</Link></>}
+                {filtered && <> · <Link href={href({ period })}>איפוס סינון</Link></>}
               </li>
             )}
           </ul>

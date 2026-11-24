@@ -10,7 +10,7 @@ const monthKey = (m: Month) => m.year * 12 + m.month;
 
 // Half away from zero, same rule as src/lib/money; only the ratio is derived here,
 // all amounts come from the already-rounded per-project summaries of FinanceApi.
-function percentTenths(net: number, income: number): number | null {
+export function percentTenths(net: number, income: number): number | null {
   if (income <= 0) return null;
   const scaled = Math.abs(net) * 1000;
   const rounded = Math.floor((scaled * 2 + income) / (income * 2));
