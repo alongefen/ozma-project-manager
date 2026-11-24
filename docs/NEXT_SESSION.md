@@ -10,8 +10,7 @@
 
 ## Next (in this order)
 
-1. **P2.8 core integration**, then gate G3 (Alon). Not opened yet: it needs a decision from Alon first. End-to-end paths for owner, manager, worker and a mixed person need non-owner test accounts in the cloud DB (only an owner exists), plus a cloud window and a live browser pass at the six widths (P2.4, P2.5, P2.7 had none). Test users in the production-bound DB are a D31 question.
-   Shared-file work for P2.8 (from P2.7): `HOME_PATH` in `src/lib/navigation.ts` is still `/more`, so sign-in does not land on `/`; nav item "פרויקטים" points to `/projects`, which has no page (home is the project list); `/reports/diary` has no nav entry; `screenTitle('/')` falls back to "חי עוצמה".
+1. **Gate G3 (Alon).** P2.8 is done ([P2.8](tasks/P2.8.md)): four roles verified on the server and in a browser at six widths. Open items for G3 are in that file: non-owner forbidden pages show the default 404 instead of `StateMessage`; DESIGN S16 archive/log screens have no task; `playwright.config.ts` needs `testMatch`.
 
 ## Open items (none blocks the next tasks)
 
@@ -22,7 +21,7 @@
 
 - Excel RTL visual check never done; U+FFFE/U+FFFF in the Excel engine produce a corrupt file; the `uuid` alert in ExcelJS is assessed, not fixed.
 - L7 protections (30 attempts per 5 minutes refill, session length via Management API) were not verified in the cloud.
-- Not verified: non-owner views live (only an owner test account exists), real devices, screen readers.
+- Not verified: real devices, screen readers, Vercel build.
 - `tests/db/support/cloud.ts` does not use `tests/support/cloud-paths.ts` yet, so `tests/db` fails from a worktree; small shared test-support change.
 - CI-CLOUD deferred (A-38). CI runs only the `unit` project; cloud suites run by hand in a window.
 - Backups are deferred; ask Alon before real data. Node 24 is required (`engines`); Alon has 25 locally, works but warns.
