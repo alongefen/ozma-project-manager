@@ -53,6 +53,14 @@ Wherever a page scrolls, the title, the project tabs and the screen's primary ac
 - No server cache across requests (`unstable_cache`, `use cache`, `revalidate`): reads depend on the actor and on per-project permissions, and finance must never reach a role without access. `tests/shell/cache-safety.test.ts` enforces it.
 - Measure with `next build && next start`, not `next dev`; compare before and after in the task file.
 
+## Print and export
+
+Two separate actions, never one combined "print / PDF" control.
+
+- **Print** opens a clean print view of the data only: finance prints the `PrintView` (`window.print()`); a diary entry or day opens its PDF inline in a new tab. A global `@media print` rule in `app.css` hides the pinned header, project tabs, every `Pin` action row, `.no-print`, the shell header, nav and sidebar. Mark any new screen chrome `no-print`. A4, RTL, no cut-off columns.
+- **Export** downloads a file: Excel for finance, `?download=1` PDF for the diary. Label it "ייצוא".
+- The diary PDF needs a browser: Chromium on Linux (Vercel); on macOS/Windows the installed Chrome (or `REPORT_CHROME_PATH`).
+
 ## Uploads
 
 - Uploading starts the moment a file is picked. There is no separate "upload" button; use `FileUpload` and never build another picker.

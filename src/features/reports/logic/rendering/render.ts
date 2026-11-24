@@ -1,13 +1,34 @@
 import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
 import { PDFDocument } from "@cantoo/pdf-lib";
+import { existsSync } from "node:fs";
 import { prepareReport } from "./template";
 import type { RenderOptions, ReportPart, ReportWarning } from "./types";
 
+const LOCAL_BROWSERS = [
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "/Applications/Chromium.app/Contents/MacOS/Chromium",
+  "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+];
+
+/**
+ * The packaged Chromium runs only on Linux (Vercel). On a developer machine (macOS, Windows) the report uses the
+ * installed Chrome: REPORT_CHROME_PATH, or a standard install location. Returns undefined on Linux.
+ */
+function localBrowser(): string | undefined {
+  if (process.platform === "linux") return undefined;
+  const fromEnv = process.env.REPORT_CHROME_PATH;
+  if (fromEnv && existsSync(fromEnv)) return fromEnv;
+  return LOCAL_BROWSERS.find(path => existsSync(path));
+}
+
 /** No remote documents are loaded. Even accidental remote references in the template are blocked. */
-export async function renderHtmlToPdf(html: string, options: RenderOptions = {}): Promise<Uint8Array> {
+export async function renderHtmlToPdf(html: string, requested: RenderOptions = {}): Promise<Uint8Array> {
+  const options = { ...requested, executablePath: requested.executablePath ?? localBrowser() };
   if (!options.executablePath && process.platform !== "linux") {
-    throw new Error("Chromium הארוז דורש Linux; בפיתוח יש למסור executablePath לדפדפן מקומי");
+    throw new Error("Chromium הארוז דורש Linux; בפיתוח יש להתקין Chrome או להגדיר REPORT_CHROME_PATH");
   }
   const browser = await puppeteer.launch({
     executablePath: options.executablePath ?? await chromium.executablePath(),

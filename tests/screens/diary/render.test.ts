@@ -56,8 +56,13 @@ describe('מסכי היומן', () => {
     const out = html(screen());
     expect(out).toContain('דיווח חדש');
     expect(out).toContain('/api/reports/diary?kind=entry');
-    expect(out).toContain('הדפסה / PDF לפי תאריך');
+    expect(out).toContain('הדפסה וייצוא לפי תאריך');
     expect(out).toContain('dr-toolbar');
+    // print (inline) and export (download) are two separate actions, never one combined control
+    expect(out).toContain('aria-label="הדפסת הדיווח"');
+    expect(out).toContain('aria-label="ייצוא הדיווח ל-PDF"');
+    expect(out).toContain('download=1');
+    expect(out).not.toContain('הדפסה / PDF');
   });
   it('פרויקט שהסתיים: אין דיווח חדש, אין עריכה וביטול, ההדפסה נשארת', () => {
     const out = html(screen({ canReport: false, readOnlyNote: 'הפרויקט הסתיים או בארכיון. אפשר לצפות ולהדפיס בלבד.' }));
@@ -65,7 +70,7 @@ describe('מסכי היומן', () => {
     expect(out).not.toContain('עריכת הדיווח');
     expect(out).not.toContain('ביטול הדיווח');
     expect(out).toContain('אפשר לצפות ולהדפיס בלבד');
-    expect(out).toContain('הדפסה / PDF');
+    expect(out).toContain('הדפסת הדיווח');
     expect(out).toContain('dr-iconbtn');
   });
   it('עריכה לפי הרשאת השרת בלבד, וביטול רק למי שהשרת מתיר', () => {

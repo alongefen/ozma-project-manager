@@ -6,7 +6,7 @@ import { loadVisibleProjects } from '@/features/diary/shared/load';
 import { PrintByDate } from '@/features/diary/shared/PrintByDate';
 import '@/features/diary/shared/diary.css';
 
-export const metadata = { title: 'הדפסת יומן לפי תאריך' };
+export const metadata = { title: 'הדפסה וייצוא יומן לפי תאריך' };
 
 /** Print or PDF of one project's diary for a chosen date (PDF-07). The PDF itself comes from /api/reports/diary. */
 export default async function DiaryReportPage() {
@@ -16,7 +16,7 @@ export default async function DiaryReportPage() {
   if (!projects) return <StateMessage tone="error" backHref="/diary" backLabel="חזרה ליומן">הפרויקטים אינם זמינים כרגע. נסו שוב בעוד רגע.</StateMessage>;
   return (
     <Page narrow>
-      <PageHeader title="הדפסת יומן לפי תאריך" backHref="/diary" backLabel="חזרה ליומן" />
+      <PageHeader title="הדפסה וייצוא יומן לפי תאריך" backHref="/diary" backLabel="חזרה ליומן" />
       <Card><PrintByDate projects={projects} today={context.value.today} /></Card>
     </Page>
   );

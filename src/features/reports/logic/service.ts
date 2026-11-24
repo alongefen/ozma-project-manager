@@ -48,7 +48,11 @@ export function createReportsApi(platform: Platform, options: Options = {}): Rep
 
   const guarded = async <T>(run: () => Promise<Result<T>>): Promise<Result<T>> => {
     try { return await run(); }
-    catch (error) { return error instanceof ReportLimitError ? failure('LIMIT') : failure('UNAVAILABLE'); }
+    catch (error) {
+      if (error instanceof ReportLimitError) return failure('LIMIT');
+      console.error('[reports] render failed:', error instanceof Error ? `${error.name}: ${error.message.slice(0, 200)}` : 'unknown');
+      return failure('UNAVAILABLE');
+    }
   };
 
   return {

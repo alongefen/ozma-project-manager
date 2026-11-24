@@ -1,7 +1,7 @@
 'use client';
 import type { DiaryRow } from '@/types/contracts';
 import { Card } from '@/components/ui';
-import { PencilIcon, PrintIcon, TrashIcon } from './DiaryIcons';
+import { DownloadIcon, PencilIcon, PrintIcon, TrashIcon } from './DiaryIcons';
 import { format } from '@/lib/format';
 import { Attachments } from './Attachments';
 import { editedText, reportUrl } from './model';
@@ -20,7 +20,8 @@ export function EntryCard({ row, showProject, onEdit, onCancel }: { row: DiaryRo
       {edited && <p className="dr-card__edited">{edited}</p>}
       <Attachments files={row.files} />
       <div className="dr-card__actions no-print">
-        <a className="dr-iconbtn" href={reportUrl({ kind: 'entry', entryId: row.id })} target="_blank" rel="noopener noreferrer" aria-label="הדפסה או PDF של הדיווח" title="הדפסה / PDF"><PrintIcon /></a>
+        <a className="dr-iconbtn" href={reportUrl({ kind: 'entry', entryId: row.id })} target="_blank" rel="noopener noreferrer" aria-label="הדפסת הדיווח" title="הדפסה"><PrintIcon /></a>
+        <a className="dr-iconbtn" href={reportUrl({ kind: 'entry', entryId: row.id }, { download: true })} aria-label="ייצוא הדיווח ל-PDF" title="ייצוא ל-PDF"><DownloadIcon /></a>
         {row.canMoveOrCancel && onCancel && <button type="button" className="dr-iconbtn dr-iconbtn--danger" onClick={() => onCancel(row)} aria-label="ביטול הדיווח" title="ביטול דיווח"><TrashIcon /></button>}
         {row.canCorrect && onEdit && <button type="button" className="dr-iconbtn" onClick={() => onEdit(row)} aria-label="עריכת הדיווח" title="עריכה"><PencilIcon /></button>}
       </div>

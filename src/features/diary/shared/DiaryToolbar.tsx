@@ -17,13 +17,13 @@ export function DiaryToolbar({ screen, idp, lead }: { screen: DiaryScreen; idp: 
     <>
       <Pin className="dr-toolbar">
         <Button variant="secondary" onClick={() => setOpen('filter')}>סינון{active > 0 && <span className="dr-toolbar__count">{active}</span>}</Button>
-        <Button variant="secondary" onClick={() => setOpen('print')}>הדפסה / PDF לפי תאריך</Button>
+        <Button variant="secondary" onClick={() => setOpen('print')}>הדפסה וייצוא לפי תאריך</Button>
         {lead && <span className="dr-toolbar__lead">{lead}</span>}
       </Pin>
       <Sheet open={open === 'filter'} onClose={() => setOpen(null)} title="סינון הדיווחים">
         <FilterBar idp={`${idp}-f`} filter={filter} projects={screen.projects} action={screen.basePath} />
       </Sheet>
-      <Sheet open={open === 'print'} onClose={() => setOpen(null)} title="הדפסה או PDF לפי תאריך">
+      <Sheet open={open === 'print'} onClose={() => setOpen(null)} title="הדפסה וייצוא לפי תאריך">
         <PrintByDate projects={screen.projects ?? []} fixedProjectId={screen.fixedProjectId} today={screen.today} />
       </Sheet>
     </>
