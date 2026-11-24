@@ -49,8 +49,8 @@ export function filterUsers(users: UserRow[], f: UserFilter | string): UserRow[]
 }
 
 /** Projects any listed person has access to, for the project filter (names come with the assignments). */
-export function projectOptions(users: UserRow[]): { id: string; name: string }[] {
-  const map = new Map<string, string>();
+export function projectOptions(users: UserRow[], projects: Pick<ProjectCard, 'id' | 'name'>[] = []): { id: string; name: string }[] {
+  const map = new Map<string, string>(projects.map(p => [p.id, p.name]));
   for (const u of users) for (const a of u.assignments) map.set(a.projectId, a.projectName);
   return [...map].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name, 'he'));
 }

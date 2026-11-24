@@ -40,7 +40,7 @@ export function UsersManager({ users: initial, projects }: { users: UserRow[]; p
   const refresh = () => router.refresh();
 
   const shown = useMemo(() => sortUsers(filterUsers(users, filter)), [users, filter]);
-  const projectChoices = useMemo(() => projectOptions(users), [users]);
+  const projectChoices = useMemo(() => projectOptions(users, projects), [users, projects]);
   const filtered = JSON.stringify(filter) !== JSON.stringify(EMPTY_FILTER);
   const selected = users.find(u => u.id === selectedId) ?? null;
 

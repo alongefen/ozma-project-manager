@@ -13,3 +13,6 @@
 
 ## Open
 - Visual pass at the six widths after merge on a signed-in session.
+
+## Review (one pass)
+Fixed: skeleton bar widths now match the new row (`loading.tsx`); project options also come from the `projects` prop. Phone filters sit under the pinned add button, same as files.
