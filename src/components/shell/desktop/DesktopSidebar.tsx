@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Avatar, Icon } from '@/components/ui';
-import { activeItem, type NavItem } from '@/lib/navigation';
+import { activeItem, navHref, type NavItem } from '@/lib/navigation';
 
 /** Desktop sidebar, matching the demo's aside (230 wide, 195 from 1024 to 1100). */
 export function DesktopSidebar({ items, fullName, roleLabel }: { items: NavItem[]; fullName: string; roleLabel: string }) {
@@ -17,7 +17,7 @@ export function DesktopSidebar({ items, fullName, roleLabel }: { items: NavItem[
         {items.map(item => (
           <Link
             key={item.key}
-            href={item.href}
+            href={navHref(item, pathname)}
             className={item.prominent ? 'd-nav__report' : undefined}
             aria-current={current?.key === item.key ? 'page' : undefined}
           >

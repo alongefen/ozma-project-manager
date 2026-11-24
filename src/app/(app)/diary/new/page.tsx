@@ -1,16 +1,11 @@
-import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
 import { GeneralDiary } from '@/features/diary/shared/GeneralDiary';
-import { projectFromReferrer } from '@/features/diary/shared/model';
 
 export const metadata = { title: 'דיווח חדש' };
 
 /**
- * The menu's report button. From inside a project it goes to that project's diary with the window open and the project
- * chosen; from anywhere else it shows the general diary with the window open.
+ * The general report flow: the general diary with the window open and no project chosen. Never reads the referrer or any
+ * remembered project: inside a project the menu button links straight to that project's diary (see `reportHref`).
  */
-export default async function NewReportPage() {
-  const project = projectFromReferrer((await headers()).get('referer'));
-  if (project) redirect(`/projects/${project}/diary?new=1`);
+export default function NewReportPage() {
   return <GeneralDiary query={{}} startOpen />;
 }
