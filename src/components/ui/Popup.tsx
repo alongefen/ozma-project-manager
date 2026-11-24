@@ -34,13 +34,20 @@ export function Popup({ open, onClose, anchor, title, className = '', children }
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    for (const k of ['top', 'bottom', 'left', 'min-width']) el.style.removeProperty(k);
+    for (const k of ['top', 'bottom', 'left', 'min-width', 'max-height']) el.style.removeProperty(k);
     if (!open || phone || !anchor.current) return;
+    // Measured after it is shown: sit under the field if it fits, else above it, else on the roomier side with its own scroll.
     const r = anchor.current.getBoundingClientRect();
-    const flip = window.innerHeight - r.bottom < 320 && r.top > window.innerHeight - r.bottom;
-    el.style.setProperty('left', `${Math.max(8, Math.min(r.left, window.innerWidth - 8 - Math.max(r.width, 316)))}px`);
+    const gap = 4, margin = 8;
+    const below = window.innerHeight - r.bottom - gap - margin, above = r.top - gap - margin;
+    const natural = el.scrollHeight;
+    const underneath = natural <= below || below >= above;
+    const room = Math.max(120, underneath ? below : above);
+    el.style.setProperty('left', `${Math.max(margin, Math.min(r.left, window.innerWidth - margin - Math.max(r.width, el.offsetWidth)))}px`);
     el.style.setProperty('min-width', `${r.width}px`);
-    if (flip) el.style.setProperty('bottom', `${window.innerHeight - r.top + 4}px`); else el.style.setProperty('top', `${r.bottom + 4}px`);
+    el.style.setProperty('max-height', `${room}px`);
+    if (underneath) el.style.setProperty('top', `${r.bottom + gap}px`);
+    else el.style.setProperty('top', `${Math.max(margin, r.top - gap - Math.min(natural, room))}px`);
   }, [open, phone, anchor]);
 
   return (

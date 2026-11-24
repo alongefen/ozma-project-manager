@@ -32,7 +32,7 @@
 .options:focus-visible .option[data-active='true'] { outline: 2px solid var(--focus); outline-offset: -2px; }
 
 .calendar { padding: 10px 12px 8px; }
-.menu.calendar { width: 316px; max-height: none; overflow: visible; }
+.menu.calendar { width: 316px; }
 .calHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 8px; }
 .nav { width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); font-size: 24px; cursor: pointer; }
 .nav:hover { background: var(--gray-bg); }
