@@ -1,6 +1,6 @@
 # Next session
 
-23.11.2026, evening. `origin/main`: `$(HEAD)`. Agent-facing doc, in English. Start here, then `git log --oneline -15` and `gh pr list`.
+24.11.2026. `origin/main`: `c9e2be1`. Agent-facing doc, in English. Start here, then `git log --oneline -15` and `gh pr list`.
 
 ## State
 
