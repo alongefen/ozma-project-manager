@@ -57,3 +57,7 @@ Private (11): 2 family-name titles (flagged), plus Beer Sheva Kalaniyot, Yavne, 
 ## Update after migration 20261124120000 (A-43)
 
 Alon chose owner-level accounts. `seed-accounts.mjs` now creates Ben with `system_bootstrap_owner` and the developer (alon@melo-digital.com) with `system_add_owner`, both with the service key. `load-projects.mjs` no longer grants the developer anything (owners see every project). The "Developer account" options table above is superseded. Purge still needs `--include-real-users` (one non-demo login). Nothing ran on the cloud for this follow-up; tests are mocks only.
+
+## Fix found by the first real dry run (25.11)
+
+The Management API role reported `can_replica: false`, so `session_replication_role` would have failed (safe, all-or-nothing). The purge SQL now disables and re-enables the 7 immutability triggers with `alter table ... disable/enable trigger` (the role owns the tables). The probe checks table ownership and that all triggers are enabled; the real run refuses otherwise and verifies the triggers are on afterwards. The dry run (read-only) is the only check done; the SQL itself has not run on the cloud.

@@ -2,9 +2,16 @@
 -- migrations and enum types are untouched. Run only through scripts/ops/purge-demo.mjs after Alon's "כן".
 --
 -- Sent as ONE multi-statement request, so it runs as one implicit transaction: all or nothing.
--- session_replication_role=replica (local to that transaction) switches off the immutability triggers
--- ("nothing is physically deleted") and FK checks. This is the single approved exception for demo data.
-set local session_replication_role = replica;
+-- The 7 immutability triggers ("nothing is physically deleted") are disabled for this transaction only and
+-- re-enabled at its end; a failure rolls back the disable too. This is the single approved exception for demo data.
+-- (session_replication_role is not available to the Management API role, so the tables' owner switches the triggers.)
+alter table public.diary_versions disable trigger immutable_diary_versions;
+alter table public.diary_version_files disable trigger immutable_diary_version_files;
+alter table public.diary_attachments disable trigger immutable_diary_attachments;
+alter table public.sensitive_events disable trigger immutable_sensitive_events;
+alter table public.diary_entries disable trigger immutable_diary_entries;
+alter table public.stored_files disable trigger immutable_stored_files;
+alter table public.transactions disable trigger immutable_transactions;
 delete from public.diary_version_files;
 delete from public.diary_versions;
 delete from public.diary_attachments;
@@ -24,3 +31,10 @@ delete from public.projects;
 delete from private.profile_creation_requests;
 delete from private.profile_updates;
 delete from public.profiles;
+alter table public.diary_versions enable trigger immutable_diary_versions;
+alter table public.diary_version_files enable trigger immutable_diary_version_files;
+alter table public.diary_attachments enable trigger immutable_diary_attachments;
+alter table public.sensitive_events enable trigger immutable_sensitive_events;
+alter table public.diary_entries enable trigger immutable_diary_entries;
+alter table public.stored_files enable trigger immutable_stored_files;
+alter table public.transactions enable trigger immutable_transactions;

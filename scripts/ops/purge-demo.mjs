@@ -22,8 +22,8 @@ const BATCH = 100;
 export const countSql = () => TABLES.map(t => `select '${t}' as t, count(*)::int as n from ${t}`).join(' union all ');
 // Every storage object (documents, display copies and orphans): the app owns all of them.
 export const filesSql = () => 'select bucket_id as bucket, name as path from storage.objects';
-// Read-only privilege probe: can this role switch triggers off in a transaction?
-export const probeSql = () => "select current_user as who, has_parameter_privilege(current_user,'session_replication_role','SET') as can_replica";
+// Read-only probe: does the role own the 7 protected tables (so it may disable their triggers), and are all triggers on?
+export const probeSql = () => "select current_user as who, (select bool_and(pg_has_role(current_user,tableowner,'member')) from pg_tables where schemaname='public' and tablename in ('diary_versions','diary_version_files','diary_attachments','sensitive_events','diary_entries','stored_files','transactions')) as can_alter_triggers, (select count(*)::int from pg_trigger where tgname like 'immutable\\_%' and tgenabled<>'O') as triggers_not_enabled";
 
 export function summarize({counts, files, users}) {
   const demo = users.filter(u => (u.email ?? '').toLowerCase().endsWith(DEMO_DOMAIN));
@@ -80,10 +80,12 @@ export async function run({args, env, log = console.log, sqlText = readFileSync(
   const admin = clients?.admin ?? createClient(e.SUPABASE_URL, e.SUPABASE_SECRET_KEY, {auth: {persistSession: false, autoRefreshToken: false}});
   const sql = clients?.sql ?? createSqlRunner({token: e.SUPABASE_ACCESS_TOKEN});
   const before = summarize(await collect({sql, admin}));
-  log(JSON.stringify({mode: mode.write ? 'REAL RUN' : 'DRY RUN', ...before, expectTotal: expectedTotal(before), privilege: (await sql(probeSql()))[0]}, null, 2));
+  const privilege = (await sql(probeSql()))[0];
+  log(JSON.stringify({mode: mode.write ? 'REAL RUN' : 'DRY RUN', ...before, expectTotal: expectedTotal(before), privilege}, null, 2));
   if (!mode.write) { log('Dry run only. Nothing was changed.'); return {wrote: false, before}; }
   // Guard against running after go-live: any non-demo login or any real owner blocks the run unless explicitly overridden.
   if (before.otherUsers.length > 0 && args['include-real-users'] !== true) throw new Error(`Refusing: ${before.otherUsers.length} non-demo login(s) exist. If these are demo logins you made yourself, add --include-real-users`);
+  if (!privilege.can_alter_triggers || privilege.triggers_not_enabled !== 0) throw new Error('Refusing: the SQL role cannot manage the protection triggers, or some are already off (see privilege in the output)');
   const total = expectedTotal(before);
   if (String(args['expect-total']) !== String(total)) throw new Error(`--expect-total must equal the dry-run total (${total}); the data changed or the flag is missing`);
   const {files, users} = await collect({sql, admin});
@@ -91,6 +93,7 @@ export async function run({args, env, log = console.log, sqlText = readFileSync(
   await sql(sqlText);                                // 2. database rows, one implicit transaction
   await removeAuthUsers(admin, users);               // 3. auth users (profiles reference them, so after step 2)
   const after = summarize(await collect({sql, admin}));
+  if ((await sql(probeSql()))[0].triggers_not_enabled !== 0) throw new Error('CRITICAL: protection triggers are not enabled after the purge; re-enable them (see purge-demo.sql)');
   if (after.rowTotal !== 0 || after.authUsers !== 0 || after.storageObjects !== 0) throw new Error('Verification failed: data remains. Re-run the purge (idempotent).');
   log('Purge complete and verified: all tables and auth users are empty.');
   return {wrote: true, before, after};
