@@ -31,7 +31,7 @@ const ownerOnly: Record<string, () => Json> = {
 };
 // Callable by authorised project members; the project gate hides foreign projects (NOT_FOUND) or refuses by role.
 const projectScoped = ['update_project', 'create_task', 'update_task', 'set_task_completed', 'delete_task', 'begin_upload', 'create_document', 'create_entry', 'correct_entry', 'move_entry', 'cancel_entry', 'create_transaction', 'update_transaction', 'cancel_transaction', 'set_finance_link', 'project_permissions', 'project_access_candidates', 'project_manager_names', 'get_pending_upload', 'authorize_file', 'diary_summary', 'finance_month_totals'];
-const sessionScoped = ['get_actor', 'project_cards'];
+const sessionScoped = ['get_actor', 'project_cards', 'update_own_name'];
 const serviceOnly = ['system_add_owner', 'system_bootstrap_owner', 'system_owner_recovered', 'system_finish_upload'];
 const all = [...Object.keys(ownerOnly), ...projectScoped, ...sessionScoped, ...serviceOnly];
 

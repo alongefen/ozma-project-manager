@@ -929,6 +929,7 @@ export type Database = {
       system_bootstrap_owner: { Args: { input: Json }; Returns: Json }
       system_finish_upload: { Args: { input: Json }; Returns: Json }
       system_owner_recovered: { Args: { input: Json }; Returns: Json }
+      update_own_name: { Args: { input: Json }; Returns: Json }
       update_profile: { Args: { input: Json }; Returns: Json }
       update_project: { Args: { input: Json }; Returns: Json }
       update_task: { Args: { input: Json }; Returns: Json }

@@ -18,3 +18,10 @@
 ## Open
 - Migration for `update_own_name` (project manager).
 - Header still shows "מנהל מערכת" for owners (see OWNERS-UI).
+
+## Part 2: `update_own_name` migration (separate PR)
+- Alon approved the function in principle (24.11.2026, relayed). The cloud APPLY still needs his direct yes in the task session chat, with the SQL shown, cost 0, rollback and the no-backup warning (Free plan).
+- `supabase/migrations/20261124150000_update_own_name.sql`: `public.update_own_name(input jsonb)`; keys `fullName`, `expectedRevision` (both required, unknown keys refused, so no id can be passed); acts only on `auth.uid()`; `private.require_active()`; name trimmed, 1..120; row lock and revision check; same name is a no-op; audit `user.updated` (existing action, no constraint change); same exception block as `set_owner_level`; `security definer`, `search_path=''`; revoke from all, grant to `authenticated` only. No other schema change.
+- Rollback: `supabase/rollback/20261124150000_update_own_name.down.sql` (drops the function; names already changed stay). Its text is trivial and was not executed.
+- Evidence prepared, not yet run: `tests/db/support/own-name-dryrun.sql` (one transaction that always ends in an exception; fake `@example.invalid` rows; 17 checks incl. refusals and grants). `src/types/database.ts` and the role-matrix catalog (`sessionScoped`) updated.
+- After apply: read-only check (`pg_proc` exists, grants `authenticated` only, advisors), then switch the own-name button on for non-owners and route `changeOwnName` to the function.
