@@ -3,6 +3,7 @@ import { SIGN_IN_PATH } from '@/lib/navigation';
 import { StateMessage } from '@/components/ui';
 import { loadProject } from '@/features/projects/shared/load';
 import { createFilesApi } from '@/features/files/logic';
+import { createUsersApi } from '@/features/users/logic';
 import { FilesProvider } from '@/features/files/shared/FilesProvider';
 import { FilesMobile } from '@/features/files/mobile/FilesMobile';
 import { FilesDesktop } from '@/features/files/desktop/FilesDesktop';
@@ -21,6 +22,9 @@ export default async function ProjectFilesPage({ params }: { params: Promise<{ i
     manageAccess ? api.listDocuments(ctx, { projectId: id, archived: true }) : Promise.resolve(null),
     uploadDocument || manageAccess ? api.listAccessCandidates(ctx, { projectId: id }) : Promise.resolve(null),
   ]);
+  // Admins always see every document: listed read-only in the access picker (owner only; listUsers is owner-only).
+  const everyone = ctx.actor.isOwner ? await createUsersApi(platform).listUsers(ctx, {}) : null;
+  const admins = everyone?.ok ? everyone.value.filter(u => u.isOwner && u.isActive).map(u => u.fullName) : [];
   if (!active.ok) {
     const code = active.error.code;
     if (code === 'NOT_FOUND' || code === 'FORBIDDEN' || code === 'VALIDATION') notFound();
@@ -29,7 +33,7 @@ export default async function ProjectFilesPage({ params }: { params: Promise<{ i
   }
   return (
     <FilesProvider projectId={id} active={active.value.items} archived={archived?.ok ? archived.value.items : []}
-      candidates={candidates?.ok ? candidates.value : []} canUpload={uploadDocument} isOwner={manageAccess}>
+      candidates={candidates?.ok ? candidates.value : []} admins={admins} canUpload={uploadDocument} isOwner={manageAccess}>
       <FilesMobile />
       <FilesDesktop />
     </FilesProvider>

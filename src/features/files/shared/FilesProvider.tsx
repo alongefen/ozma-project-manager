@@ -10,7 +10,7 @@ import { UploadForm } from './UploadForm';
 import { countsOf, visibleDocuments } from './model';
 
 type Props = {
-  projectId: string; active: DocumentRow[]; archived: DocumentRow[]; candidates: AccessCandidate[];
+  projectId: string; active: DocumentRow[]; archived: DocumentRow[]; candidates: AccessCandidate[]; admins?: string[];
   canUpload: boolean; isOwner: boolean; children?: ReactNode;
 };
 type Ctx = {
@@ -32,7 +32,7 @@ async function guarded(action: () => Promise<Result<unknown>>): Promise<Result<u
  * One state for both layouts. Documents are loaded in full, so category, search and the archive view are
  * client-side; every write goes through a server action and the page refreshes afterwards.
  */
-export function FilesProvider({ projectId, active, archived, candidates, canUpload, isOwner, children }: Props) {
+export function FilesProvider({ projectId, active, archived, candidates, admins, canUpload, isOwner, children }: Props) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [category, setCategory] = useState<DocumentCategory | null>(null);
@@ -120,7 +120,7 @@ export function FilesProvider({ projectId, active, archived, candidates, canUplo
       </div>
       <Sheet open={upload !== null} onClose={() => setUpload(null)} dismissible={!uploadBusy} title="העלאת מסמך">
         {upload && (
-          <UploadForm projectId={projectId} initialCategory={upload.category} candidates={candidates}
+          <UploadForm projectId={projectId} initialCategory={upload.category} candidates={candidates} admins={admins}
             pending={pending?.files ?? []} busy={uploadBusy} error={uploadError}
             onUploaded={(files, cat, access) => { void save(files, cat, access); }}
             onSave={() => { if (pending) void save(pending.files, pending.category, pending.access); }}
@@ -128,7 +128,7 @@ export function FilesProvider({ projectId, active, archived, candidates, canUplo
         )}
       </Sheet>
       <Sheet open={accessDoc !== null} onClose={() => setAccessDoc(null)} dismissible={!accessBusy} title="הרשאות צפייה במסמך">
-        {accessDoc && <AccessForm doc={accessDoc} candidates={candidates} busy={accessBusy} error={accessError} onSubmit={access => { void saveAccess(access); }} onCancel={() => setAccessDoc(null)} />}
+        {accessDoc && <AccessForm doc={accessDoc} candidates={candidates} admins={admins} busy={accessBusy} error={accessError} onSubmit={access => { void saveAccess(access); }} onCancel={() => setAccessDoc(null)} />}
       </Sheet>
       <ConfirmDialog open={archiveDoc !== null} title={archiveDoc?.archived ? 'החזרת מסמך' : 'העברת מסמך לארכיון'}
         confirmLabel={archiveDoc?.archived ? 'החזרה' : 'העברה לארכיון'} busyLabel="מבצע…" busy={archiveBusy} error={archiveError} danger={!archiveDoc?.archived}

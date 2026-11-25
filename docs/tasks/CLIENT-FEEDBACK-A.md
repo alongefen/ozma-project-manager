@@ -19,3 +19,9 @@
 - No cloud tests and no real browser pass at 360-1280 (no signed-in session; cloud needs the PM window and Alon's yes). Server refusals for 6 and 1 are covered with fakes only; confirm on cloud with a manager/worker membership on a finished project.
 - Known gaps of item 6 (RLS untouched, needs a migration to close): a stored file is still readable by its id through `/api/storage/files/[id]` for a non-owner who knows it; "reports today" in the home counter may still count a finished project's reports.
 - The "all reports" PDF uses a sentinel range, so a report dated after 2099 would be missed (unrealistic).
+
+## Follow-up (25.11.2026, second client feedback; branch `claude/feedback-a2`)
+- **Finished projects button** now works like the documents archive: owner-only button at the far end (left on desktop) of the search row, secondary style with a count, pressed state; switching shows only finished projects with a "מוצגים פרויקטים שהסתיימו בלבד" notice and a matching count line. Default is still active only.
+- **Label**: document access mode "בן בלבד" is now "אדמינים בלבד" (model.ts, summary, hint).
+- **Admins visible, not removable**: the project access page lists active admins in a read-only section (no controls); the document access picker (upload and access form) lists them as a read-only line. Names come from `listUsers` (owner only), so nobody else gets them.
+- Checked: tsc, eslint, unit suites tests/screens and tests/logic/files (222 pass). Not checked: browser pass at 360-1280; no separate reviewer pass for this small UI follow-up.
