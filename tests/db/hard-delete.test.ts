@@ -5,6 +5,9 @@ import { actor, clients, login, membership, project, rpc, value, type Client, ty
 
 // HARD-DELETE (A-44) end to end with real JWTs and REAL storage objects. Fake data only (@example.invalid).
 // Runs only on a throwaway project created here; it never touches other projects or accounts.
+// OPT-IN: this suite creates fake accounts (one owner-level, two members) that cannot be deleted from the API (audit rows are
+// immutable), so it is skipped unless OZMA_ALLOW_TEST_ACCOUNTS=1 and it needs Alon's yes first. Afterwards remove the leftovers with
+// scripts/ops/remove-test-accounts.mjs (dry run first; its selection rule names the test day and test names).
 vi.mock('server-only', () => ({}));
 const { drainStorageQueue } = await import('../../src/features/projects/logic/hard-delete');
 
@@ -46,10 +49,12 @@ async function fakeOwner(): Promise<TestActor> {
   return login(email, password);
 }
 beforeAll(async () => {
+  if (process.env.OZMA_ALLOW_TEST_ACCOUNTS !== '1') return;
   ({ admin, anonymous } = clients()); ben = await fakeOwner();
   manager = await actor(admin, ben.client, 'hdm'); worker = await actor(admin, ben.client, 'hdw');
 }, 120_000);
-afterAll(async () => { // leave nothing behind: every project made here is deleted by the feature itself if still present
+afterAll(async () => { // every project made here is deleted by the feature itself if still present
+  if (process.env.OZMA_ALLOW_TEST_ACCOUNTS !== '1') return;
   for (const id of made) {
     const row = (await ben.client.from('projects').select('name,revision,archived_at').eq('id', id).maybeSingle()).data;
     if (!row) continue;
@@ -65,7 +70,7 @@ async function newProject(label: string) {
 }
 const projectName = async (id: string) => (await ben.client.from('projects').select('name').eq('id', id).single()).data!.name;
 
-describe.sequential('מחיקה סופית (HARD-DELETE, A-44)', () => {
+describe.skipIf(process.env.OZMA_ALLOW_TEST_ACCOUNTS !== '1').sequential('מחיקה סופית (HARD-DELETE, A-44)', () => {
   it('מסמך: רק בעלים, רק מארכיון, שם מוקלד, והקובץ נמחק באמת מהאחסון', async () => {
     const p = await newProject('hd-doc');
     const f = await realFile(p.id, ben, 'document'); const name = await nameOf(f.id);
