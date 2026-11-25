@@ -62,8 +62,8 @@ declare r public.tasks; ids uuid[];
 begin
 perform private.require_active(); perform private.keys(input,array['requestId','projectId','body','dueDate','completed','assigneeId','userIds']::text[],array['requestId','projectId','body','dueDate','completed']::text[]);
 perform private.require_project((input->>'projectId')::uuid,'member'); ids:=private.assignee_ids(input); perform private.check_assignees((input->>'projectId')::uuid,ids); perform private.request_lock('task',(input->>'requestId')::uuid); select * into r from public.tasks where created_by=auth.uid() and request_id=(input->>'requestId')::uuid; if found then perform private.require_project(r.project_id,'member'); return private.saved(r.id,r.revision); end if;
- insert into public.tasks(project_id,body,due_date,completed,created_by,request_id,assignee_id) values((input->>'projectId')::uuid,btrim(input->>'body'),(input->>'dueDate')::date,(input->>'completed')::boolean,auth.uid(),(input->>'requestId')::uuid,coalesce(ids,'{}')[1]) returning * into r;
- insert into public.task_assignees(task_id,user_id,project_id) select r.id,x,r.project_id from unnest(coalesce(ids,'{}')) x;
+ insert into public.tasks(project_id,body,due_date,completed,created_by,request_id,assignee_id) values((input->>'projectId')::uuid,btrim(input->>'body'),(input->>'dueDate')::date,(input->>'completed')::boolean,auth.uid(),(input->>'requestId')::uuid,(coalesce(ids,'{}'::uuid[]))[1]) returning * into r;
+ insert into public.task_assignees(task_id,user_id,project_id) select r.id,x,r.project_id from unnest(coalesce(ids,'{}'::uuid[])) x;
 return private.saved(r.id,r.revision);
 exception when unique_violation then perform private.fail('CONFLICT'); return null;
 when foreign_key_violation then perform private.fail('VALIDATION'); return null;

@@ -11,13 +11,13 @@ import { TasksMobile } from '@/features/tasks/mobile/TasksMobile';
 import { TasksDesktop } from '@/features/tasks/desktop/TasksDesktop';
 
 const row = (id: string, over: Partial<TaskRow> = {}): TaskRow => ({
-  id, projectId: '11111111-1111-4111-8111-111111111111', body: `פתק ${id}`, completed: false, dueDate: null, createdAt: '2026-11-23T08:00:00.000Z', revision: 1, assigneeId: null, assigneeName: null, ...over,
+  id, projectId: '11111111-1111-4111-8111-111111111111', body: `פתק ${id}`, completed: false, dueDate: null, createdAt: '2026-11-23T08:00:00.000Z', revision: 1, assignees: [], ...over,
 });
 const initial = { open: [row('a', { dueDate: '2026-11-01' })], completed: [row('b', { completed: true })] };
 
 function page(canWrite: boolean, canDelete: boolean) {
   return renderToStaticMarkup(
-    h(TasksProvider, { projectId: 'p', initial, canWrite, canDelete, today: '2026-11-23', assignees: [{ id: 'u1', name: 'דנה בדויה', role: 'worker' }], userId: 'u1', initialMine: false }, h(TasksMobile), h(TasksDesktop)),
+    h(TasksProvider, { projectId: 'p', initial, canWrite, canDelete, today: '2026-11-23', assignees: [{ id: 'u1', name: 'דנה בדויה', role: 'worker', isOwner: false }], userId: 'u1', initialMine: false }, h(TasksMobile), h(TasksDesktop)),
   );
 }
 
@@ -43,7 +43,7 @@ describe('הרשאות במסך', () => {
   });
   it('שתי הקבוצות ומצבי ריק', () => {
     const html = renderToStaticMarkup(
-      h(TasksProvider, { projectId: 'p', initial: { open: [], completed: [] }, canWrite: true, canDelete: false, today: '2026-11-23', assignees: [{ id: 'u1', name: 'דנה בדויה', role: 'worker' }], userId: 'u1', initialMine: false }, h(TasksMobile)),
+      h(TasksProvider, { projectId: 'p', initial: { open: [], completed: [] }, canWrite: true, canDelete: false, today: '2026-11-23', assignees: [{ id: 'u1', name: 'דנה בדויה', role: 'worker', isOwner: false }], userId: 'u1', initialMine: false }, h(TasksMobile)),
     );
     expect(html).toContain('אין משימות לביצוע');
     // Completed tasks are hidden on entry (item 3); the toggle says how many there are.

@@ -28,14 +28,15 @@ export function createOverviewQueries(platform: Platform, deps: OverviewDeps): O
       const summary = await deps.diary.getSummary(ctx, { from: ctx.today, to: ctx.today });
       if (!summary.ok) return summary;
       const customers = new Set(visible.map(card => platform.format.searchKey(card.businessName)));
-      // Open tasks assigned to the signed-in user (A-46), among projects they can see. RLS already hides the rest.
+      // Open tasks that list the signed-in user among their assignees (A-46, A-47), among projects they can see. RLS already hides the rest.
       let mine: string[] = [];
       try {
         const rows = await platform.fetchAll(async (from, to) => {
-          const { data, error } = await (ctx.db as unknown as SupabaseClient).from('tasks').select('id,project_id')
-            .eq('assignee_id', ctx.actor.userId).eq('completed', false).is('deleted_at', null).order('id').range(from, to);
+          // A task counts for me when I am among its assignees (A-47); only open, not deleted tasks.
+          const { data, error } = await (ctx.db as unknown as SupabaseClient).from('task_assignees').select('task_id,project_id,tasks!inner(completed,deleted_at)')
+            .eq('user_id', ctx.actor.userId).eq('tasks.completed', false).is('tasks.deleted_at', null).order('task_id').range(from, to);
           if (error) throw error;
-          return (data ?? []) as { id: string; project_id: string }[];
+          return (data ?? []) as { task_id: string; project_id: string }[];
         });
         const visibleIds = new Set(visible.map(card => card.id));
         mine = rows.filter(row => visibleIds.has(row.project_id)).map(row => row.project_id);

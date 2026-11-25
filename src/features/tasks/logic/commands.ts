@@ -4,10 +4,10 @@ import { TasksApiInputSchemas } from '@/types/contracts/tasks';
 import { failure } from '@/lib/db/rpc';
 import { validate } from './validation';
 
-/** The database takes '' for "no assignee" (JSON null is refused by the shared key check); omitted means unchanged on update. */
-function withAssignee<T extends { assigneeId?: string | null }>(input: T) {
-  const { assigneeId, ...rest } = input;
-  return assigneeId === undefined ? rest : { ...rest, assigneeId: assigneeId ?? '' };
+/** The database key is `userIds` (an array the shared key check already knows); omitted means unchanged on update, [] means none. */
+function withAssignees<T extends { assigneeIds?: string[] }>(input: T) {
+  const { assigneeIds, ...rest } = input;
+  return assigneeIds === undefined ? rest : { ...rest, userIds: assigneeIds };
 }
 
 export function createTaskCommands(platform: Pick<Platform, 'rpc'>) {
@@ -18,11 +18,11 @@ export function createTaskCommands(platform: Pick<Platform, 'rpc'>) {
   return {
     async createTask(ctx, input) {
       const parsed = validate(TasksApiInputSchemas.createTask, input);
-      return parsed.ok ? execute<unknown, Saved>(ctx, 'create_task', withAssignee(parsed.value)) : parsed;
+      return parsed.ok ? execute<unknown, Saved>(ctx, 'create_task', withAssignees(parsed.value)) : parsed;
     },
     async updateTask(ctx, input) {
       const parsed = validate(TasksApiInputSchemas.updateTask, input);
-      return parsed.ok ? execute<unknown, Saved>(ctx, 'update_task', withAssignee(parsed.value)) : parsed;
+      return parsed.ok ? execute<unknown, Saved>(ctx, 'update_task', withAssignees(parsed.value)) : parsed;
     },
     async setTaskCompleted(ctx, input) {
       const parsed = validate(TasksApiInputSchemas.setTaskCompleted, input);

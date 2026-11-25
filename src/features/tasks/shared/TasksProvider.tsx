@@ -5,7 +5,7 @@ import type { Result, TaskAssignee, TaskRow } from '@/types/contracts';
 import { ConfirmDialog, Notice, Sheet } from '@/components/ui';
 import { createTask, deleteTask, setTaskCompleted, updateTask } from '../logic/actions';
 import { TaskForm } from './TaskForm';
-import { onlyMine, withRevision, withToggled, withoutTask, type TaskLists } from './model';
+import { onlyMine, sameIds, withRevision, withToggled, withoutTask, type TaskLists } from './model';
 
 type Props = { projectId: string; initial: TaskLists; canWrite: boolean; canDelete: boolean; today: string; assignees: TaskAssignee[]; userId: string; initialMine: boolean; children?: ReactNode };
 
@@ -70,14 +70,14 @@ export function TasksProvider({ projectId, initial, canWrite, canDelete, today, 
     refresh();
   }
 
-  async function submit(fields: { body: string; dueDate: string | null; assigneeId: string | null }) {
+  async function submit(fields: { body: string; dueDate: string | null; assigneeIds: string[] }) {
     setFormBusy(true); setFormError(null);
     const task = form?.task ?? null;
     const dueDate = fields.dueDate as TaskRow['dueDate'];
     const result = await guarded(() => task
-      ? updateTask({ id: task.id, expectedRevision: task.revision, body: fields.body, dueDate, // Unchanged assignee is not sent, so a task whose assignee left the project can still be edited.
-          ...(fields.assigneeId === task.assigneeId ? {} : { assigneeId: fields.assigneeId }) })
-      : createTask({ requestId, projectId, body: fields.body, dueDate, completed: false, assigneeId: fields.assigneeId }));
+      ? updateTask({ id: task.id, expectedRevision: task.revision, body: fields.body, dueDate, // An unchanged list is not sent, so a task whose assignee left the project can still be edited.
+          ...(sameIds(fields.assigneeIds, task.assignees.map(a => a.id)) ? {} : { assigneeIds: fields.assigneeIds }) })
+      : createTask({ requestId, projectId, body: fields.body, dueDate, completed: false, assigneeIds: fields.assigneeIds }));
     setFormBusy(false);
     if (!result.ok) {
       ambiguous.current = result.error.code === 'UNAVAILABLE';

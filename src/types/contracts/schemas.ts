@@ -51,7 +51,7 @@ export const ProjectCardSchema = z.strictObject({"id": UuidSchema,"name": z.stri
 
 export const ProjectDetailsSchema = ProjectFieldsSchema.safeExtend(z.strictObject({"id": UuidSchema,"status": ProjectStatusSchema,"archived": z.boolean(),"revision": z.number().int().positive(),"coverFileId": z.union([UuidSchema,z.null()]),"managerNames": z.array(z.string()),"permissions": ProjectPermissionsSchema}).shape);
 
-export const TaskRowSchema = z.strictObject({"id": UuidSchema,"projectId": UuidSchema,"body": z.string(),"completed": z.boolean(),"dueDate": z.union([IsoDateSchema,z.null()]),"createdAt": IsoDateTimeSchema,"revision": z.number().int().positive(),"assigneeId": z.union([UuidSchema,z.null()]),"assigneeName": z.union([z.string(),z.null()])});
+export const TaskRowSchema = z.strictObject({"id": UuidSchema,"projectId": UuidSchema,"body": z.string(),"completed": z.boolean(),"dueDate": z.union([IsoDateSchema,z.null()]),"createdAt": IsoDateTimeSchema,"revision": z.number().int().positive(),"assignees": z.array(z.strictObject({"id": UuidSchema,"name": z.string()}))});
 
 export const DocumentCategorySchema = z.union([z.literal('specification'),z.literal('plans'),z.literal('additional_plans'),z.literal('renderings')]);
 
@@ -151,8 +151,8 @@ setProjectCover: EditSchema.safeExtend(z.strictObject({"fileId": UuidSchema}).sh
 } as const;
 export const TasksApiInputSchemas = {
 listTasks: z.strictObject({"projectId": UuidSchema}),
-createTask: z.strictObject({"requestId": UuidSchema,"projectId": UuidSchema,"body": z.string().trim().min(1).max(2000),"dueDate": z.union([IsoDateSchema,z.null()]),"completed": z.boolean(),"assigneeId": z.union([UuidSchema,z.null()]).optional()}),
-updateTask: EditSchema.safeExtend(z.strictObject({"body": z.string().trim().min(1).max(2000),"dueDate": z.union([IsoDateSchema,z.null()]),"assigneeId": z.union([UuidSchema,z.null()]).optional()}).shape),
+createTask: z.strictObject({"requestId": UuidSchema,"projectId": UuidSchema,"body": z.string().trim().min(1).max(2000),"dueDate": z.union([IsoDateSchema,z.null()]),"completed": z.boolean(),"assigneeIds": z.array(UuidSchema).max(50).optional()}),
+updateTask: EditSchema.safeExtend(z.strictObject({"body": z.string().trim().min(1).max(2000),"dueDate": z.union([IsoDateSchema,z.null()]),"assigneeIds": z.array(UuidSchema).max(50).optional()}).shape),
 setTaskCompleted: EditSchema.safeExtend(z.strictObject({"completed": z.boolean()}).shape),
 deleteTask: EditSchema,
 } as const;

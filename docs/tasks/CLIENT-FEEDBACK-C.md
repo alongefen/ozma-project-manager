@@ -55,7 +55,14 @@ Applied to the cloud database on 25.11.2026 after Alon's typed "כן" in this ch
 
 Findings first: #147 already lists active admins (read-only) and all members on the project access page. What is still wrong there: members whose account is disabled still show ("חשבון מושבת"); Alon wants them hidden (UI only, no migration). The assignee picker (`list_project_assignees`) and `check_assignee` only knew membership rows, so admins could not be picked: that needs SQL.
 
-### D31 (awaiting Alon's typed "כן" in the task chat; nothing applied)
+### D31 (applied 25.11.2026 after Alon's typed "כן"; checked afterwards: table with RLS on, 5 functions present, 0 backfilled rows because no task had an assignee yet)
 - Migration `supabase/migrations/20261125150000_task_assignees.sql` (one file for both parts): new table `task_assignees(task_id, user_id, project_id)` (RLS read = project member and task not deleted; no write grants, writes only in the two functions; FK to tasks cascades so the A-44 hard delete needs no change), backfill from `tasks.assignee_id`, helpers `private.check_assignees` / `private.assignee_ids`, `create or replace` of `create_task` / `update_task`, and replacement of `list_project_assignees` (active members plus active owner-level accounts, new `is_owner` column). `tasks.assignee_id` stays and is kept equal to the first assignee.
 - The functions accept the new `userIds` array and the old `assigneeId`, so the app version running before the deploy keeps working between "migration applied" and "PR merged".
 - Rollback `supabase/rollback/20261125150000_task_assignees.down.sql`: restores the previous bodies of the three functions, drops the helpers and the table (multi-assignee rows are lost, `assignee_id` keeps each task's first assignee). No backup exists (Free plan). Cost: none.
+
+### What changed in code (A-47)
+- Contracts: `TaskRow.assignees: {id,name}[]` (replaces the single assignee), `TaskAssignee` gains `isOwner` and a nullable role, inputs take `assigneeIds?: Uuid[]` (sent to the database as `userIds`; omitted = unchanged, `[]` = none). `listTasks` reads `task_assignees` for the project and names from `list_project_assignees`.
+- Form: "אחראים (רשות)" checkbox list (members and admins, admins labelled "אדמין"), bounded height with its own scroll. Row: all names on desktop; first name and "+N" on phone. "המשימות שלי" and the home "שלי"/personal counter count a task when the user is among its assignees. An unchanged list is not sent on edit.
+- Access page: members whose account is disabled are no longer listed (admins and active members unchanged, #147 untouched).
+- Known gaps: people who were deactivated or left the project do not appear as assignees and are dropped from a task when its assignee list is edited. The migration SQL had one syntax slip (`coalesce(...)[1]` needs parentheses) fixed in the file before it was applied.
+- Checked: unit screens + logic (974 pass), tsc, eslint; cloud read check above. **Not checked:** server refusals on the cloud (non-member, inactive, other project), a real create/edit round trip with several assignees, and the browser at 360–1280.

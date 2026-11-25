@@ -28,13 +28,19 @@ export function createTaskQueries(platform: Pick<Platform, 'permissions' | 'fetc
         const loadAssignees = async (): Promise<TaskAssignee[]> => {
           const { data, error } = await untypedDb(ctx).rpc('list_project_assignees', { p: projectId });
           if (error) throw error;
-          return ((data ?? []) as { user_id: string; full_name: string; role: TaskAssignee['role'] }[])
-            .map(row => ({ id: row.user_id, name: row.full_name, role: row.role }));
+          return ((data ?? []) as { user_id: string; full_name: string; role: TaskAssignee['role']; is_owner: boolean }[])
+            .map(row => ({ id: row.user_id, name: row.full_name, role: row.role, isOwner: row.is_owner }));
         };
-        const [rows, openCount, completedCount, assignees] = await Promise.all([
+        // Who is responsible, per task. Inactive people and people who left the project have no name here and are not shown.
+        const loadLinks = () => platform.fetchAll(async (from, to) => {
+          const { data, error } = await untypedDb(ctx).from('task_assignees').select('task_id,user_id').eq('project_id', projectId).order('task_id').order('user_id').range(from, to);
+          if (error) throw error;
+          return (data ?? []) as { task_id: string; user_id: string }[];
+        });
+        const [rows, openCount, completedCount, assignees, links] = await Promise.all([
           platform.fetchAll(async (from, to) => {
             const { data, error } = await untypedDb(ctx).from('tasks')
-              .select('id,project_id,body,completed,due_date,created_at,revision,assignee_id')
+              .select('id,project_id,body,completed,due_date,created_at,revision')
               .eq('project_id', projectId).is('deleted_at', null)
               .order('created_at', { ascending: false }).order('id', { ascending: false })
               .range(from, to);
@@ -43,16 +49,21 @@ export function createTaskQueries(platform: Pick<Platform, 'permissions' | 'fetc
             return (data as TaskDbRow[]).map(row => TaskRowSchema.parse({
               id: row.id, projectId: row.project_id, body: row.body, completed: row.completed,
               dueDate: row.due_date, createdAt: row.created_at, revision: row.revision,
-              assigneeId: row.assignee_id, assigneeName: null,
+              assignees: [],
             }));
           }),
-          countTasks(false), countTasks(true), loadAssignees(),
+          countTasks(false), countTasks(true), loadAssignees(), loadLinks(),
         ]);
         // Names come from the members read; a person who left the project keeps the id but has no name.
         const names = new Map(assignees.map(a => [a.id, a.name]));
+        const byTask = new Map<string, TaskRow['assignees']>();
+        for (const link of links) {
+          const name = names.get(link.user_id);
+          if (name !== undefined) byTask.set(link.task_id, [...(byTask.get(link.task_id) ?? []), { id: link.user_id, name }]);
+        }
         const open: TaskRow[] = [];
         const completed: TaskRow[] = [];
-        for (const row of rows) (row.completed ? completed : open).push(row.assigneeId ? { ...row, assigneeName: names.get(row.assigneeId) ?? null } : row);
+        for (const row of rows) (row.completed ? completed : open).push({ ...row, assignees: byTask.get(row.id) ?? [] });
         return { ok: true, value: { open, completed, openCount, completedCount, canWrite: permission.value.writeTasks, assignees } };
       } catch (error) { return { ok: false, error: mapError(error) }; }
     },

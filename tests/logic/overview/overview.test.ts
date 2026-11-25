@@ -15,7 +15,7 @@ const month = (year: number, m: number, income: number, expense: number, tax: nu
 });
 const denied = { ok: false, error: { code: 'NOT_FOUND', message: 'x' } } as const;
 
-function fixture(owner: boolean, cards: ProjectCard[], totals: { projectId: string; projectName: string; month: MonthSummary }[] = [], mineRows: { id: string; project_id: string }[] = []) {
+function fixture(owner: boolean, cards: ProjectCard[], totals: { projectId: string; projectName: string; month: MonthSummary }[] = [], mineRows: { task_id: string; project_id: string }[] = []) {
   const listProjects = vi.fn().mockResolvedValue({ ok: true, value: cards });
   const getSummary = vi.fn().mockResolvedValue({ ok: true, value: { reportCount: 3, workDays: 1, byProject: [] } });
   const getAllProjectTotals = vi.fn().mockResolvedValue({ ok: true, value: totals });
@@ -46,9 +46,9 @@ describe('getHome counters and badges', () => {
   });
   it('a non-owner counts only the open tasks assigned to them, and links the project when all are in one (A-46)', async () => {
     const cards = [card({ openTaskCount: 5 }), card({ openTaskCount: 4 })];
-    const one = fixture(false, cards, [], [{ id: 't1', project_id: cards[0].id }, { id: 't2', project_id: cards[0].id }, { id: 'x', project_id: randomUUID() }]);
+    const one = fixture(false, cards, [], [{ task_id: 't1', project_id: cards[0].id }, { task_id: 't2', project_id: cards[0].id }, { task_id: 'x', project_id: randomUUID() }]);
     expect(await one.api.getHome(one.ctx, {})).toMatchObject({ ok: true, value: { counters: { openTasks: 2, myOpenTasks: 2, myTasksProjectId: cards[0].id } } });
-    const two = fixture(false, cards, [], [{ id: 't1', project_id: cards[0].id }, { id: 't2', project_id: cards[1].id }]);
+    const two = fixture(false, cards, [], [{ task_id: 't1', project_id: cards[0].id }, { task_id: 't2', project_id: cards[1].id }]);
     expect(await two.api.getHome(two.ctx, {})).toMatchObject({ ok: true, value: { counters: { openTasks: 2, myTasksProjectId: null } } });
   });
   it('the owner gets both numbers: all open tasks and their own (0 when none) (A-46)', async () => {
