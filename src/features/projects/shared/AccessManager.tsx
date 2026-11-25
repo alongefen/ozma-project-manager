@@ -1,11 +1,10 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Card, ConfirmDialog, DeleteIcon, IconButton, Sheet } from '@/components/ui';
+import { Button, Card, ConfirmDialog, DeleteIcon, IconButton, SelectField, Sheet } from '@/components/ui';
 import { removeMembership, setFinanceAccess, setMembership } from '@/features/users/logic/actions';
 import type { MemberRow, ProjectRole, Result } from '@/types/contracts';
 import { errorText } from './view-model';
-import { Select } from './Select';
 import css from './AccessManager.module.css';
 
 export type Candidate = { id: string; fullName: string };
@@ -126,7 +125,7 @@ export function AccessManager({ projectId, members: initial, candidates: initial
                 </div>
                 <div className={css.controls}>
                     <div className={css.roleSelect}>
-                      <Select label={`תפקיד של ${m.fullName}`} hideLabel value={m.role} disabled={busy}
+                      <SelectField aria-label={`תפקיד של ${m.fullName}`} value={m.role} disabled={busy}
                         options={[{ value: 'manager', label: ROLE_LABEL.manager }, { value: 'worker', label: ROLE_LABEL.worker }]}
                         onChange={v => v !== m.role && changeRole(m, v as ProjectRole)} />
                     </div>
@@ -151,11 +150,11 @@ export function AccessManager({ projectId, members: initial, candidates: initial
           </ConfirmDialog>
         );
       })()}
-      <Sheet open={adding} onClose={closeAdd} title="הוספת גישה" menus>
+      <Sheet open={adding} onClose={closeAdd} title="הוספת גישה">
         {candidates.length === 0 ? <p className={css.empty}>אין עוד משתמשים פעילים להוספה</p> : (
           <>
-            <Select label="אדם" value={userId} onChange={setUserId} placeholder="בחירת אדם" options={candidates.map(c => ({ value: c.id, label: c.fullName }))} />
-            <Select label="תפקיד בפרויקט" value={role} onChange={v => setRole(v as ProjectRole)} options={[{ value: 'worker', label: ROLE_LABEL.worker }, { value: 'manager', label: ROLE_LABEL.manager }]} />
+            <SelectField label="אדם" value={userId} onChange={setUserId} placeholder="בחירת אדם" options={candidates.map(c => ({ value: c.id, label: c.fullName }))} />
+            <SelectField label="תפקיד בפרויקט" value={role} onChange={v => setRole(v as ProjectRole)} options={[{ value: 'worker', label: ROLE_LABEL.worker }, { value: 'manager', label: ROLE_LABEL.manager }]} />
             <p className={css.muted}>גישה לכספים נפתחת רק למנהל, אחרי ההוספה.</p>
             <div className={css.row}>
               <Button disabled={!userId || addBusy} onClick={add}>{addBusy ? 'שומר…' : 'הוספה'}</Button>
