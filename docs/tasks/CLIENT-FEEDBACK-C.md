@@ -45,3 +45,8 @@ Applied to the cloud database on 25.11.2026 after Alon's typed "כן" in this ch
 
 - Cause: `Sheet` had a `menus` flag (used by the people access sheet, the project access "add" sheet and the filter sheet) that set the body to `overflow: visible`, so a long project list pushed the buttons below the viewport. The flag existed so dropdowns would not be clipped. `SelectField`/`DateField` pop-ups are native popovers in the top layer and never clip, but the two access sheets used an older in-flow `Select` (absolute list) that would clip once the body scrolls (reviewer finding). Those 5 uses (people access sheet, project access list and the add-access sheet) now use `SelectField`, and the unused old `Select` component and CSS are deleted. The flag is removed; every `Sheet` body now scrolls inside `max-height` (90dvh phone, 88vh desktop) with the header fixed. This covers all other long sheets that use the shared `Sheet`.
 - Checked: unit screens (203 pass), tsc, eslint. **Not checked in a browser** at 360/390/desktop with 20+ projects, and not that the dropdowns inside these sheets still open correctly: the PM or Alon should try both.
+
+## Follow-up 3 (Alon): account buttons next to "עריכת שם"
+
+- In the people sheet the account actions (איפוס סיסמה, השבתת חשבון / הפעלה מחדש, הפיכה לאדמין / הסרת הרשאת אדמין) moved from the bottom into the top row beside "עריכת שם", above the scrolling project list. The reset-password form and the "last admin" / "your own account" notes open under that row. The old "חשבון" section is gone. Same rules and dialogs as before; no logic change.
+- Checked: unit screens + users logic (236 pass), tsc, eslint. Not checked in a browser at 360–1280 (the row wraps on narrow screens).
