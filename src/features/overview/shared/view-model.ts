@@ -8,7 +8,6 @@ export function counterItems(counters: HomeData['counters']): CounterItem[] {
   return [
     { key: 'active', label: 'פרויקטים פעילים', value: counters.activeProjects },
     { key: 'reports', label: 'דיווחים היום', value: counters.reportsToday },
-    { key: 'customers', label: 'לקוחות', value: counters.customers },
     { key: 'tasks', label: 'משימות פתוחות', value: counters.openTasks },
   ];
 }
