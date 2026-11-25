@@ -22,7 +22,7 @@ const step = (m: { year: number; month: number }, delta: number) => {
 
 /** Phone (up to 1023): back arrow, period switch, one summary, a grouped list, an entry sheet. No table, no tab bar. */
 export function FinanceMobile({ book, filteredRows, today }: Props) {
-  const { filter, go, goWith, totalsReady, all, href } = useFinanceNav();
+  const { filter, go, goWith, totalsReady, all, href, rowProjectId, rowOpen } = useFinanceNav();
   const [sheet, setSheet] = useState<{ row: TransactionRow | null } | null>(null);
   const [cancelRow, setCancelRow] = useState<TransactionRow | null>(null);
   const [panel, setPanel] = useState<'link' | null>(null);
@@ -107,7 +107,7 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
                 {all && <span className="fin-item__project">{all.projectOf[row.id]}</span>}
                 <span className="fin-item__bottom">
                   <span className="fin-item__sub fin-num">{rowDate(row)}</span>
-                  {book.canWrite && (
+                  {book.canWrite && rowOpen(row.id) && (
                     <span className="ui-iconrow no-print">
                       {book.canCancel && <IconButton tone="danger" label={`ביטול תנועה: ${row.details}`} onClick={() => setCancelRow(row)}><DeleteIcon /></IconButton>}
                       <IconButton label={`עריכת תנועה: ${row.details}`} onClick={() => setSheet({ row })}><EditIcon /></IconButton>
@@ -129,11 +129,11 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
         </>
       )}
 
-      {cancelRow && <CancelConfirm projectId={book.projectId} row={cancelRow} onClose={() => setCancelRow(null)} />}
+      {cancelRow && <CancelConfirm projectId={rowProjectId(cancelRow.id)} row={cancelRow} onClose={() => setCancelRow(null)} />}
 
       {sheet && (
         <EntrySheet title={sheet.row ? 'עריכת תנועה' : 'תנועה חדשה'} onClose={() => setSheet(null)}>
-          <EntryForm projectId={book.projectId} today={today} row={sheet.row} defaultMonth={entryMonth} variant="screen" onDone={() => setSheet(null)} />
+          <EntryForm projectId={sheet.row ? rowProjectId(sheet.row.id) : (all ? (all.projects.find(p => p.id === all.project)?.open ? all.project! : '') : book.projectId)} projects={all?.projects} today={today} row={sheet.row} defaultMonth={entryMonth} variant="screen" onDone={() => setSheet(null)} />
         </EntrySheet>
       )}
     </div>

@@ -175,3 +175,7 @@
 .fin-fbar__project { flex: 0 1 240px; min-width: 180px; }
 .fin-project { min-width: 110px; overflow-wrap: anywhere; font-weight: 600; }
 .fin-item__project { color: var(--nav-active-ink); font-size: 13px; font-weight: 700; }
+
+.fin-cancelled > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.fin-cancelled > summary h2 { font-size: 16px; }
+.fin-cancelled .fin-list { margin-top: 8px; }

@@ -3,6 +3,7 @@ import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 vi.mock('server-only', () => ({}));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: () => {}, replace: () => {}, refresh: () => {} }) }));
+vi.mock('@/features/projects/logic/actions', () => ({ hardDelete: vi.fn(), previewHardDelete: vi.fn() }));
 vi.mock('@/features/finance/logic/actions', () => ({ createTransaction: vi.fn(), updateTransaction: vi.fn(), cancelTransaction: vi.fn(), setExcelLink: vi.fn() }));
 import type { Platform, RequestContext } from '@/types/contracts';
 import { getAllFinance } from '@/features/overview/logic/finance-all';
@@ -10,6 +11,8 @@ import { loadFinanceAll } from '@/features/overview/shared/load';
 import { FinanceNavProvider } from '@/features/finance/shared/nav';
 import { FinanceMobile } from '@/features/finance/mobile/FinanceMobile';
 import { FinanceDesktop } from '@/features/finance/desktop/FinanceDesktop';
+import { CancelledRows } from '@/features/finance/shared/CancelledRows';
+import { EntryForm } from '@/features/finance/shared/EntryForm';
 import { PrintView } from '@/features/finance/shared/PrintView';
 import { allExportHref } from '@/features/finance/shared/query';
 import { format } from '@/lib/format';
@@ -17,6 +20,7 @@ import { format } from '@/lib/format';
 const A = '11111111-1111-4111-8111-111111111111';
 const B = '22222222-2222-4222-8222-222222222222';
 const T1 = 'a0000000-0000-4000-8000-000000000001', T2 = 'a0000000-0000-4000-8000-000000000002', T3 = 'a0000000-0000-4000-8000-000000000003', T4 = 'a0000000-0000-4000-8000-000000000004';
+const T5 = 'a0000000-0000-4000-8000-000000000005';
 const raw = (id: string, project_id: string, kind: string, amount: number, details: string, day = 5) =>
   ({ id, project_id, year: 2026, month: 11, day, kind, amount, details, position: 1, cancelled_at: null, revision: 1 });
 const rows = [raw(T1, A, 'income', 100000, 'תשלום לקוח'), raw(T2, A, 'expense', 20000, 'ברזל'), raw(T3, B, 'income', 50000, 'מקדמה'), raw(T4, B, 'expense', 10000, 'ברזל ושרשראות', 9)];
@@ -24,7 +28,7 @@ const totals = [
   { projectId: A, projectName: 'בניין א', year: 2026, month: 11, income: 100000, expense: 20000 },
   { projectId: B, projectName: 'בניין ב', year: 2026, month: 11, income: 50000, expense: 10000 },
 ];
-const projects = [{ id: A, name: 'בניין א' }, { id: B, name: 'בניין ב' }];
+const projects = [{ id: A, name: 'בניין א', status: 'active', archived_at: null }, { id: B, name: 'בניין ב', status: 'completed', archived_at: null }];
 
 function fake(owner: boolean) {
   const touched: string[] = [];
@@ -33,7 +37,7 @@ function fake(owner: boolean) {
     format,
     permissions: { requireOwner: async () => owner ? { ok: true, value: {} } : { ok: false, error: { code: 'FORBIDDEN', message: 'x' } } },
     rpc: async (_c: unknown, name: string) => { touched.push(name); return { ok: true, value: name === 'diary_summary' ? { workDays: 3 } : totals }; },
-    fetchAll: async () => { touched.push('fetchAll'); return rows; },
+    fetchAll: async () => { touched.push('fetchAll'); return touched.filter(t => t === 'fetchAll').length % 2 === 1 ? rows : [{ ...raw(T5, A, 'expense', 7000, 'טעות'), cancelled_at: '2026-11-10T10:00:00Z' }]; },
   } as unknown as Platform;
   const ctx = { actor: { userId: 'u', fullName: 'בדוי', email: 'a@example.test', isOwner: owner }, db, today: '2026-11-24' } as unknown as RequestContext;
   return { platform, ctx, touched };
@@ -47,7 +51,11 @@ describe('כספי כל הפרויקטים: נתונים', () => {
     const { book, projectOf } = r.value;
     expect(book.period.income).toBe(150000);
     expect(book.period.expense).toBe(30000);
-    expect(book.canWrite).toBe(false);
+    expect(book.canWrite).toBe(true);
+    expect(r.value.cancelled.map(c => c.id)).toEqual([T5]);
+    expect(r.value.projectIdOf[T3]).toBe(B);
+    expect(r.value.projects).toEqual([{ id: A, name: 'בניין א', open: true }, { id: B, name: 'בניין ב', open: false }]);
+    expect(book.period.expense).toBe(30000); // the cancelled row counts nowhere
     expect(book.workDays).toBe(3);
     expect(book.months).toHaveLength(1);
     expect(projectOf).toMatchObject({ [T1]: 'בניין א', [T3]: 'בניין ב' });
@@ -92,16 +100,37 @@ describe('כספי כל הפרויקטים: מסך', () => {
     const { platform, ctx } = fake(true);
     const r = await getAllFinance(platform, ctx, { filter: { period: 'all' } });
     if (!r.ok) throw new Error('expected ok ' + JSON.stringify(r.error));
-    const { book, filteredRows, projectOf } = r.value;
-    const html = renderToStaticMarkup(h(FinanceNavProvider, { all: { projects, projectOf, project: null }, filter: { period: 'all' }, children: [
-      h(FinanceMobile, { key: 'm', book, filteredRows, today: ctx.today }), h(FinanceDesktop, { key: 'd', book, filteredRows, today: ctx.today }), h(PrintView, { key: 'p', book, filteredRows })] }));
+    const { book, filteredRows, projectOf, projectIdOf, cancelled, projects: scopeProjects } = r.value;
+    const html = renderToStaticMarkup(h(FinanceNavProvider, { all: { projects: scopeProjects, projectOf, projectIdOf, cancelled, project: null }, filter: { period: 'all' }, children: [
+      h(FinanceMobile, { key: 'm', book, filteredRows, today: ctx.today }), h(FinanceDesktop, { key: 'd', book, filteredRows, today: ctx.today }), h(PrintView, { key: 'p', book, filteredRows }), h(CancelledRows, { key: 'c' })] }));
     expect(html).toContain('כל הפרויקטים');
     expect(html).toContain('>פרויקט<');
     expect(html).toContain('בניין ב');
     expect(html).toContain('href="/finance/export?period=all"');
     expect(html).toContain('הדפסה');
-    expect(html).not.toContain('הוספת תנועה');
+    expect(html).toContain('הוספת תנועה');
+    // Rows of the open project can be edited and cancelled; rows of the finished one cannot.
+    expect(html).toContain('עריכת תנועה: תשלום לקוח');
+    expect(html).not.toContain('עריכת תנועה: מקדמה');
     expect(html).not.toContain('קישור לקובץ Excel');
+    expect(html).toContain('תנועות מבוטלות (1)');
+    expect(html).toContain('מחיקה סופית: טעות');
     expect(allExportHref({ period: 'all', search: 'x' }, B)).toBe(`/finance/export?period=all&search=x&project=${B}`);
+  });
+});
+
+describe('כספי כל הפרויקטים: טופס תנועה', () => {
+  const form = (row: null | { id: string }, projectId: string) => {
+    const scope = [{ id: A, name: 'בניין א', open: true }, { id: B, name: 'בניין ב', open: false }];
+    return renderToStaticMarkup(h(EntryForm, { projectId, projects: scope, today: '2026-11-25', row: row as never, defaultMonth: { year: 2026, month: 11 }, variant: 'screen', onDone: () => {} }));
+  };
+  it('תנועה חדשה: בחירת פרויקט ריקה כברירת מחדל (בלי פרויקט)', () => {
+    const html = form(null, '');
+    expect(html).toContain('פרויקט');
+    expect(html).toContain('בחירת פרויקט');
+  });
+  it('עריכה: הפרויקט קבוע וחסום לשינוי', () => {
+    const row = { id: T1, year: 2026, month: 11, day: 5, kind: 'income', amount: 100, details: 'x', position: 1, cancelledAt: null, revision: 1 };
+    expect(form(row, A)).toMatch(/disabled/);
   });
 });

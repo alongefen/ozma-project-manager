@@ -7,6 +7,7 @@ import { FINANCE_ERROR } from '@/features/overview/shared/view-model';
 import { TransferMobile } from '@/features/overview/mobile/TransferMobile';
 import { TransferDesktop } from '@/features/overview/desktop/TransferDesktop';
 import { parseFilter, type FinanceQuery } from '@/features/finance/shared/query';
+import { CancelledRows } from '@/features/finance/shared/CancelledRows';
 import { PrintView } from '@/features/finance/shared/PrintView';
 import { FinanceMobile } from '@/features/finance/mobile/FinanceMobile';
 import { FinanceDesktop } from '@/features/finance/desktop/FinanceDesktop';
@@ -36,15 +37,16 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   if (all.kind === 'hidden') notFound();
   if (all.kind === 'signed-out') redirect(SIGN_IN_PATH);
   if (all.kind === 'error') return <StateMessage tone="error" backHref="/projects" backLabel="חזרה לפרויקטים">{FINANCE_ERROR}</StateMessage>;
-  const { book, filteredRows, projects, projectOf, projectId } = all.data;
+  const { book, filteredRows, projects, projectOf, projectIdOf, cancelled, projectId } = all.data;
   const props = { book, filteredRows, today: context.value.today };
   return (
     <>
       <DesktopTitle title="כספים" />
-      <FinanceNavProvider all={{ projects, projectOf, project: projectId }} filter={filter}>
+      <FinanceNavProvider all={{ projects, projectOf, projectIdOf, cancelled, project: projectId }} filter={filter}>
         <FinanceMobile {...props} />
         <FinanceDesktop {...props} />
         <PrintView book={book} filteredRows={filteredRows} />
+        <CancelledRows />
         {transfer?.kind === 'ok' && transfer.months.length > 0 && (
           <>
             <TransferMobile months={transfer.months} embedded />
