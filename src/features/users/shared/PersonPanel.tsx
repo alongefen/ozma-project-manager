@@ -1,8 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { Badge, Button, ConfirmDialog, DeleteIcon, IconButton, Notice, TextField } from '@/components/ui';
+import { Badge, Button, ConfirmDialog, DeleteIcon, IconButton, Notice, SelectField, TextField } from '@/components/ui';
 import { addToAllProjects, removeMembership, resetPassword, setFinanceAccess, setMembership, setOwnerLevel, setUserActive, updateUser } from '@/features/users/logic/actions';
-import { Select } from '@/features/projects/shared/Select';
 import type { ProjectCard, ProjectRole, Result, UserAssignment, UserRow } from '@/types/contracts';
 import { ADMIN_LABEL, ROLE_LABEL, addableProjects, adminControls, errorText, ownerErrorText, statusLabel, validateName, validatePassword } from './view-model';
 import css from './PersonPanel.module.css';
@@ -219,8 +218,8 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
               <div className={css.add}>
                 {options.length === 0 ? <p className={css.muted}>אין פרויקט פתוח נוסף לשיוך</p> : (
                   <>
-                    <Select label="פרויקט" value={addProject} onChange={setAddProject} placeholder="בחירת פרויקט" options={options.map(p => ({ value: p.id, label: p.name }))} />
-                    <Select label="תפקיד בפרויקט" value={addRole} onChange={v => setAddRole(v as ProjectRole)} options={[{ value: 'worker', label: ROLE_LABEL.worker }, { value: 'manager', label: ROLE_LABEL.manager }]} />
+                    <SelectField label="פרויקט" value={addProject} onChange={setAddProject} placeholder="בחירת פרויקט" options={options.map(p => ({ value: p.id, label: p.name }))} />
+                    <SelectField label="תפקיד בפרויקט" value={addRole} onChange={v => setAddRole(v as ProjectRole)} options={[{ value: 'worker', label: ROLE_LABEL.worker }, { value: 'manager', label: ROLE_LABEL.manager }]} />
                     <p className={css.muted}>גישה לכספים נפתחת רק למנהל, אחרי ההוספה. הוספה לכל הפרויקטים הפעילים נעשית בלי גישה לכספים, ולא משנה שיוך קיים.</p>
                     <div className={css.row}>
                       <Button disabled={!addProject || addBusy || allBusy} onClick={addAccess}>{addBusy ? 'שומר…' : 'הוספה'}</Button>
@@ -240,7 +239,7 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
                     <strong className={css.project}>{a.projectName}</strong>
                     <div className={css.controls}>
                       <div className={css.role}>
-                        <Select label={`תפקיד ב${a.projectName}`} hideLabel value={a.role} disabled={b}
+                        <SelectField aria-label={`תפקיד ב${a.projectName}`} value={a.role} disabled={b}
                           options={[{ value: 'manager', label: ROLE_LABEL.manager }, { value: 'worker', label: ROLE_LABEL.worker }]}
                           onChange={v => v !== a.role && changeRole(a, v as ProjectRole)} />
                       </div>
