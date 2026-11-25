@@ -17,7 +17,7 @@ type Props = { book: FinanceBook; filteredRows: FinanceBook['filteredRows']; tod
 
 /** Desktop (from 1024): the demo's content in one panel: summary on top, filters, quick entry, table. */
 export function FinanceDesktop({ book, filteredRows, today }: Props) {
-  const { filter, totalsReady, all, href } = useFinanceNav();
+  const { filter, totalsReady, all, href, rowProjectId, rowOpen } = useFinanceNav();
   const cols = all ? 6 : 5;
   const [dialog, setDialog] = useState<{ row: TransactionRow | null } | null>(null);
   const [cancelRow, setCancelRow] = useState<TransactionRow | null>(null);
@@ -72,7 +72,7 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
                   <td className="fin-details">{row.details}{row.kind !== 'income' && row.kind !== 'expense' && <span className="fin-kind">{KIND_LABELS[row.kind]}</span>}</td>
                   <td className="fin-num">{isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
                   <td className="fin-num">{!isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
-                  <td className="no-print">{book.canWrite && (
+                  <td className="no-print">{book.canWrite && rowOpen(row.id) && (
                     <span className="ui-iconrow">
                       {book.canCancel && <IconButton tone="danger" label={`ביטול תנועה: ${row.details}`} onClick={() => setCancelRow(row)}><DeleteIcon /></IconButton>}
                       <IconButton label={`עריכת תנועה: ${row.details}`} onClick={() => setDialog({ row })}><EditIcon /></IconButton>
@@ -90,11 +90,11 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
 
       {dialog && (
         <EntrySheet title={dialog.row ? 'עריכת תנועה' : 'תנועה חדשה'} onClose={() => setDialog(null)}>
-          <EntryForm projectId={book.projectId} today={today} row={dialog.row} defaultMonth={entryMonth} variant="screen" onDone={() => setDialog(null)} />
+          <EntryForm projectId={dialog.row ? rowProjectId(dialog.row.id) : (all?.project ?? book.projectId)} projects={all?.projects} today={today} row={dialog.row} defaultMonth={entryMonth} variant="screen" onDone={() => setDialog(null)} />
         </EntrySheet>
       )}
 
-      {cancelRow && <CancelConfirm projectId={book.projectId} row={cancelRow} onClose={() => setCancelRow(null)} />}
+      {cancelRow && <CancelConfirm projectId={rowProjectId(cancelRow.id)} row={cancelRow} onClose={() => setCancelRow(null)} />}
 
       {period === 'all' && (
         <Card className="fin-main fin-monthsbox">

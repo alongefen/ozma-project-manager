@@ -22,3 +22,22 @@ Alon, 24.11.2026: `/finance` must look and behave like a project's finance tab (
 - No signed-in browser pass and no 360–1280 screenshot check (no session; cloud tests need a window and Alon's yes). Layout reuses the project page's CSS; added rules only cap the project field width.
 - Real-data cloud run of `getAllFinance` not done.
 - Reviewer (Sonnet): approved, no blocking findings; the tax summary now hides while day/search is active.
+
+## Round 2 — add, edit, cancel, permanent delete from `/finance` (25.11.2026, branch `claude/finance-all-write`)
+
+- **Add / edit / cancel** reuse the project tab's `EntryForm`, `EntrySheet` and `CancelConfirm` (same commands). `getAllFinance` now returns `canWrite`/`canCancel` true (the page is owner only). "הוספת תנועה" sits in the same pinned row as on the project tab (phone `Pin`, desktop filter bar).
+- **Project picker (new):** `EntryForm` takes optional `projects`. A new entry shows a required "פרויקט" `SelectField`, empty by default (preselected only when the page is already filtered to one project) and listing only projects that accept finance (active, not archived). Editing shows the row's own project, disabled. Without `projects` (project tab) nothing changes.
+- **Row actions:** the shared `IconButton` edit and delete icons; on a row of a finished or archived project they are not shown (the database also refuses). New `useFinanceNav().rowProjectId/rowOpen`.
+- **Permanent delete (A-44):** the project tab lists no cancelled transactions, so there was nothing to hang it on. `/finance` now has a collapsed section "תנועות מבוטלות (N)" (owner page, period and project filters apply, in no total, hidden when printing) with "מחיקה סופית" per row, using the shared `HardDeleteDialog` (`kind="transaction"`: server preview, irreversible notice, owner and cancelled only, enforced by the database function). Refreshes the page after.
+- Result appears at once: the same `router.refresh()` as the project tab reloads rows and totals.
+- No migration, service or cost. The PRODUCTION database was not touched: no cloud test ran.
+
+### Checked
+
+- tsc, eslint clean; `vitest --project unit tests/screens tests/shell tests/logic`: 67 files, 983 tests pass. New: cancelled rows and project ids from `getAllFinance`, add button and per-row actions only for open projects, picker empty and required, edit project disabled, cancelled section with permanent delete, non-owner refused with nothing read.
+- Server rules (manager without finance, worker, finished project) are the existing database functions behind `create_transaction` / `update_transaction` / `cancel_transaction` / `hard_delete_transaction`; their tests exist (`tests/db/hard-delete.test.ts`, finance and role-matrix suites) and were not re-run (cloud).
+
+### Not checked / open
+
+- The picker has no text search: `SelectField` has none (shared component, not mine). It has type-ahead; a search box is a shared change if Alon wants it with 40+ projects.
+- No signed-in browser pass at 360–1280, no cloud run.

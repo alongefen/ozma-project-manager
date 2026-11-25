@@ -1,7 +1,7 @@
 'use client';
 import { createContext, useContext, useEffect, useOptimistic, useRef, useState, useTransition, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import type { FinanceFilter } from '@/types/contracts';
+import type { FinanceFilter, TransactionRow } from '@/types/contracts';
 import { allFinanceHref, financeHref } from './query';
 
 type Nav = {
@@ -18,10 +18,21 @@ type Nav = {
   goProject(project: string | null): void;
   /** Applies a whole filter and the project in one navigation (the phone's filter window). */
   goWith(next: FinanceFilter, project: string | null): void;
+  /** The project a row belongs to (the page's project, or the row's own on the all-projects page). */
+  rowProjectId(rowId: string): string;
+  /** False for a row of a finished or archived project on the all-projects page: it can be neither edited nor cancelled. */
+  rowOpen(rowId: string): boolean;
   /** The address of this screen for a filter (project page or all-projects page). */
   href(next: FinanceFilter): string;
 };
-export type AllScope = { projects: { id: string; name: string }[]; projectOf: Record<string, string>; project: string | null };
+export type AllScope = {
+  projects: { id: string; name: string; open: boolean }[];
+  projectOf: Record<string, string>;
+  projectIdOf: Record<string, string>;
+  /** Cancelled rows of the shown period, for permanent delete. */
+  cancelled: TransactionRow[];
+  project: string | null;
+};
 const Ctx = createContext<Nav | null>(null);
 const periodKey = (p: FinanceFilter['period']) => (p === 'all' ? 'all' : `${p.year}-${p.month}`);
 
@@ -69,7 +80,9 @@ export function FinanceNavProvider({ projectId, all = null, filter: serverFilter
   }
 
   return (
-    <Ctx.Provider value={{ filter: shown, go, loading, totalsReady, all: all && { ...all, project }, goProject, goWith, href: next => hrefFor(next) }}>
+    <Ctx.Provider value={{ filter: shown, go, loading, totalsReady, all: all && { ...all, project }, goProject, goWith, href: next => hrefFor(next),
+      rowProjectId: id => (all ? all.projectIdOf[id] ?? '' : projectId ?? ''),
+      rowOpen: id => !all || !!all.projects.find(p => p.id === all.projectIdOf[id])?.open }}>
       <div className="fin-wrap" data-pending={loading || undefined} aria-busy={loading}>
         {loading && <div className="fin-progress" role="status"><span className="sr-only">טוען…</span></div>}
         {children}

@@ -9,6 +9,8 @@ import { yearOptions } from './query';
 
 type Props = {
   projectId: string;
+  /** All-projects page: the choices. A new entry then needs a chosen project; an edited one shows its own, fixed. */
+  projects?: { id: string; name: string; open: boolean }[];
   today: string;
   /** Row being edited, or null for a new entry. */
   row: TransactionRow | null;
@@ -20,9 +22,10 @@ type Props = {
 };
 
 /** One form for both shells; the layout classes differ, the fields and rules do not. */
-export function EntryForm({ projectId, today, row, defaultMonth, variant, onDone }: Props) {
+export function EntryForm({ projectId, projects, today, row, defaultMonth, variant, onDone }: Props) {
   const uid = useId();
-  const tx = useTransactions(projectId);
+  const [pid, setPid] = useState(projectId);
+  const tx = useTransactions(pid);
   const [draft, setDraft] = useState<EntryDraft>(
     row
       ? draftFromRow(row)
@@ -36,6 +39,7 @@ export function EntryForm({ projectId, today, row, defaultMonth, variant, onDone
 
   async function submit(event?: { preventDefault(): void }) {
     event?.preventDefault();
+    if (projects && !row && !pid) { setErrors({ project: 'יש לבחור פרויקט' }); return; }
     const parsed = parseDraft(draft);
     if (!parsed.ok) {
       setErrors(parsed.errors);
@@ -55,7 +59,7 @@ export function EntryForm({ projectId, today, row, defaultMonth, variant, onDone
     if (event.key === 'Escape') { event.preventDefault(); onDone(); }
   }
 
-  const field = (name: keyof EntryDraft, label: string, control: React.ReactNode) => (
+  const field = (name: keyof EntryDraft | 'project', label: string, control: React.ReactNode) => (
     <div className={`fin-field fin-field--${name}`}>
       <label htmlFor={`${uid}-${name}`}>{label}</label>
       {control}
@@ -67,6 +71,10 @@ export function EntryForm({ projectId, today, row, defaultMonth, variant, onDone
   return (
     <form ref={formRef} className={`fin-entry fin-entry--${variant}`} onSubmit={submit} onKeyDown={keys} noValidate>
       <div className="fin-entry__grid">
+        {projects && field('project', 'פרויקט', (
+          <SelectField {...aria('project')} value={pid} disabled={!!row} placeholder="בחירת פרויקט" onChange={setPid}
+            options={(row ? projects : projects.filter(p => p.open)).map(p => ({ value: p.id, label: p.name }))} />
+        ))}
         <div className="fin-field fin-field--date">
           <span className="fin-field__legend" id={`${uid}-date`}>חודש, שנה ויום</span>
           <div className="fin-date" role="group" aria-labelledby={`${uid}-date`}>
