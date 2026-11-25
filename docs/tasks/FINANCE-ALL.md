@@ -41,3 +41,4 @@ Alon, 24.11.2026: `/finance` must look and behave like a project's finance tab (
 
 - The picker has no text search: `SelectField` has none (shared component, not mine). It has type-ahead; a search box is a shared change if Alon wants it with 40+ projects.
 - No signed-in browser pass at 360–1280, no cloud run.
+- Reviewer (Sonnet): approved. Fixed: a new entry preselects the filtered project only if it is open. Permanent delete is also offered for cancelled rows of finished projects (the database function decides; allowed by A-44 for any cancelled transaction).

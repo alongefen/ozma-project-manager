@@ -90,7 +90,7 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
 
       {dialog && (
         <EntrySheet title={dialog.row ? 'עריכת תנועה' : 'תנועה חדשה'} onClose={() => setDialog(null)}>
-          <EntryForm projectId={dialog.row ? rowProjectId(dialog.row.id) : (all?.project ?? book.projectId)} projects={all?.projects} today={today} row={dialog.row} defaultMonth={entryMonth} variant="screen" onDone={() => setDialog(null)} />
+          <EntryForm projectId={dialog.row ? rowProjectId(dialog.row.id) : (all ? (all.projects.find(p => p.id === all.project)?.open ? all.project! : '') : book.projectId)} projects={all?.projects} today={today} row={dialog.row} defaultMonth={entryMonth} variant="screen" onDone={() => setDialog(null)} />
         </EntrySheet>
       )}
 

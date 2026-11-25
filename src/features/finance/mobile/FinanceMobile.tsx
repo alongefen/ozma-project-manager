@@ -133,7 +133,7 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
 
       {sheet && (
         <EntrySheet title={sheet.row ? 'עריכת תנועה' : 'תנועה חדשה'} onClose={() => setSheet(null)}>
-          <EntryForm projectId={sheet.row ? rowProjectId(sheet.row.id) : (all?.project ?? book.projectId)} projects={all?.projects} today={today} row={sheet.row} defaultMonth={entryMonth} variant="screen" onDone={() => setSheet(null)} />
+          <EntryForm projectId={sheet.row ? rowProjectId(sheet.row.id) : (all ? (all.projects.find(p => p.id === all.project)?.open ? all.project! : '') : book.projectId)} projects={all?.projects} today={today} row={sheet.row} defaultMonth={entryMonth} variant="screen" onDone={() => setSheet(null)} />
         </EntrySheet>
       )}
     </div>
