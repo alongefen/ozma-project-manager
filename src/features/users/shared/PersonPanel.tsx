@@ -195,10 +195,12 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
         <span className={`${css.email} ltr`} dir="ltr">{user.email}</span>
         <Badge tone={user.isActive ? 'active' : 'gray'}>{statusLabel(user)}</Badge>
       </div>
-      <div className={css.row}>
-        {!renaming && <Button size="small" variant="secondary" onClick={() => { setNameValue(user.fullName); setRenaming(true); }}>עריכת שם</Button>}
-        {!renaming && accountButtons}
-      </div>
+      {!renaming && (
+        <div className={css.row}>
+          {!resetting && <Button size="small" variant="secondary" onClick={() => { setNameValue(user.fullName); setRenaming(true); }}>עריכת שם</Button>}
+          {accountButtons}
+        </div>
+      )}
       {renaming && (
         <form className={css.add} onSubmit={saveName} noValidate>
           <TextField label="שם מלא" value={nameValue} onChange={e => setNameValue(e.target.value)} error={nameError} autoComplete="off" hint="דיווחים שכבר נשמרו נשארים עם השם שהיה בעת הדיווח." />
