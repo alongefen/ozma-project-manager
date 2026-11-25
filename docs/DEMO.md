@@ -64,3 +64,8 @@ Env file also needs `SUPABASE_ACCESS_TOKEN` (SQL via the Management API, as in `
 4. **Finance** (as the owner): month totals, the cube, monthly advances, one cancelled row and one corrected row; then the all-projects summary.
 5. **People and roles**: the five demo people; Dana (manager) sees finance on the building project, Yossi (manager) does not on the same project; workers never see finance. On the finished project everyone except the owner can only view and print.
 6. Say plainly: this is fictional data and will be removed after the meeting.
+
+## Removal flags for rows added during a meeting
+- `--adopt-extras` adds rows people created INSIDE the demo projects (test uploads, tasks, documents) to the ledger first; rows outside the demo projects are never adopted.
+- `--extra-login=<email>` (typed by hand, never an owner) also removes that login and its profile; without the flag a non-demo login still blocks the run.
+- Memberships are removed by project or by demo login, so a demo person added to a real project is detached (the real project is not touched; the dry run prints `demoMembershipsOnOtherProjects`).
