@@ -1,6 +1,6 @@
 # Next session
 
-25.11.2026. `origin/main`: `5dcd9e2`. Agent-facing doc, in English. Start here, then `git log --oneline -15` and `gh pr list`.
+25.11.2026. `origin/main`: `6d5b118`. Agent-facing doc, in English. Start here, then `git log --oneline -15` and `gh pr list`.
 
 ## State
 
@@ -9,8 +9,8 @@
 - **Multiple owner-level accounts (A-43):** migration `multiple_owners` is applied to the production DB (PR #121) and `more_document_types` too. UI: "אדמין" label and owner management in the people screen (#124). The developer account is visible, owner-level. No backup exists (Free plan).
 - **GO-LIVE-PREP is merged (#114, #122): scripts only, dry runs only, nothing written to the cloud.** Runbook: [GO_LIVE](GO_LIVE.md). Dry-run counts (24.11): 294 profiles, 193 projects, 313 auth users (312 `@example.invalid`, 1 other = the current demo owner; the purge then needs `--include-real-users`). Ben: `office@hy-ozma-ltd.com`; developer owner: `alon@melo-digital.com`.
 - **Client change requests (25.11.2026, A-45) are merged:** CLIENT-FEEDBACK-A (#143, `af5ffe5`, no migration) and CLIENT-FEEDBACK-B (#144, `5dcd9e2`, migration for `project_notes` and `project_contacts` applied to the production DB after Alon's yes; rollback = drop both tables). **Not verified:** no browser pass at 360-1280 and no cloud suites for either (the stored cloud-test owner fixture `supabase/.temp/p12-owner.json` no longer signs in; repair it). Known gaps of A item 6 (non-owners see only active projects), closing them needs a migration: a file of a finished project is still readable by id via `/api/storage/files/[id]`, and the home "reports today" count may include finished projects. B follow-up: regenerate `src/types/database.ts` and drop `untyped-db.ts`; hard delete of a project with notes/contacts not exercised.
-- **CLIENT-FEEDBACK-C is running (session `feedback-c`, A-46):** part 1 clean home (remove the customers card, full-width open tasks on the phone); part 2 optional task assignee, per-person counter and a "my tasks" filter, which needs a migration. The session asks Alon for D31 in its own chat.
-- **Before C, no task session was running.** Working model is A-39: a task brief per [TEMPLATE](handoffs/TEMPLATE.md); at most two task sessions at once; the PM does not write code or poll.
+- **CLIENT-FEEDBACK-C is merged (A-46):** #149 (customers card removed) and #150 (optional task assignee, per-person open-tasks counter, "my tasks" filter). Two migrations applied to the production DB with Alon's yes: `tasks.assignee_id` + `create_task`/`update_task`, and `list_project_assignees`; rollback SQL is in `supabase/rollback/`. **Not verified:** no cloud tests after applying, no browser pass at 360-1280. Same gaps as A/B (cloud-test owner fixture does not sign in).
+- **No task session is running.** Working model is A-39: a task brief per [TEMPLATE](handoffs/TEMPLATE.md); at most two task sessions at once; the PM does not write code or poll.
 
 ## Next (in this order)
 
