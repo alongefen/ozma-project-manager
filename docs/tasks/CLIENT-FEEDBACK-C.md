@@ -66,3 +66,7 @@ Findings first: #147 already lists active admins (read-only) and all members on 
 - Access page: members whose account is disabled are no longer listed (admins and active members unchanged, #147 untouched).
 - Known gaps: people who were deactivated or left the project do not appear as assignees and are dropped from a task when its assignee list is edited. The migration SQL had one syntax slip (`coalesce(...)[1]` needs parentheses) fixed in the file before it was applied.
 - Checked: unit screens + logic (974 pass), tsc, eslint; cloud read check above. **Not checked:** server refusals on the cloud (non-member, inactive, other project), a real create/edit round trip with several assignees, and the browser at 360–1280.
+
+### Follow-up 5 (Alon): monday.com-style multi-select
+- New shared `MultiSelectField` (src/components/ui): the chosen people stay visible as chips, each with a small × remove button; "הוספה" opens the same pop-up as `SelectField` (menu on desktop, bottom sheet on phone) with search and ticks, and it stays open while ticking. Replaces the checkbox list in the task form. Admins/roles show as a hint in the list.
+- Checked: unit screens + logic, tsc, eslint; in the in-app browser at 390px on a throwaway page: chips and × render, ticking adds a chip, × removes it, the list stays open. Not checked: 360/375/768/1024/1280, the real task sheet with a long list, keyboard use, visual polish of the chips (the pane's screenshots were taken mid-animation).
