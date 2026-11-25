@@ -74,7 +74,14 @@ export function createQueries(platform: Platform) {
         const ownership = await owner(ctx); if (!ownership.ok) return ownership;
         const result = await documents(ctx).eq('id', input.id).maybeSingle();
         if (result.error) return { ok: false, error: mapError(result.error) };
-        return result.data ? { ok: true, value: await mapDocument(ctx, result.data, ownership.value) } : failure('NOT_FOUND');
+        if (!result.data) return failure('NOT_FOUND');
+        if (!ctx.actor.isOwner) {
+          // CLIENT-FEEDBACK-A item 6: a finished project's document is closed to non-owners, also by id.
+          const permission = await platform.permissions.forProject(ctx, { projectId: result.data.project_id });
+          if (!permission.ok) return permission;
+          if (!permission.value.view) return failure('NOT_FOUND');
+        }
+        return { ok: true, value: await mapDocument(ctx, result.data, ownership.value) };
       } catch (error) { return { ok: false, error: mapError(error) }; }
     },
   } satisfies Pick<FilesApi, 'listAccessCandidates' | 'listDocuments' | 'getDocument'>;

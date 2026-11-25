@@ -35,6 +35,10 @@ describe('מסמכים: קריאות RLS, מונים ופרטי פלט',()=>{
   const f=fixture();const result=await f.api.getDocument(f.ctx,{id}); expect(result.ok).toBe(true);
   if(result.ok){expect(result.value).not.toHaveProperty('access');expect(result.value.file).toEqual({id,name:'test.png',mime:'image/png',sizeBytes:20,displayState:'none'});}
  });
+ it('getDocument by id is closed to a non-owner when the project is not viewable (finished project)',async()=>{
+  const f=fixture();(f.platform.permissions.forProject as ReturnType<typeof vi.fn>).mockResolvedValue({ok:true,value:{view:false}});
+  expect(await f.api.getDocument(f.ctx,{id})).toMatchObject({ok:false,error:{code:'NOT_FOUND'}});
+ });
  it('paginates lists beyond the Data API page limit',async()=>{const f=fixture(false,0,1001);const result=await f.api.listDocuments(f.ctx,{projectId:id});expect(result.ok&&result.value.items.length).toBe(1001);expect(f.calls.some(x=>x.method==='range'&&x.args[0]===1000)).toBe(true);});
  it('fails closed on failed metadata or count reads',async()=>{
   const f=fixture();f.setError({message:'provider internal secret'});expect(await f.api.listDocuments(f.ctx,{projectId:id})).toMatchObject({ok:false,error:{code:'UNAVAILABLE'}});

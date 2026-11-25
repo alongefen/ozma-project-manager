@@ -8,7 +8,7 @@
 3. **Tasks**: completed group hidden by default on phone and desktop, with a toggle showing the count.
 4. **Projects**: finished projects hidden by default; owner-only toggle "הצגת פרויקטים שהסתיימו" (`ProjectsBrowser`). The old 3-way status filter is gone.
 5. **Finance**: "(לא כולל מע״מ)" next to every income label: project and all-projects finance (desktop, phone, print view) and the Excel export labels. Transfer summary headers too.
-6. **Non-owners see only active projects**: X06 view access is superseded (PERMISSIONS updated). Closed in the app layer: `permissions.forProject` returns all-false for a non-owner on a finished project (covers tasks, files, diary, reports, finance, print); `listProjects` and `getProject` (404) filter; the all-projects diary excludes finished projects. No SQL or RLS change.
+6. **Non-owners see only active projects**: X06 view access is superseded (PERMISSIONS updated). Closed in the app layer: `getDocument` by id (reviewer finding, fixed), `permissions.forProject` returns all-false for a non-owner on a finished project (covers tasks, files, diary, reports, finance, print); `listProjects` and `getProject` (404) filter; the all-projects diary excludes finished projects. No SQL or RLS change.
 7. **Finance card removed** from the projects page (both shells). `getHome` still computes `financeCube` (contract and tests unchanged); it is just not rendered.
 
 ## Checked
