@@ -2,7 +2,7 @@
 import {describe, expect, it, vi} from 'vitest';
 import {PROJECT_REF} from '../../scripts/ops/lib.mjs';
 import {PROTECTED} from '../../scripts/ops/purge-demo.mjs';
-import {checkStoragePaths, foreignSql, presentSql, removalSql, run} from '../../scripts/demo/remove-demo.mjs';
+import {adoptExtras, checkStoragePaths, removeAuthUsers, foreignSql, presentSql, removalSql, run} from '../../scripts/demo/remove-demo.mjs';
 import {archiveLedger, emptyLedger, loadLedger, record, saveLedger} from '../../scripts/demo/ledger.mjs';
 import {makeFile} from '../../scripts/demo/assets.mjs';
 
@@ -128,6 +128,45 @@ describe('poisoned ledger', () => {
     const ops: string[] = []; const fs = {mkdir: () => {}, write: (p: string) => ops.push(`write ${p}`), rename: (a: string, b: string) => ops.push(`rename ${a}>${b}`), unlink: (p: string) => ops.push(`unlink ${p}`)};
     archiveLedger(emptyLedger(PROJECT_REF), 'x/l.json', fs as any);
     expect(ops).toEqual(['write x/l.json.removed.json.tmp', 'rename x/l.json.removed.json.tmp>x/l.json.removed.json', 'unlink x/l.json']);
+  });
+});
+
+describe('adopting what people added during the meeting', () => {
+  const sqlFor = (extra: any[] = [], found: any[] = []): any => vi.fn(async (q: string) => {
+    if (q.includes('from public.stored_files')) return [{id: U(20), project_id: U(1), bucket: 'originals', object_path: `${U(1)}/${U(20)}`, display_path: `${U(1)}/${U(20)}.jpg`}];
+    if (q.includes('from public.profiles')) return found;
+    if (q.includes('from public.tasks')) return [{id: U(21)}];
+    return extra;
+  });
+  it('adds only rows inside the demo projects, with their storage paths', async () => {
+    const l = ledger(); const sql = sqlFor();
+    const added = await adoptExtras({sql, ledger: l});
+    expect(added).toMatchObject({tasks: 1, storedFiles: 1, storage: 2, extraLogins: 0});
+    expect(l.tasks.map((t: any) => t.id)).toContain(U(21)); expect(l.storage.map((o: any) => o.bucket)).toContain('display');
+    for (const q of sql.mock.calls.map((c: any) => c[0])) expect(q).toMatch(/project_id = any\(array\[/); // never "everything in the table"
+    checkStoragePaths(l);
+  });
+  it('an extra login is recorded as extra; an owner or a malformed address is refused', async () => {
+    const l = ledger(); await adoptExtras({sql: sqlFor([], [{id: U(30), email: 'x@gmail.test', is_owner: false}]), ledger: l, extraLogins: ['X@Gmail.test']});
+    expect(l.profiles.find((p: any) => p.id === U(30))).toMatchObject({extra: true}); expect(l.authUsers.find((p: any) => p.id === U(30))).toMatchObject({extra: true});
+    expect(foreignSql(l)).toContain(`id <> all(array['${U(30)}']::uuid[])`);
+    await expect(adoptExtras({sql: sqlFor([], [{id: U(31), email: 'o@x.test', is_owner: true}]), ledger: ledger(), extraLogins: ['o@x.test']})).rejects.toThrow(/owner/);
+    await expect(adoptExtras({sql: sqlFor(), ledger: ledger(), extraLogins: ["a'; drop table x; --@b.test"]})).rejects.toThrow(/plain email/);
+  });
+  it('memberships are removed by project or by demo login (a demo person added to a real project)', () => {
+    expect(removalSql(ledger())).toMatch(/delete from public.memberships where project_id = any\(.*\) or user_id = any\(/);
+  });
+  it('auth deletion allows a typed extra login, still refuses any other non-demo login', async () => {
+    const admin = (email: string) => ({auth: {admin: {getUserById: vi.fn(async () => ({data: {user: {email}}, error: null})), deleteUser: vi.fn(async () => ({error: null}))}}});
+    const a = admin('me@gmail.test'); await removeAuthUsers(a as any, [{id: U(30), extra: true}]); expect(a.auth.admin.deleteUser).toHaveBeenCalled();
+    const b = admin('me@gmail.test'); await expect(removeAuthUsers(b as any, [{id: U(30)}])).rejects.toThrow(/not a demo account/);
+  });
+  it('a real run with --adopt-extras saves the adopted ledger before deleting', async () => {
+    const f = fake(); const l = ledger(); const i = {load: () => l, save: vi.fn(), archive: vi.fn()};
+    const base = f.sql.getMockImplementation()!;
+    f.sql.mockImplementation(async (q: string) => q.startsWith('select id from public.tasks') ? [{id: U(21)}] : q.startsWith('select id') ? [] : base(q));
+    const r = await run({args: {...real(4), 'adopt-extras': true}, env, log: vi.fn(), clients: f as any, ledgerIO: i});
+    expect(r.wrote).toBe(true); expect(i.save).toHaveBeenCalled();
   });
 });
 

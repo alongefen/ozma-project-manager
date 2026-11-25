@@ -24,3 +24,8 @@
 ## Real seed run (24.11.2026, after Alon's direct "כן")
 - First attempt stopped at the first Excel upload (bucket restriction above); the retry skipped finished steps and completed. Orphan: one pending, never uploaded Excel row of the building project, listed in the ledger, so the removal handles it.
 - Verified read-only with SQL: 3 demo projects (1 completed), 5 demo logins, 3 owners untouched, 39 real projects and their 39 covers untouched, 22 reports (24 versions), 12 documents, 10 tasks, 34 transactions (3 cancelled), all 7 protection triggers enabled. Not done: opening the screens in a browser.
+
+## Removal run (25.11.2026, after Alon's direct "כן" for the removal and for the extras)
+- First dry run refused on purpose: during the meeting Alon and Maor added a cover, 3 documents with files and a task to the building project, a test login (Alon's gmail) joined it, and a demo worker was added to a real project. Alon approved deleting all of it and the test login. Added `--adopt-extras` and `--extra-login` (33 tests, eslint/tsc clean).
+- Real run with `--expect-total=329`: verified by the script and by a separate read-only SQL check: 39 projects (0 demo), 3 owner profiles and 3 auth users left, 0 memberships/entries/transactions, covers 39, all 7 protection triggers enabled. The ledger moved to `ledger.local.json.removed.json`.
+- Not reviewed by a second reviewer pass (the one pass covered the first version); the adoption code is covered by unit tests and the dry run.

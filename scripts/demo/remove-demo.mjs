@@ -11,12 +11,14 @@ import {fileURLToPath} from 'node:url';
 import {createClient} from '@supabase/supabase-js';
 import {createSqlRunner, PROJECT_REF, parseArgs, requireEnv, resolveMode} from '../ops/lib.mjs';
 import {PROTECTED, enableTriggersSql, probeSql, removeStorage} from '../ops/purge-demo.mjs';
-import {LEDGER_PATH, archiveLedger, ledgerCounts, loadLedger} from './ledger.mjs';
+import {LEDGER_PATH, archiveLedger, ledgerCounts, loadLedger, record, saveLedger} from './ledger.mjs';
 import {DEMO_DOMAIN, NAME_PREFIX} from './plan.mjs';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const lit = list => { for (const x of list) if (!UUID.test(String(x))) throw new Error('The ledger holds a value that is not a uuid; refusing'); return list.length ? `array[${list.map(x => `'${x}'`).join(',')}]::uuid[]` : "array[]::uuid[]"; };
 const idsOf = (ledger, k) => ledger[k].map(x => x.id);
+// Logins that are not @example.invalid but were typed by hand with --extra-login (never an owner).
+const extraIds = ledger => ledger.profiles.filter(x => x.extra).map(x => x.id);
 
 export function scope(ledger) {
   return {P: lit(idsOf(ledger, 'projects')), U: lit(idsOf(ledger, 'profiles')), E: lit(idsOf(ledger, 'diaryEntries')), D: lit(idsOf(ledger, 'documents')), T: lit(idsOf(ledger, 'tasks')), X: lit(idsOf(ledger, 'transactions')), F: lit(idsOf(ledger, 'storedFiles'))};
@@ -28,7 +30,7 @@ export function presentSql(ledger) {
   const q = (t, where) => `select '${t}' as t, count(*)::int as n from ${t} where ${where}`;
   return [
     q('public.projects', `id = any(${s.P})`), q('public.project_contacts', `project_id = any(${s.P})`), q('public.project_private', `project_id = any(${s.P})`),
-    q('public.project_finance_settings', `project_id = any(${s.P})`), q('public.memberships', `project_id = any(${s.P})`),
+    q('public.project_finance_settings', `project_id = any(${s.P})`), q('public.memberships', `project_id = any(${s.P}) or user_id = any(${s.U})`),
     q('public.project_covers', `project_id = any(${s.P})`), q('public.stored_files', `project_id = any(${s.P})`),
     q('public.documents', `project_id = any(${s.P})`), q('public.document_grants', `project_id = any(${s.P})`),
     q('public.diary_entries', `project_id = any(${s.P})`), q('public.diary_versions', `entry_id = any(${s.E})`),
@@ -51,7 +53,6 @@ export function foreignSql(ledger) {
     q('documents', 'public.documents', `(project_id = any(${s.P}) or uploaded_by = any(${s.U})) and id <> all(${s.D})`),
     q('stored_files', 'public.stored_files', `(project_id = any(${s.P}) or uploaded_by = any(${s.U})) and id <> all(${s.F})`),
     q('memberships of other people', 'public.memberships', `project_id = any(${s.P}) and user_id <> all(${s.U})`),
-    q('memberships of demo logins elsewhere', 'public.memberships', `user_id = any(${s.U}) and project_id <> all(${s.P})`),
     q('listed entries outside the demo projects', 'public.diary_entries', `id = any(${s.E}) and project_id <> all(${s.P})`),
     q('listed documents outside the demo projects', 'public.documents', `id = any(${s.D}) and project_id <> all(${s.P})`),
     q('listed tasks outside the demo projects', 'public.tasks', `id = any(${s.T}) and project_id <> all(${s.P})`),
@@ -59,7 +60,7 @@ export function foreignSql(ledger) {
     q('listed files outside the demo projects', 'public.stored_files', `id = any(${s.F}) and project_id <> all(${s.P})`),
     q('projects created by a demo login', 'public.projects', `created_by = any(${s.U}) and id <> all(${s.P})`),
     q('ledger projects that are not demo-named', 'public.projects', `id = any(${s.P}) and name not like '${NAME_PREFIX}%'`),
-    q('ledger logins that are not demo accounts', 'public.profiles', `id = any(${s.U}) and email not like '%${DEMO_DOMAIN}'`),
+    q('ledger logins that are not demo accounts', 'public.profiles', `id = any(${s.U}) and email not like '%${DEMO_DOMAIN}' and id <> all(${lit(extraIds(ledger))})`),
   ].join(' union all ');
 }
 
@@ -82,7 +83,7 @@ export function removalSql(ledger) {
     `delete from public.project_finance_settings where project_id = any(${s.P});`,
     `delete from public.project_private where project_id = any(${s.P});`,
     `delete from public.project_contacts where project_id = any(${s.P});`,
-    `delete from public.memberships where project_id = any(${s.P}) and user_id = any(${s.U});`,
+    `delete from public.memberships where project_id = any(${s.P}) or user_id = any(${s.U});`,
     `delete from public.projects where id = any(${s.P});`,
     `delete from private.profile_creation_requests where user_id = any(${s.U});`,
     `delete from private.profile_updates where user_id = any(${s.U});`,
@@ -99,10 +100,34 @@ export async function removeAuthUsers(admin, authUsers) {
   for (const u of authUsers) {
     const found = await admin.auth.admin.getUserById(u.id);
     if (found.error || !found.data?.user) continue; // already gone: idempotent
-    if (!String(found.data.user.email ?? '').toLowerCase().endsWith(DEMO_DOMAIN)) throw new Error('Refusing: a ledger login is not a demo account');
+    if (!u.extra && !String(found.data.user.email ?? '').toLowerCase().endsWith(DEMO_DOMAIN)) throw new Error('Refusing: a ledger login is not a demo account');
     const {error} = await admin.auth.admin.deleteUser(u.id);
     if (error) throw new Error('Deleting a demo login failed; re-run the removal, it is idempotent');
   }
+}
+
+const EMAIL = /^[^\s@'";\\]+@[^\s@'";\\]+\.[^\s@'";\\]+$/;
+
+// Adds what people created INSIDE the demo projects (test uploads, tasks...) and the typed extra logins to the ledger.
+// Rows outside the demo projects are never adopted; a login that owns anything else stays "foreign" and blocks the run.
+export async function adoptExtras({sql, ledger, extraLogins = /** @type {string[]} */ ([])}) {
+  const s = scope(ledger);
+  const added = {diaryEntries: 0, documents: 0, tasks: 0, transactions: 0, storedFiles: 0, storage: 0, extraLogins: 0};
+  const ids = async (table, list, key) => { for (const r of await sql(`select id from public.${table} where project_id = any(${s.P}) and id <> all(${s[key]})`)) { record(ledger, list, {id: r.id, adopted: true}); added[list]++; } };
+  await ids('diary_entries', 'diaryEntries', 'E'); await ids('documents', 'documents', 'D'); await ids('tasks', 'tasks', 'T'); await ids('transactions', 'transactions', 'X');
+  for (const f of await sql(`select id, project_id, bucket, object_path, display_path from public.stored_files where project_id = any(${s.P}) and id <> all(${s.F})`)) {
+    record(ledger, 'storedFiles', {id: f.id, projectId: f.project_id, bucket: f.bucket, path: f.object_path, adopted: true}); added.storedFiles++;
+    record(ledger, 'storage', {bucket: f.bucket, path: f.object_path}); added.storage++;
+    if (f.display_path) { record(ledger, 'storage', {bucket: 'display', path: f.display_path}); added.storage++; }
+  }
+  for (const email of extraLogins.map(e => String(e).trim().toLowerCase())) {
+    if (!EMAIL.test(email)) throw new Error('--extra-login must be a plain email address');
+    const found = await sql(`select id, email, is_owner from public.profiles where lower(email) = '${email}'`);
+    if (!found.length) continue; // already gone: idempotent
+    if (found[0].is_owner) throw new Error('Refusing: an owner account can never be removed by this script');
+    record(ledger, 'profiles', {id: found[0].id, email, extra: true}); record(ledger, 'authUsers', {id: found[0].id, email, extra: true}); added.extraLogins++;
+  }
+  return added;
 }
 
 // Every listed storage object must live under a ledger project id in one of the app's two buckets.
@@ -117,21 +142,25 @@ const projectCount = async sql => (await sql('select count(*)::int as n from pub
 export async function run({args, env, log = console.log, clients = /** @type {any} */ (undefined), ledgerIO = /** @type {any} */ (undefined), ref = PROJECT_REF}) {
   const mode = resolveMode(args, env, ref);
   const e = requireEnv(env, ['SUPABASE_URL', 'SUPABASE_SECRET_KEY', 'SUPABASE_ACCESS_TOKEN']);
-  const io = ledgerIO ?? {load: () => loadLedger(LEDGER_PATH, ref), archive: l => archiveLedger(l, LEDGER_PATH)};
+  const io = ledgerIO ?? {load: () => loadLedger(LEDGER_PATH, ref), save: l => saveLedger(l, LEDGER_PATH), archive: l => archiveLedger(l, LEDGER_PATH)};
   const ledger = io.load();
   if (!ledger.projects.length && !ledger.profiles.length && !ledger.authUsers.length) throw new Error('The ledger is empty: there is nothing to remove');
   const admin = clients?.admin ?? createClient(e.SUPABASE_URL, e.SUPABASE_SECRET_KEY, {auth: {persistSession: false, autoRefreshToken: false}});
   const sql = clients?.sql ?? createSqlRunner({token: e.SUPABASE_ACCESS_TOKEN});
+  const extraLogins = [args['extra-login']].flat().filter(x => typeof x === 'string');
+  const adopted = args['adopt-extras'] === true || args['adopt-extras'] === 'true' ? await adoptExtras({sql, ledger, extraLogins}) : null;
   checkStoragePaths(ledger);
+  const elsewhere = (await sql(`select count(*)::int as n from public.memberships where user_id = any(${scope(ledger).U}) and project_id <> all(${scope(ledger).P})`))[0].n;
   const present = await sql(presentQuery(ledger));
   const foreign = (await sql(foreignSql(ledger))).filter(r => r.n > 0);
   const privilege = (await sql(probeSql()))[0];
   const expectTotal = total(present) + ledger.storage.length + ledger.authUsers.length;
-  log(JSON.stringify({mode: mode.write ? 'REAL RUN' : 'DRY RUN', ledger: ledgerCounts(ledger), rowsPresent: Object.fromEntries(present.map(r => [r.t, r.n])), rowTotal: total(present), storageObjects: ledger.storage.length, authUsers: ledger.authUsers.length, expectTotal, foreignRows: foreign, privilege}, null, 2));
+  log(JSON.stringify({mode: mode.write ? 'REAL RUN' : 'DRY RUN', ledger: ledgerCounts(ledger), rowsPresent: Object.fromEntries(present.map(r => [r.t, r.n])), rowTotal: total(present), storageObjects: ledger.storage.length, authUsers: ledger.authUsers.length, expectTotal, adopted, demoMembershipsOnOtherProjects: elsewhere, foreignRows: foreign, privilege}, null, 2));
   if (!mode.write) { log('Dry run only. Nothing was changed.'); return {wrote: false, expectTotal, foreign}; }
   if (foreign.length) throw new Error(`Refusing: rows exist that the demo did not create (${foreign.map(f => `${f.t}: ${f.n}`).join(', ')}). Nothing was changed; ask the project manager.`);
   if (!privilege.can_alter_triggers || privilege.triggers_not_enabled !== 0) throw new Error('Refusing: the SQL role cannot manage the protection triggers, or some are already off (see privilege in the output)');
   if (String(args['expect-total']) !== String(expectTotal)) throw new Error(`--expect-total must equal the dry-run total (${expectTotal}); the data changed or the flag is missing`);
+  if (adopted) io.save?.(ledger); // persist what was adopted, so a crash can be retried without flags
   const projectsBefore = await projectCount(sql);
   await removeStorage(admin, ledger.storage);                    // 1. the demo's files only (ledger paths)
   try { await sql(removalScript(ledger)); } catch (err) {          // 2. database rows, one transaction
