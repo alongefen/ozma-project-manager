@@ -19,7 +19,7 @@ type Toast = { text: string; tone: 'ok' | 'error'; id: number };
  * revision, so a stale screen gets a conflict and a refresh, never an overwrite. Messages are floating
  * toasts, so the list never jumps.
  */
-export function AccessManager({ projectId, members: initial, candidates: initialCandidates }: { projectId: string; members: MemberRow[]; candidates: Candidate[] }) {
+export function AccessManager({ projectId, members: initial, candidates: initialCandidates, admins = [] }: { projectId: string; members: MemberRow[]; candidates: Candidate[]; admins?: string[] }) {
   const router = useRouter();
   const [members, setMembers] = useState(initial);
   const [candidates, setCandidates] = useState(initialCandidates);
@@ -108,6 +108,12 @@ export function AccessManager({ projectId, members: initial, candidates: initial
           <h2 className={css.title}>משויכים לפרויקט</h2>
           <Button size="small" onClick={() => setAdding(true)}>הוספת גישה</Button>
         </div>
+        {admins.length > 0 && (
+          <section aria-labelledby="am-admins">
+            <h3 id="am-admins" className={css.muted}>אדמינים: גישה מלאה לכל הפרויקטים, אי אפשר להסיר</h3>
+            <ul className={css.list}>{admins.map(name => <li key={name} className={css.item}><div className={css.who}><strong>{name}</strong></div></li>)}</ul>
+          </section>
+        )}
         {members.length === 0 && <p className={css.empty}>לא שויך אף אחד לפרויקט</p>}
         <ul className={css.list}>
           {members.map(m => {

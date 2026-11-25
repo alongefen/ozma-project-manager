@@ -11,8 +11,8 @@ import { CATEGORIES, emptyAccess, parseAccess, type AccessDraft } from './model'
  * Upload sheet body. Category and access are chosen first (access has no default, also for the uploading manager);
  * the picker stays locked until both are valid. Files that uploaded but could not be saved stay listed for a retry.
  */
-export function UploadForm({ projectId, initialCategory, candidates, pending, busy, error, onUploaded, onSave, onClose }: {
-  projectId: string; initialCategory: DocumentCategory | null; candidates: AccessCandidate[];
+export function UploadForm({ projectId, initialCategory, candidates, admins, pending, busy, error, onUploaded, onSave, onClose }: {
+  projectId: string; initialCategory: DocumentCategory | null; candidates: AccessCandidate[]; admins?: string[];
   pending: FileRef[]; busy: boolean; error: string | null;
   onUploaded: (files: FileRef[], category: DocumentCategory, access: DocumentAccess) => void;
   onSave: () => void; onClose: () => void;
@@ -36,7 +36,7 @@ export function UploadForm({ projectId, initialCategory, candidates, pending, bu
           ))}
         </div>
       </fieldset>
-      <AccessPicker draft={draft} candidates={candidates} disabled={busy || uploading || pending.length > 0} error={touched && !parsed.ok ? parsed.error : null}
+      <AccessPicker draft={draft} candidates={candidates} admins={admins} disabled={busy || uploading || pending.length > 0} error={touched && !parsed.ok ? parsed.error : null}
         onChange={next => { setTouched(true); setDraft(next); }} />
       {pending.length > 0 ? (
         <>

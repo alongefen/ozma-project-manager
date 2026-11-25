@@ -18,10 +18,11 @@ export default async function AccessPage({ params }: { params: Promise<{ id: str
   if (!members.ok || !everyone.ok) throw new Error('access unavailable');
   const memberIds = new Set(members.value.map(m => m.userId));
   const candidates = everyone.value.filter(u => u.isActive && !u.isOwner && !memberIds.has(u.id)).map(u => ({ id: u.id, fullName: u.fullName }));
+  const admins = everyone.value.filter(u => u.isOwner && u.isActive).map(u => u.fullName);
   return (
     <Page narrow>
       <PageHeader title="הרשאות" sub={project.name} backHref={`/projects/${id}`} backLabel="חזרה לתיק הפרויקט" />
-      <AccessManager projectId={id} members={members.value} candidates={candidates} />
+      <AccessManager projectId={id} members={members.value} candidates={candidates} admins={admins} />
     </Page>
   );
 }

@@ -7,8 +7,8 @@ import { accessDraftOf, parseAccess, type AccessDraft } from './model';
 import type { DocumentAccess } from '@/types/contracts';
 
 /** Access screen (owner only): change who sees one document. The save is refused again on the server for anyone else. */
-export function AccessForm({ doc, candidates, busy, error, onSubmit, onCancel }: {
-  doc: DocumentRow; candidates: AccessCandidate[]; busy: boolean; error: string | null;
+export function AccessForm({ doc, candidates, admins, busy, error, onSubmit, onCancel }: {
+  doc: DocumentRow; candidates: AccessCandidate[]; admins?: string[]; busy: boolean; error: string | null;
   onSubmit: (access: DocumentAccess) => void; onCancel: () => void;
 }) {
   const [draft, setDraft] = useState<AccessDraft>(accessDraftOf(doc.access));
@@ -23,7 +23,7 @@ export function AccessForm({ doc, candidates, busy, error, onSubmit, onCancel }:
   return (
     <form className="fl-form" onSubmit={submit} noValidate>
       <p className="fl-access__file ltr">{doc.file.name}</p>
-      <AccessPicker draft={draft} candidates={candidates} error={fieldError} disabled={busy} onChange={setDraft} />
+      <AccessPicker draft={draft} candidates={candidates} admins={admins} error={fieldError} disabled={busy} onChange={setDraft} />
       {error && <Notice tone="error">{error}</Notice>}
       <FormActions placement="sheet" submitLabel={busy ? 'שומר…' : 'שמירה'} busy={busy} onCancel={onCancel} />
     </form>

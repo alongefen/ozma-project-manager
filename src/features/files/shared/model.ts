@@ -11,7 +11,7 @@ export const categoryLabel = (key: DocumentCategory): string => CATEGORIES.find(
 
 export type AccessMode = DocumentAccess['mode'];
 export const ACCESS_MODES: { mode: AccessMode; label: string; hint: string }[] = [
-  { mode: 'owner', label: 'בן בלבד', hint: 'רק בעל החברה רואה את המסמך' },
+  { mode: 'owner', label: 'אדמינים בלבד', hint: 'רק אדמינים רואים את המסמך' },
   { mode: 'all', label: 'כל המשויכים לפרויקט', hint: 'כל מי ששויך לפרויקט רואה את המסמך' },
   { mode: 'selected', label: 'אנשים נבחרים', hint: 'רק מי שנבחר ברשימה רואה את המסמך' },
 ];
@@ -42,7 +42,7 @@ export function accessDraftOf(access: DocumentAccess | undefined): AccessDraft {
 
 export function accessSummary(access: DocumentAccess | undefined, candidates: readonly AccessCandidate[]): string | null {
   if (!access) return null;
-  if (access.mode === 'owner') return 'בן בלבד';
+  if (access.mode === 'owner') return 'אדמינים בלבד';
   if (access.mode === 'all') return 'כל המשויכים';
   const names = access.userIds.map(id => candidates.find(c => c.userId === id)?.fullName).filter(Boolean);
   const missing = access.userIds.length - names.length;

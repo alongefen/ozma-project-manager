@@ -4,8 +4,8 @@ import type { AccessCandidate } from '@/types/contracts';
 import { ACCESS_MODES, toggleUser, type AccessDraft, type AccessMode } from './model';
 
 /** Mandatory access choice: three modes, and for "selected" the active people associated with the project. */
-export function AccessPicker({ draft, candidates, error, disabled, onChange }: {
-  draft: AccessDraft; candidates: AccessCandidate[]; error?: string | null; disabled?: boolean; onChange: (next: AccessDraft) => void;
+export function AccessPicker({ draft, candidates, admins = [], error, disabled, onChange }: {
+  draft: AccessDraft; candidates: AccessCandidate[]; /** Active admins: always see every document, shown read-only (no control). */ admins?: string[]; error?: string | null; disabled?: boolean; onChange: (next: AccessDraft) => void;
 }) {
   const name = useId();
   return (
@@ -31,6 +31,7 @@ export function AccessPicker({ draft, candidates, error, disabled, onChange }: {
               ))}
             </ul>
       )}
+      {admins.length > 0 && <p className="fl-radio__hint">{`אדמינים (גישה מלאה תמיד, אי אפשר להסיר): ${admins.join(', ')}`}</p>}
       {error && <span className="ui-field__error" role="alert">{error}</span>}
     </fieldset>
   );

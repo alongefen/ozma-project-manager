@@ -48,8 +48,8 @@ describe('מסך הבית', () => {
     expect(both(home(cube), true)).toContain('פרויקט חדש');
     expect(both(home(null), false)).not.toContain('פרויקט חדש');
     expect(both(home(null), false)).toContain('חיפוש פרויקט');
-    expect(both(home(null), true)).toContain('הצגת פרויקטים שהסתיימו');
-    expect(both(home(null), false)).not.toContain('הצגת פרויקטים שהסתיימו');
+    expect(both(home(null), true)).toContain('פרויקטים שהסתיימו');
+    expect(both(home(null), false)).not.toContain('פרויקטים שהסתיימו');
   });
   it('פרויקטים שהסתיימו מוסתרים כברירת מחדל גם לבעלים (פריט 4)', () => {
     const done = { ...card, id: 'p2', name: 'חניון סגור', status: 'completed' as const };
