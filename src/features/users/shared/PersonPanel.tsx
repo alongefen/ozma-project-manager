@@ -159,10 +159,21 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
     refresh(); // the server may bump the profile revision (sessions are revoked)
   }
 
-  const accountSection = (
-    <section className={css.section} aria-labelledby="pp-account">
-      <h3 id="pp-account" className={css.h}>חשבון</h3>
-      {resetting ? (
+  // Account actions sit in the top row next to "עריכת שם", above the long project list, so they stay reachable (A-46 follow-up).
+  const canActOnAccount = !(user.isOwner && controls.isSelf);
+  const accountButtons = canActOnAccount && !resetting && (
+    <>
+      {user.isActive && <Button size="small" variant="secondary" onClick={() => setResetting(true)}>איפוס סיסמה</Button>}
+      {user.isActive
+        ? <Button size="small" variant="secondary" disabled={!!controls.lastAdminReason} aria-describedby={controls.lastAdminReason ? 'pp-last-admin' : undefined} onClick={() => { setDialogError(null); setDeactivating(true); }}>השבתת חשבון</Button>
+        : <Button size="small" disabled={dialogBusy} onClick={() => setActive(true)}>הפעלה מחדש</Button>}
+      {user.isOwner && <Button size="small" variant="secondary" disabled={!!controls.lastAdminReason} aria-describedby={controls.lastAdminReason ? 'pp-last-admin' : undefined} onClick={() => { setDialogError(null); setLevelChange('demote'); }}>הסרת הרשאת אדמין</Button>}
+      {controls.canPromote && <Button size="small" variant="secondary" onClick={() => { setDialogError(null); setLevelChange('promote'); }}>הפיכה לאדמין</Button>}
+    </>
+  );
+  const accountNotes = (
+    <>
+      {resetting && (
         <form className={css.add} onSubmit={doReset} noValidate>
           <TextField label="סיסמה חדשה" type="password" value={password} onChange={e => setPassword(e.target.value)} error={passwordError} autoComplete="new-password" hint="הסיסמה הקודמת מפסיקה לעבוד והאדם יתחבר מחדש." />
           <div className={css.row}>
@@ -170,23 +181,10 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
             <Button variant="secondary" disabled={resetBusy} onClick={() => { setResetting(false); setPassword(''); setPasswordError(undefined); }}>ביטול</Button>
           </div>
         </form>
-      ) : (
-        <>
-          {user.isOwner && controls.isSelf && <p className={css.muted}>זה החשבון שלכם. את ההרשאות שלו משנה אדמין אחר.</p>}
-          {!(user.isOwner && controls.isSelf) && (
-            <div className={css.row}>
-              {user.isActive && <Button variant="secondary" onClick={() => setResetting(true)}>איפוס סיסמה</Button>}
-              {user.isActive
-                ? <Button variant="secondary" disabled={!!controls.lastAdminReason} aria-describedby={controls.lastAdminReason ? 'pp-last-admin' : undefined} onClick={() => { setDialogError(null); setDeactivating(true); }}>השבתת חשבון</Button>
-                : <Button disabled={dialogBusy} onClick={() => setActive(true)}>הפעלה מחדש</Button>}
-              {user.isOwner && <Button variant="secondary" disabled={!!controls.lastAdminReason} aria-describedby={controls.lastAdminReason ? 'pp-last-admin' : undefined} onClick={() => { setDialogError(null); setLevelChange('demote'); }}>הסרת הרשאת אדמין</Button>}
-              {controls.canPromote && <Button variant="secondary" onClick={() => { setDialogError(null); setLevelChange('promote'); }}>הפיכה לאדמין</Button>}
-            </div>
-          )}
-          {controls.lastAdminReason && <p id="pp-last-admin" className={css.muted}>{controls.lastAdminReason}</p>}
-        </>
       )}
-    </section>
+      {user.isOwner && controls.isSelf && <p className={css.muted}>זה החשבון שלכם. את ההרשאות שלו משנה אדמין אחר.</p>}
+      {controls.lastAdminReason && !resetting && <p id="pp-last-admin" className={css.muted}>{controls.lastAdminReason}</p>}
+    </>
   );
 
   const options = addableProjects(projects, user.assignments);
@@ -197,7 +195,13 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
         <span className={`${css.email} ltr`} dir="ltr">{user.email}</span>
         <Badge tone={user.isActive ? 'active' : 'gray'}>{statusLabel(user)}</Badge>
       </div>
-      {renaming ? (
+      {!renaming && (
+        <div className={css.row}>
+          {!resetting && <Button size="small" variant="secondary" onClick={() => { setNameValue(user.fullName); setRenaming(true); }}>עריכת שם</Button>}
+          {accountButtons}
+        </div>
+      )}
+      {renaming && (
         <form className={css.add} onSubmit={saveName} noValidate>
           <TextField label="שם מלא" value={nameValue} onChange={e => setNameValue(e.target.value)} error={nameError} autoComplete="off" hint="דיווחים שכבר נשמרו נשארים עם השם שהיה בעת הדיווח." />
           <div className={css.row}>
@@ -205,9 +209,10 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
             <Button variant="secondary" disabled={nameBusy} onClick={() => { setRenaming(false); setNameValue(user.fullName); setNameError(undefined); }}>ביטול</Button>
           </div>
         </form>
-      ) : <div className={css.row}><Button size="small" variant="secondary" onClick={() => { setNameValue(user.fullName); setRenaming(true); }}>עריכת שם</Button></div>}
+      )}
+      {accountNotes}
 
-      {user.isOwner ? <><Notice>{`${ADMIN_LABEL} רואה ומנהל הכול: כל הפרויקטים, הכספים והמסמכים, וגם אדמינים אחרים. הוא לא משויך לפרויקט מסוים.`}</Notice>{accountSection}</> : (
+      {user.isOwner ? <Notice>{`${ADMIN_LABEL} רואה ומנהל הכול: כל הפרויקטים, הכספים והמסמכים, וגם אדמינים אחרים. הוא לא משויך לפרויקט מסוים.`}</Notice> : (
         <>
           <section className={css.section} aria-labelledby="pp-projects">
             <div className={css.sectionHead}>
@@ -255,8 +260,6 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
               })}
             </ul>
           </section>
-
-          {accountSection}
         </>
       )}
 
