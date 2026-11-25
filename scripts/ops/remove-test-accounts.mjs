@@ -5,6 +5,7 @@
 //   node --env-file=<env> scripts/ops/remove-test-accounts.mjs --confirm --project-ref=<ref> --expect-total=<n from the dry run>
 // Env: SUPABASE_URL, SUPABASE_SECRET_KEY (auth users), SUPABASE_ACCESS_TOKEN (SQL via the Management API).
 //
+// Dates are compared in the database time zone (UTC); an edge row is simply not selected (fails closed).
 // Selection is by rule, not by "everything on @example.invalid": inactive, not an owner, @example.invalid, created on the test day,
 // and one of the three exact test names. Demo accounts ("(דמו)"), owners and real people never match.
 // Anything that still points at a selected account (membership, project, file, entry, task, transaction, document, a log row of another
@@ -18,7 +19,8 @@ import {PROTECTED, enableTriggersSql, probeSql} from './purge-demo.mjs';
 
 export const TEST_DAY = '2026-11-25';
 export const TEST_NAMES = ['אדמין בדוי למחיקה%', 'בדיקה hdm%', 'בדיקה hdw%'];
-export const ORPHAN_EMAIL = 'p12-owner-%@example.invalid';
+export const ORPHAN_EMAILS = ['p12-owner-%@example.invalid', 'p12-hdm-%@example.invalid', 'p12-hdw-%@example.invalid', 'hd-owner-%@example.invalid'];
+export const TEST_PROJECT_NAME = 'בדיקה hd-%';
 export const LOG_ACTIONS = ['user.created', 'owner.created', 'user.active_changed', 'project.deleted'];
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const lit = ids => { for (const x of ids) if (!UUID.test(String(x))) throw new Error('A selected id is not a uuid; refusing'); return ids.length ? `array[${ids.map(x => `'${x}'`).join(',')}]::uuid[]` : 'array[]::uuid[]'; };
@@ -30,7 +32,7 @@ select 'profile' as kind, id::text, email from public.profiles
  and (${TEST_NAMES.map(n => `full_name like '${n}'`).join(' or ')}) and full_name not like '%(דמו)%'
 union all
 select 'auth-only', u.id::text, u.email from auth.users u
- where u.email like '${ORPHAN_EMAIL}' and u.created_at::date = '${TEST_DAY}' and not exists (select 1 from public.profiles p where p.id = u.id)`;
+ where (${ORPHAN_EMAILS.map(e => `u.email like '${e}'`).join(' or ')}) and u.created_at::date = '${TEST_DAY}' and not exists (select 1 from public.profiles p where p.id = u.id)`;
 
 export function scopeOf(rows) {
   return {P: lit(rows.filter(r => r.kind === 'profile').map(r => r.id)), A: lit(rows.map(r => r.id))};
@@ -66,6 +68,7 @@ export function foreignSql(rows) {
     q('log rows of another kind', 'public.sensitive_events', `(actor_id = any(${P}) or (entity_type = 'profile' and entity_id = any(${P}::text[]))) and action <> all(array[${acts}])`),
     q('log rows with a project', 'public.sensitive_events', `(actor_id = any(${P}) or (entity_type = 'profile' and entity_id = any(${P}::text[]))) and project_id is not null`),
     q('log rows of a selected account about someone outside the set', 'public.sensitive_events', `actor_id = any(${P}) and entity_type = 'profile' and entity_id <> all(${P}::text[])`),
+    q('project.deleted rows about a project that is not a test project', 'public.sensitive_events', `actor_id = any(${P}) and entity_type = 'project' and (action <> 'project.deleted' or coalesce(after->>'name', '') not like '${TEST_PROJECT_NAME}')`),
     q('log rows by someone outside the set about a selected account', 'public.sensitive_events', `entity_type = 'profile' and entity_id = any(${P}::text[]) and actor_id is not null and actor_id <> all(${P})`),
     q('request rows that also touch someone outside the set', 'private.profile_creation_requests', `(user_id = any(${P}) and actor_id <> all(${P})) or (actor_id = any(${P}) and user_id <> all(${P}))`),
     q('update rows that also touch someone outside the set', 'private.profile_updates', `(user_id = any(${P}) and actor_id <> all(${P})) or (actor_id = any(${P}) and user_id <> all(${P}))`),

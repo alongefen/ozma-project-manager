@@ -42,6 +42,12 @@ describe('remove-test-accounts', () => {
     const q = foreignSql(selected);
     for (const t of ['memberships', 'projects', 'stored_files', 'documents', 'diary_entries', 'diary_versions', 'tasks', 'transactions', 'project_covers']) expect(q).toContain(`public.${t}`);
   });
+  it('a re-run after a half-finished run still finds the leftover logins (no profile, test prefixes, test day)', () => {
+    const q = selectSql();
+    for (const prefix of ['p12-owner-', 'p12-hdm-', 'p12-hdw-', 'hd-owner-']) expect(q).toContain(`u.email like '${prefix}%@example.invalid'`);
+    expect(q).toContain('not exists (select 1 from public.profiles');
+  });
+  it('guards project.deleted rows that describe a non-test project', () => { expect(foreignSql(selected)).toContain("not like 'בדיקה hd-%'"); });
   it('dry run changes nothing and masks emails and ids', async () => {
     const f = fake(); const log = vi.fn();
     const r = await run({args: {}, env, log, clients: {admin: f.admin, sql: f.sql}});
