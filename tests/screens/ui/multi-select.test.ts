@@ -12,6 +12,14 @@ describe('MultiSelectField', () => {
     expect(html).toContain('aria-label="הסרת רונית בדויה"');
     expect(html).not.toContain('הסרת יוסי בדוי');
   });
+  it('a chosen value missing from the options still shows as a removable chip', () => {
+    const html = renderToStaticMarkup(h(MultiSelectField, { label: 'אחראים', unknownLabel: 'אחראי לשעבר', value: ['gone'], options, onChange: () => {} }));
+    expect(html).toContain('aria-label="הסרת אחראי לשעבר"');
+  });
+  it('the opening button names the label and the chosen people for screen readers', () => {
+    const html = renderToStaticMarkup(h(MultiSelectField, { label: 'אחראים', value: ['a'], options, onChange: () => {} }));
+    expect(html).toContain('אחראים: דנה בדויה. הוספה');
+  });
   it('shows the placeholder and no chips when nothing is chosen', () => {
     const html = renderToStaticMarkup(h(MultiSelectField, { label: 'אחראים', placeholder: 'בחירת אחראים', value: [], options, onChange: () => {} }));
     expect(html).toContain('בחירת אחראים');

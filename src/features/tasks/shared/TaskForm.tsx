@@ -32,7 +32,7 @@ export function TaskForm({ task, assignees, busy, error, onSubmit, onCancel }: {
       </div>
       <DateField label="תאריך יעד (רשות)" value={draft.dueDate} error={errors.dueDate}
         onChange={v => setDraft(d => ({ ...d, dueDate: v }))} />
-      <MultiSelectField label="אחראים (רשות)" placeholder="בחירת אחראים" value={draft.assigneeIds}
+      <MultiSelectField label="אחראים (רשות)" placeholder="בחירת אחראים" unknownLabel="אחראי לשעבר" value={draft.assigneeIds}
         options={assignees.map(a => ({ value: a.id, label: a.name, hint: a.isOwner ? ADMIN_LABEL : a.role ? ROLE_LABEL[a.role] : undefined }))}
         onChange={ids => setDraft(d => ({ ...d, assigneeIds: ids }))} />
       {error && <Notice tone="error">{error}</Notice>}
