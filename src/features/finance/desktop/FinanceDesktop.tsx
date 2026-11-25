@@ -58,7 +58,7 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
         <section className="fin-summary" aria-label={`סיכום ${label}`}>
           <h2 className="fin-period">{label}</h2>
           <div className="fin-kpis">
-            <div><span>הכנסות בתקופה</span><strong className="fin-num">{shekels(book.period.income)}</strong></div>
+            <div><span>הכנסות בתקופה (לא כולל מע״מ)</span><strong className="fin-num">{shekels(book.period.income)}</strong></div>
             <div><span>סה״כ הוצאה כולל מס 3%</span><strong className="fin-num">{shekels(book.period.totalExpense)}</strong></div>
             <div><span>רווח נקי</span><strong className="fin-num">{shekels(book.period.netProfit)}</strong></div>
           </div>
@@ -73,7 +73,7 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
           <table className="fin-table">
             <caption className="sr-only">תנועות כספיות</caption>
             <thead>
-              <tr><th scope="col">תאריך</th>{all && <th scope="col">פרויקט</th>}<th scope="col">פרטים / ספק</th><th scope="col">הכנסה</th><th scope="col">הוצאה</th><th scope="col" className="no-print">פעולות</th></tr>
+              <tr><th scope="col">תאריך</th>{all && <th scope="col">פרויקט</th>}<th scope="col">פרטים / ספק</th><th scope="col">הכנסה (לא כולל מע״מ)</th><th scope="col">הוצאה</th><th scope="col" className="no-print">פעולות</th></tr>
             </thead>
             <tbody>
               {rows.length === 0 && (

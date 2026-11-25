@@ -26,11 +26,12 @@ const months: TransferMonth[] = [
 const both = (d: HomeData, isOwner = true) => renderToStaticMarkup(h('div', null, h(HomeMobile, { data: d, isOwner }), h(HomeDesktop, { data: d, isOwner })));
 
 describe('מסך הבית', () => {
-  it('בעלים: קובייה וקישור לסכום העברה', () => {
+  it('אין כרטיס כספים בעמוד הפרויקטים, גם כשהשרת שלח קובייה (פריט 7)', () => {
     const html = both(home(cube));
-    expect(html).toContain('לפירוט התנועות');
-    expect(html).toContain('href="/finance"');
-    expect(html).toContain('הכנסות');
+    expect(html).not.toContain('לפירוט התנועות');
+    expect(html).not.toContain('href="/finance"');
+    expect(html).not.toContain('הכנסות');
+    expect(html).not.toContain('₪');
   });
   it('בלי קובייה מהשרת: אין שום נתון כספי ואין קישור לכספים', () => {
     const html = both(home(null));
@@ -47,7 +48,15 @@ describe('מסך הבית', () => {
     expect(both(home(cube), true)).toContain('פרויקט חדש');
     expect(both(home(null), false)).not.toContain('פרויקט חדש');
     expect(both(home(null), false)).toContain('חיפוש פרויקט');
-    expect(both(home(null), false)).toContain('הסתיימו');
+    expect(both(home(null), true)).toContain('הצגת פרויקטים שהסתיימו');
+    expect(both(home(null), false)).not.toContain('הצגת פרויקטים שהסתיימו');
+  });
+  it('פרויקטים שהסתיימו מוסתרים כברירת מחדל גם לבעלים (פריט 4)', () => {
+    const done = { ...card, id: 'p2', name: 'חניון סגור', status: 'completed' as const };
+    const html = both({ ...home(null), projects: [card, done] }, true);
+    expect(html).toContain('בניין בדוי');
+    expect(html).not.toContain('חניון סגור');
+    expect(html).toContain('aria-pressed="false"');
   });
   it('סינון: לפי שם, לקוח, כתובת וסטטוס', () => {
     const done = { ...card, id: 'p2', name: 'חניון', businessName: 'לוג-פארק', siteAddress: 'הנמל 5', status: 'completed' as const };

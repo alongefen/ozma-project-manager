@@ -14,7 +14,7 @@ export function TransferDesktop({ months, embedded = false }: { months: Transfer
         <Card panel className={d.tableCard}>
           <table className={d.table}>
             <thead>
-              <tr><th scope="col">חודש / פרויקט</th><th scope="col">הכנסות</th><th scope="col">הוצאות</th><th scope="col">מס להעברה</th><th scope="col">רווח נקי</th></tr>
+              <tr><th scope="col">חודש / פרויקט</th><th scope="col">הכנסות (לא כולל מע״מ)</th><th scope="col">הוצאות</th><th scope="col">מס להעברה</th><th scope="col">רווח נקי</th></tr>
             </thead>
             {views.map(v => (
               <tbody key={v.key}>

@@ -37,3 +37,4 @@
   .tk-card { grid-template-columns: auto 1fr auto; }
   .tk-card__actions { grid-column: auto; flex-wrap: nowrap; }
 }
+.tk-desktop .tk-toggle { justify-self: start; align-self: start; padding-inline: 16px; }

@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Badge, Button, ConfirmDialog, DeleteIcon, IconButton, Notice, TextField } from '@/components/ui';
-import { removeMembership, resetPassword, setFinanceAccess, setMembership, setOwnerLevel, setUserActive, updateUser } from '@/features/users/logic/actions';
+import { addToAllProjects, removeMembership, resetPassword, setFinanceAccess, setMembership, setOwnerLevel, setUserActive, updateUser } from '@/features/users/logic/actions';
 import { Select } from '@/features/projects/shared/Select';
 import type { ProjectCard, ProjectRole, Result, UserAssignment, UserRow } from '@/types/contracts';
 import { ADMIN_LABEL, ROLE_LABEL, addableProjects, adminControls, errorText, ownerErrorText, statusLabel, validateName, validatePassword } from './view-model';
@@ -33,6 +33,7 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
   const [addProject, setAddProject] = useState('');
   const [addRole, setAddRole] = useState<ProjectRole>('worker');
   const [addBusy, setAddBusy] = useState(false);
+  const [allBusy, setAllBusy] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState<string | undefined>();
@@ -91,6 +92,18 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
     patchUser(user.id, u => ({ ...u, assignments: [...u.assignments, { projectId: project.id, projectName: project.name, role: addRole, financeAccess: result.value.financeAccess, revision: result.value.revision }] }));
     setAdding(false); setAddProject(''); setAddRole('worker');
     say('הגישה נוספה');
+  }
+
+  async function addAll() {
+    if (allBusy) return;
+    setAllBusy(true);
+    const result = await addToAllProjects({ userId: user.id, role: addRole });
+    setAllBusy(false);
+    if (!result.ok) { fail(result.error.code); return; }
+    const { added, alreadyMember, failed } = result.value;
+    say(`נוספו ${added} פרויקטים${alreadyMember ? `, ${alreadyMember} כבר היו משויכים` : ''}${failed ? `, ${failed} נכשלו` : ''}`, failed ? 'error' : 'ok');
+    setAdding(false); setAddProject(''); setAddRole('worker');
+    refresh();
   }
 
   async function setActive(active: boolean) {
@@ -208,9 +221,10 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
                   <>
                     <Select label="פרויקט" value={addProject} onChange={setAddProject} placeholder="בחירת פרויקט" options={options.map(p => ({ value: p.id, label: p.name }))} />
                     <Select label="תפקיד בפרויקט" value={addRole} onChange={v => setAddRole(v as ProjectRole)} options={[{ value: 'worker', label: ROLE_LABEL.worker }, { value: 'manager', label: ROLE_LABEL.manager }]} />
-                    <p className={css.muted}>גישה לכספים נפתחת רק למנהל, אחרי ההוספה.</p>
+                    <p className={css.muted}>גישה לכספים נפתחת רק למנהל, אחרי ההוספה. הוספה לכל הפרויקטים הפעילים נעשית בלי גישה לכספים, ולא משנה שיוך קיים.</p>
                     <div className={css.row}>
-                      <Button disabled={!addProject || addBusy} onClick={addAccess}>{addBusy ? 'שומר…' : 'הוספה'}</Button>
+                      <Button disabled={!addProject || addBusy || allBusy} onClick={addAccess}>{addBusy ? 'שומר…' : 'הוספה'}</Button>
+                      <Button variant="secondary" disabled={addBusy || allBusy} onClick={addAll}>{allBusy ? 'מוסיף…' : 'הוספה לכל הפרויקטים הפעילים'}</Button>
                       <Button variant="secondary" disabled={addBusy} onClick={() => setAdding(false)}>ביטול</Button>
                     </div>
                   </>

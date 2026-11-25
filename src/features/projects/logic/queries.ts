@@ -17,12 +17,15 @@ export function createProjectQueries(platform: Platform): Queries {
       const cards = z.array(ProjectCardSchema).safeParse(result.value);
       if (!cards.success) return failure('UNAVAILABLE');
       const key = platform.format.searchKey(search ?? '');
-      return { ok: true, value: cards.data.filter(card => !key || platform.format.searchKey(`${card.name} ${card.businessName} ${card.siteAddress}`).includes(key)) };
+      // Item 6: finished projects are for owner-level accounts only.
+      const visible = ctx.actor.isOwner ? cards.data : cards.data.filter(card => card.status !== 'completed');
+      return { ok: true, value: visible.filter(card => !key || platform.format.searchKey(`${card.name} ${card.businessName} ${card.siteAddress}`).includes(key)) };
     }),
     getProject: validated(schemas.getProject, async (ctx, { id }) => {
       const project = await ctx.db.from('projects').select('id,name,business_name,site_address,start_date,end_date,access_notes,status,archived_at,revision').eq('id', id).maybeSingle();
       if (project.error) return { ok: false, error: mapError(project.error) };
       if (!project.data) return failure('NOT_FOUND');
+      if (!ctx.actor.isOwner && project.data.status === 'completed') return failure('NOT_FOUND');
       const contact = await ctx.db.from('project_contacts').select('name,phone,email,role_title').eq('project_id', id).maybeSingle();
       if (contact.error) return { ok: false, error: mapError(contact.error) };
       if (!contact.data) return failure('NOT_FOUND');

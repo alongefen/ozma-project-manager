@@ -54,7 +54,7 @@ describe('finance workbook rendering', () => {
     const sheet = (await read()).getWorksheet('כספים')!;
     for (const heading of ['סיכום תקופה', 'סיכום חודש']) {
       const value = section(sheet, heading);
-      for (const [label, expected] of [ ['הכנסות', 9876.54], ['הוצאות', 3456.78], ['מס', 123.45],
+      for (const [label, expected] of [ ['הכנסות (לא כולל מע״מ)', 9876.54], ['הוצאות', 3456.78], ['מס', 123.45],
         ['סה״כ הוצאות', 3580.23], ['רווח נקי', 6296.31], ['שארית', 8123.45], ['אחוז רווח', 0.637] ] as const) {
         expect(value(label).value, `${heading}: ${label}`).toBe(expected);
         expect(value(label).type).toBe(ExcelJS.ValueType.Number);
@@ -62,14 +62,14 @@ describe('finance workbook rendering', () => {
       expect(value('אחוז רווח').numFmt).toBe('0.0%');
     }
     const filtered = section(sheet, 'סיכום שורות מסוננות');
-    expect(filtered('הכנסות').value).toBe(98.45);
+    expect(filtered('הכנסות (לא כולל מע״מ)').value).toBe(98.45);
     expect(filtered('הוצאות').value).toBe(49.88);
     expect(cells(sheet).some(c => c.value === 'חודש 12/2026')).toBe(true);
     expect(cells(sheet).some(c => c.value === 'חודש 01/2027')).toBe(true);
     const empty = section(sheet, 'סיכום חודש', 1);
     expect(empty('שארית').value).toBe(8123.45);
     expect(empty('אחוז רווח').value).toBe('—');
-    expect(empty('הכנסות').value).toBe(0);
+    expect(empty('הכנסות (לא כולל מע״מ)').value).toBe(0);
   });
 
   it('preserves negative summaries, zero percentages and an empty book', async () => {
@@ -78,7 +78,7 @@ describe('finance workbook rendering', () => {
     book.period = { income: -101, expense: -202, tax: -3, totalExpense: -205, netProfit: 104, balance: -999, profitPercentTenths: 0 };
     const sheet = (await read(book)).getWorksheet('כספים')!;
     const value = section(sheet, 'סיכום תקופה');
-    expect(value('הכנסות').value).toBe(-1.01);
+    expect(value('הכנסות (לא כולל מע״מ)').value).toBe(-1.01);
     expect(value('הוצאות').value).toBe(-2.02);
     expect(value('מס').value).toBe(-0.03);
     expect(value('שארית').value).toBe(-9.99);

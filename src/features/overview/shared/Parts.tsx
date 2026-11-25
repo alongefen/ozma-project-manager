@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { HomeData, ProjectCard } from '@/types/contracts';
 import { Badge, Card } from '@/components/ui';
 import { coverSrc } from '@/features/projects/shared/view-model';
-import { cubeRows, cubeTitle, counterItems, projectBadges, NO_PROJECTS } from './view-model';
+import { counterItems, projectBadges, NO_PROJECTS } from './view-model';
 import css from './Overview.module.css';
 
 export function Counters({ counters }: { counters: HomeData['counters'] }) {
@@ -15,23 +15,6 @@ export function Counters({ counters }: { counters: HomeData['counters'] }) {
         </Card>
       ))}
     </div>
-  );
-}
-
-/** The finance cube: one wide card with the same top-level cards as the counters. Only when the server sent one (the owner). */
-export function Cube({ cube }: { cube: NonNullable<HomeData['financeCube']> }) {
-  return (
-    <Card className={css.cube}>
-      <div className={css.cubeHead}>
-        <h2 className={css.cubeTitle}>{cubeTitle(cube)}</h2>
-        <Link href="/finance" className={css.cubeLink}>לפירוט התנועות</Link>
-      </div>
-      <dl className={css.cubeFigures}>
-        {cubeRows(cube).map(row => (
-          <div key={row.key}><dt>{row.label}</dt><dd className={css.num}>{row.value}</dd></div>
-        ))}
-      </dl>
-    </Card>
   );
 }
 

@@ -83,8 +83,8 @@ async function expectFilteredBook(person: Person) {
   const book = await finance.getBook(person.ctx, { projectId: exported.id, filter: filtered });
   if (!book.ok) throw new Error(`קריאת ספר הבדיקה נכשלה: ${book.error.code}`);
   expect(rows).toEqual(await sheetRows(await renderFinanceWorkbook(book.value)));
-  expect(pairsAfter(rows, 'סיכום תקופה', 2)).toEqual([['הכנסות', 3000.5], ['הוצאות', 40]]);
-  expect(pairsAfter(rows, 'סיכום שורות מסוננות', 2)).toEqual([['הכנסות', 1000.5], ['הוצאות', 40]]);
+  expect(pairsAfter(rows, 'סיכום תקופה', 2)).toEqual([['הכנסות (לא כולל מע״מ)', 3000.5], ['הוצאות', 40]]);
+  expect(pairsAfter(rows, 'סיכום שורות מסוננות', 2)).toEqual([['הכנסות (לא כולל מע״מ)', 1000.5], ['הוצאות', 40]]);
   expect(rows).toContainEqual([2, 'הכנסה', formula, 1000.5]);
   for (const absent of [cancelled, otherMonth, otherDay]) expect(rows.flat()).not.toContain(absent);
 }

@@ -4,7 +4,7 @@ import { UsersApiInputSchemas } from '@/types/contracts/schemas';
 import { createPlatform } from '@/lib/auth/platform';
 import { failure } from '@/lib/db/rpc';
 import { createUsersApi } from './index';
-import { SetOwnerLevelSchema, createOwnerLevelCommand, type SetOwnerLevelInput } from './commands';
+import { AddToAllProjectsSchema, SetOwnerLevelSchema, createBulkAccessCommand, createOwnerLevelCommand, type AddToAllProjectsInput, type AddToAllProjectsResult, type SetOwnerLevelInput } from './commands';
 
 type Input<K extends keyof UsersApi> = Parameters<UsersApi[K]>[1];
 type Output<K extends keyof UsersApi> = Awaited<ReturnType<UsersApi[K]>>;
@@ -40,5 +40,17 @@ export async function setOwnerLevel(input: SetOwnerLevelInput): Promise<Result<{
     const parsed = SetOwnerLevelSchema.safeParse(input);
     if (!parsed.success) return failure('VALIDATION');
     return await createOwnerLevelCommand(platform).setOwnerLevel(context.value, parsed.data);
+  } catch { return failure('UNAVAILABLE'); }
+}
+
+/** Add a person to every open project they are not in yet (owner only). Finance stays off; existing roles are untouched. */
+export async function addToAllProjects(input: AddToAllProjectsInput): Promise<Result<AddToAllProjectsResult>> {
+  try {
+    const platform = await createPlatform();
+    const context = await platform.auth.getContext();
+    if (!context.ok) return context;
+    const parsed = AddToAllProjectsSchema.safeParse(input);
+    if (!parsed.success) return failure('VALIDATION');
+    return await createBulkAccessCommand(platform).addToAllProjects(context.value, parsed.data);
   } catch { return failure('UNAVAILABLE'); }
 }
