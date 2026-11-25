@@ -1,0 +1,20 @@
+/* Project notes tab. Tokens come from app.css. One card style, two layouts. */
+.nt-root { display: grid; gap: 16px; min-width: 0; }
+.nt { display: grid; gap: 16px; min-width: 0; }
+.nt-bar { display: flex; align-items: center; gap: 12px; }
+.nt-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
+.nt-empty { color: var(--muted); margin: 0; padding: 12px 0; }
+.nt-card { display: grid; gap: 8px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; min-width: 0; }
+.nt-card__meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; color: var(--muted); }
+.nt-card__who { font-weight: 700; color: inherit; }
+.nt-card__when { unicode-bidi: plaintext; }
+.nt-card__body { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 16px; line-height: 1.5; }
+.nt-card__actions { display: flex; gap: 8px; }
+.nt-form { display: grid; gap: 14px; }
+.nt-textarea { min-height: 140px; resize: vertical; font: inherit; }
+.nt-count { text-align: end; }
+@media (min-width: 1024px) {
+  .nt-card { grid-template-columns: 1fr auto; align-items: start; }
+  .nt-card__meta, .nt-card__body { grid-column: 1; }
+  .nt-card__actions { grid-column: 2; grid-row: 1 / span 2; }
+}

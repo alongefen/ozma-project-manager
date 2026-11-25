@@ -44,8 +44,8 @@ describe('מבנה הנתיבים של טאבי הפרויקט', () => {
 describe('סדר הטאבים והחלקה (מימין לשמאל)', () => {
   const viewAll = { id: 'p', permissions: { viewFinance: true } } as Parameters<typeof sectionsFor>[0];
   const hrefs = tabItems('p', sectionsFor(viewAll)).map(i => i.href);
-  it('הפרטים ראשון, ואחריו המסמכים, המשימות, היומן והכספים', () => {
-    expect(hrefs).toEqual(['/projects/p', '/projects/p/files', '/projects/p/tasks', '/projects/p/diary', '/projects/p/finance']);
+  it('הפרטים ראשון, ואחריו המסמכים, המשימות, היומן, ההערות והכספים', () => {
+    expect(hrefs).toEqual(['/projects/p', '/projects/p/files', '/projects/p/tasks', '/projects/p/diary', '/projects/p/notes', '/projects/p/finance']);
   });
   it('כל טאב מזוהה לפי הכתובת שלו', () => {
     hrefs.forEach((h, i) => expect(tabIndex(h, hrefs)).toBe(i));

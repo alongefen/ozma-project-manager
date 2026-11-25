@@ -34,7 +34,6 @@ export function ProjectForm(props: ProjectFormProps) {
   // One id per opened form: a retry after an unknown answer repeats the same create, never a duplicate.
   const [requestId] = useState(() => crypto.randomUUID());
   const formId = useId();
-  const { isOwner } = props;
 
   useEffect(() => {
     if (!dirty) return;
@@ -51,11 +50,11 @@ export function ProjectForm(props: ProjectFormProps) {
     e.preventDefault();
     if (saving) return;
     setMessage(null);
-    const found = validateValues(values, isOwner);
+    const found = validateValues(values);
     if (firstErrorField(found)) { setErrors(found); setMessage('יש לתקן את השדות המסומנים'); setTimeout(() => focusFirst(found), 0); return; }
     setErrors({});
     setSaving(true);
-    const fields = toFields(values, isOwner);
+    const fields = toFields(values);
     const result = props.mode === 'create'
       ? await createProject({ requestId, fields })
       : await updateProject({ id: props.projectId, expectedRevision: props.revision, fields });
@@ -112,7 +111,6 @@ export function ProjectForm(props: ProjectFormProps) {
             <DateField label={LABELS.startDate} value={values.startDate} onChange={v => setField('startDate', v)} error={errors.startDate} data-field="startDate" />
             <DateField label={LABELS.endDate} value={values.endDate} onChange={v => setField('endDate', v)} error={errors.endDate} data-field="endDate" />
           </div>
-          {isOwner && field('businessNumber', { ltr: true, hint: 'מוצג לבן בלבד' })}
         </div>
       </Section>}
       {shows('contact') && <Section sheet={sheet} title="איש קשר">
