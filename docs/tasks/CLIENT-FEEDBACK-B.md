@@ -45,6 +45,12 @@ commit;
 
 No blocking finding. Fixed: a retry after a lost answer reused the request id even for different text (it would have dropped the new text); the id is now kept only for the identical text/contact. Noted: lists are capped at 1000 notes and 200 contacts without paging; a replay of a create returns the original row even if it was cancelled since; hard delete of a project with notes and contacts relies on `on delete cascade` and has no automated test (cloud-test owner fixture is broken).
 
+## Follow-up (Alon, 25.11.2026): contacts in the new-project wizard
+
+- The contact step now takes several contacts (up to 5, add/remove rows: name, role, phone) and none are required. The first filled row becomes the primary contact; the others are saved as extra contacts right after the project is created (a failure leaves the project and shows a message).
+- Alon chose **no migration**. The database still requires a primary contact (name and phone, in `create_project`, `update_project` and the table), so with no contact entered the project stores the placeholder name "לא הוזן" and phone "-" (`NO_CONTACT` in `view-model.ts`); the details page shows "לא הוזן" for it. Editing a project with the placeholder still shows the placeholder in the edit form, which keeps the edit form valid. Removing the requirement from the database would need a separate D31 approval.
+- Checked: tsc, eslint, 242 unit tests (new cases for contact rows and the split), `next build`. Not checked in a browser (no sign-in); the wizard contact list scrolls inside its step like the permissions list (max-height 250px). The single follow-up diff was self-reviewed, without a second reviewer pass.
+
 ## Open items
 
 - Regenerate `src/types/database.ts` and drop `untyped-db.ts`.

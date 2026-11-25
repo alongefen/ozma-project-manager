@@ -4,10 +4,11 @@ import { useRouter } from 'next/navigation';
 import { Button, ConfirmDialog, DateField, DeleteIcon, IconButton, Notice, SelectField, Sheet, TextField } from '@/components/ui';
 import { listUsers, removeMembership, setFinanceAccess, setMembership } from '@/features/users/logic/actions';
 import { createProject } from '../logic/actions';
+import { createContact } from '../contacts/logic/actions';
 import { CoverControl } from './CoverControl';
 import { FIELD_LABELS, emptyValues, firstErrorField, mapServerErrors, toFields, validateValues, type FieldErrors, type FieldKey, type FormValues } from './form-model';
 import { errorText } from './view-model';
-import { LAST_FORM_STEP, STEPS, firstStepWithError, roleAction, stepFields, validateStep, type RoleChoice } from './wizard-model';
+import { LAST_FORM_STEP, MAX_WIZARD_CONTACTS, STEPS, emptyContact, firstStepWithError, roleAction, splitContacts, stepFields, validateContacts, validateStep, type ContactDraft, type ContactDraftErrors, type RoleChoice } from './wizard-model';
 import css from './NewProjectWizard.module.css';
 
 type Person = { id: string; fullName: string; role: RoleChoice; finance: boolean; revision: number | null };
@@ -25,6 +26,8 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
   const [step, setStep] = useState(0);
   const [values, setValues] = useState<FormValues>(emptyValues());
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [contacts, setContacts] = useState<ContactDraft[]>([emptyContact()]);
+  const [contactErrors, setContactErrors] = useState<Record<number, ContactDraftErrors>>({});
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [created, setCreated] = useState<{ id: string; revision: number } | null>(null);
@@ -38,6 +41,9 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
 
   const setField = (key: FieldKey, value: string) => { dirty.current = true; setValues(v => ({ ...v, [key]: value })); };
   const set = (key: FieldKey) => (e: { target: { value: string } }) => setField(key, e.target.value);
+  const setContactField = (i: number, key: keyof ContactDraft, value: string) => { dirty.current = true; setContacts(list => list.map((c, j) => (j === i ? { ...c, [key]: value } : c))); };
+  const addContact = () => { dirty.current = true; setContacts(list => (list.length < MAX_WIZARD_CONTACTS ? [...list, emptyContact()] : list)); };
+  const removeContact = (i: number) => { setContacts(list => (list.length > 1 ? list.filter((_, j) => j !== i) : [emptyContact()])); setContactErrors({}); };
   const focusIn = (index: number, errs: FieldErrors) => setTimeout(() => {
     const key = stepFields(index).find(k => errs[k]) ?? firstErrorField(errs);
     if (key) document.querySelector<HTMLElement>(`[data-wizard-field="${key}"]`)?.focus();
@@ -74,6 +80,13 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
   async function next() {
     if (busy) return;
     setMessage(null);
+    if (step === 1) {
+      const found = validateContacts(contacts);
+      setContactErrors(found);
+      if (Object.keys(found).length) { setMessage('יש לתקן את השדות המסומנים'); return; }
+      setStep(2);
+      return;
+    }
     if (step < LAST_FORM_STEP) {
       const found = validateStep(values, step);
       setErrors(found);
@@ -82,7 +95,10 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
       return;
     }
     if (step === LAST_FORM_STEP) {
-      const found = validateValues(values);
+      // The contact step is optional: the first contact (or a placeholder) fills the primary contact the database requires.
+      const { primary, extras } = splitContacts(contacts);
+      const effective: FormValues = { ...values, contactName: primary.name, contactPhone: primary.phone, contactRole: primary.roleTitle ?? '', contactEmail: '' };
+      const found = validateValues(effective);
       if (firstErrorField(found)) {
         setErrors(found);
         const target = firstStepWithError(found);
@@ -90,7 +106,7 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
       }
       setErrors({});
       setBusy(true);
-      const result = await createProject({ requestId, fields: toFields(values) });
+      const result = await createProject({ requestId, fields: toFields(effective) });
       setBusy(false);
       if (!result.ok) {
         const server = mapServerErrors(result.error.fieldErrors);
@@ -102,6 +118,13 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
       }
       setCreated({ id: result.value.id, revision: result.value.revision });
       setStep(3);
+      // The other contacts are saved on the new project; a failure leaves the project and says so.
+      let failed = 0;
+      for (const extra of extras) {
+        const saved = await createContact({ requestId: crypto.randomUUID(), projectId: result.value.id, ...extra }).catch(() => null);
+        if (!saved || !saved.ok) failed += 1;
+      }
+      if (failed) setMessage(`הפרויקט נוצר, אך ${failed === 1 ? 'איש קשר אחד' : `${failed} אנשי קשר`} לא נשמרו. אפשר להוסיף אותם בעמוד הפרויקט.`);
       return;
     }
     if (step < STEPS.length - 1) { setStep(step + 1); return; }
@@ -171,14 +194,18 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
                 <button type="submit" className="sr-only" tabIndex={-1}>הבא</button>
               </form>
               <form id={`${formId}-1`} className={css.step} inert={step !== 1} aria-hidden={step !== 1} onSubmit={e => { e.preventDefault(); next(); }} noValidate>
-                <div className={css.twoWide}>
-                  {field('contactName')}
-                  {field('contactRole')}
-                </div>
-                <div className={css.twoWide}>
-                  {field('contactPhone', { ltr: true, type: 'tel' })}
-                  {field('contactEmail', { ltr: true, type: 'email' })}
-                </div>
+                <p className={css.hint}>אפשר להוסיף כמה אנשי קשר, או לדלג ולהוסיף אחר כך. הראשון הוא איש הקשר הראשי.</p>
+                <ul className={css.contacts}>
+                  {contacts.map((c, i) => (
+                    <li key={i} className={css.contact}>
+                      <TextField label="שם" value={c.name} error={contactErrors[i]?.name} autoComplete="off" onChange={e => setContactField(i, 'name', e.target.value)} />
+                      <TextField label="תפקיד" value={c.roleTitle} autoComplete="off" onChange={e => setContactField(i, 'roleTitle', e.target.value)} />
+                      <TextField label="טלפון" value={c.phone} error={contactErrors[i]?.phone} ltr type="tel" inputMode="tel" autoComplete="off" onChange={e => setContactField(i, 'phone', e.target.value)} />
+                      {contacts.length > 1 && <IconButton tone="danger" label={`הסרת איש קשר ${i + 1}`} onClick={() => removeContact(i)}><DeleteIcon /></IconButton>}
+                    </li>
+                  ))}
+                </ul>
+                {contacts.length < MAX_WIZARD_CONTACTS && <Button variant="secondary" className="ui-lead" icon="add" onClick={addContact}>הוספת איש קשר</Button>}
                 <button type="submit" className="sr-only" tabIndex={-1}>הבא</button>
               </form>
               <div className={css.step} inert={step !== 2} aria-hidden={step !== 2}>
