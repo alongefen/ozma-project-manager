@@ -42,3 +42,8 @@ Alon, 24.11.2026: `/finance` must look and behave like a project's finance tab (
 - The picker has no text search: `SelectField` has none (shared component, not mine). It has type-ahead; a search box is a shared change if Alon wants it with 40+ projects.
 - No signed-in browser pass at 360–1280, no cloud run.
 - Reviewer (Sonnet): approved. Fixed: a new entry preselects the filtered project only if it is open. Permanent delete is also offered for cancelled rows of finished projects (the database function decides; allowed by A-44 for any cancelled transaction).
+
+## Round 3 — month rows instead of the bottom table (25.11.2026, branch `claude/finance-month-rows`)
+
+- Alon: the "פירוט חודשים" table under the main table added nothing. Removed it from the shared desktop finance screen (so the project tab matches). For the whole period, the main table is now split by month: a month row (month name linking to that month, net profit and month balance, income, total expense) followed by that month's movements, newest month first. A single-month view has no month rows (its summary is above). Day/search narrowing hides months with no matching rows. Phone is unchanged (its month list already was the summary).
+- Checked: tsc, eslint, `tests/screens tests/shell` pass (new assertion: no "פירוט חודשים", month rows present). Not checked: browser at 1024/1280, print (print view already has month rows).

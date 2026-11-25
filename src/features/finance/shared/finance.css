@@ -179,3 +179,8 @@
 .fin-cancelled > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
 .fin-cancelled > summary h2 { font-size: 16px; }
 .fin-cancelled .fin-list { margin-top: 8px; }
+
+/* Month rows inside the main table (whole-period view): the month and its figures, then its movements */
+.fin-table .fin-monthrow th, .fin-table .fin-monthrow td { background: var(--nav-active-bg); font-weight: 800; border-top: 1px solid var(--line); }
+.fin-monthrow th a { color: inherit; }
+.fin-monthrow__sub { font-weight: 400; font-size: 14px; color: var(--muted); margin-inline-start: 14px; }

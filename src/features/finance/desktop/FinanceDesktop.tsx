@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import Link from 'next/link';
 import type { FinanceBook, TransactionRow } from '@/types/contracts';
 import { Button, Card, DeleteIcon, EditIcon, ExcelIcon, IconButton, Notice, Pin, PrintIcon } from '@/components/ui';
@@ -26,6 +26,23 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
   const entryMonth = period === 'all' ? currentMonth(today) : period;
   const filtered = filter.day !== undefined || !!filter.search;
   const label = period === 'all' ? 'כל התקופה' : monthLabel(period);
+
+  const groups = monthsNewestFirst(book).map(block => ({ summary: block.summary, rows: visibleRows(bookRows([block]), filter) })).filter(g => g.rows.length > 0);
+  const renderRow = (row: TransactionRow) => (
+    <tr key={row.id}>
+      <td className="fin-num">{rowDate(row)}</td>
+      {all && <td className="fin-project">{all.projectOf[row.id]}</td>}
+      <td className="fin-details">{row.details}{row.kind !== 'income' && row.kind !== 'expense' && <span className="fin-kind">{KIND_LABELS[row.kind]}</span>}</td>
+      <td className="fin-num">{isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
+      <td className="fin-num">{!isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
+      <td className="no-print">{book.canWrite && rowOpen(row.id) && (
+        <span className="ui-iconrow">
+          {book.canCancel && <IconButton tone="danger" label={`ביטול תנועה: ${row.details}`} onClick={() => setCancelRow(row)}><DeleteIcon /></IconButton>}
+          <IconButton label={`עריכת תנועה: ${row.details}`} onClick={() => setDialog({ row })}><EditIcon /></IconButton>
+        </span>
+      )}</td>
+    </tr>
+  );
 
   return (
     <div className="fin fin-desktop d-only">
@@ -65,21 +82,20 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
                   {filtered && <> · <Link href={href({ period })}>איפוס סינון</Link></>}
                 </td></tr>
               )}
-              {rows.map((row: TransactionRow) => (
-                <tr key={row.id}>
-                  <td className="fin-num">{rowDate(row)}</td>
-                  {all && <td className="fin-project">{all.projectOf[row.id]}</td>}
-                  <td className="fin-details">{row.details}{row.kind !== 'income' && row.kind !== 'expense' && <span className="fin-kind">{KIND_LABELS[row.kind]}</span>}</td>
-                  <td className="fin-num">{isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
-                  <td className="fin-num">{!isIncomeKind(row.kind) ? rowAmount(row) : ''}</td>
-                  <td className="no-print">{book.canWrite && rowOpen(row.id) && (
-                    <span className="ui-iconrow">
-                      {book.canCancel && <IconButton tone="danger" label={`ביטול תנועה: ${row.details}`} onClick={() => setCancelRow(row)}><DeleteIcon /></IconButton>}
-                      <IconButton label={`עריכת תנועה: ${row.details}`} onClick={() => setDialog({ row })}><EditIcon /></IconButton>
-                    </span>
-                  )}</td>
-                </tr>
-              ))}
+              {period === 'all'
+                ? groups.map(({ summary: sm, rows: groupRows }) => (
+                    <Fragment key={`${sm.year}-${sm.month}`}>
+                      <tr className="fin-monthrow">
+                        <th scope="rowgroup" colSpan={all ? 3 : 2}>
+                          <Link href={href({ period: { year: sm.year, month: sm.month } })}>{monthLabel(sm)}</Link>
+                          <span className="fin-monthrow__sub">רווח נקי <span className="fin-num">{shekels(sm.netProfit)}</span> · שארית חודש <span className="fin-num">{shekels(sm.balance)}</span></span>
+                        </th>
+                        <td className="fin-num">{shekels(sm.income)}</td><td className="fin-num">{shekels(sm.totalExpense)}</td><td className="no-print" />
+                      </tr>
+                      {groupRows.map(renderRow)}
+                    </Fragment>
+                  ))
+                : rows.map(renderRow)}
             </tbody>
             <tfoot>
               <tr><th scope="row" colSpan={all ? 3 : 2}>סיכום התנועות המוצגות</th><td className="fin-num" aria-busy={!totalsReady}>{totalsReady ? shekels(filteredRows.income) : '…'}</td><td className="fin-num">{totalsReady ? shekels(filteredRows.expense) : '…'}</td><td className="no-print" /></tr>
@@ -96,23 +112,6 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
 
       {cancelRow && <CancelConfirm projectId={rowProjectId(cancelRow.id)} row={cancelRow} onClose={() => setCancelRow(null)} />}
 
-      {period === 'all' && (
-        <Card className="fin-main fin-monthsbox">
-          <h2>פירוט חודשים</h2>
-          <table className="fin-table fin-months">
-            <thead><tr><th scope="col">חודש</th><th scope="col">הכנסות</th><th scope="col">סה״כ הוצאה</th><th scope="col">רווח נקי</th><th scope="col">שארית חודש</th></tr></thead>
-            <tbody>
-              {monthsNewestFirst(book).map(({ summary: s }) => (
-                <tr key={`${s.year}-${s.month}`}>
-                  <th scope="row"><Link href={href({ period: { year: s.year, month: s.month } })}>{monthLabel(s)}</Link></th>
-                  <td className="fin-num">{shekels(s.income)}</td><td className="fin-num">{shekels(s.totalExpense)}</td>
-                  <td className="fin-num">{shekels(s.netProfit)}</td><td className="fin-num">{shekels(s.balance)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
-      )}
     </div>
   );
 }
