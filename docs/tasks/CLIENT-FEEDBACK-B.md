@@ -36,4 +36,13 @@ commit;
 
 ## Checks
 
-STATUS_PLACEHOLDER
+- Migration applied to `izjmvyguzbampoasvnru` on 25.11.2026 after Alon's typed "כן" in this session (via the Supabase MCP `apply_migration`; no other statement changed schema).
+- Local: `tsc --noEmit`, `eslint src tests/logic/project-notes`, `vitest --project unit tests/screens tests/logic/project-notes tests/logic/projects` (235 passed; new `tests/logic/project-notes/notes-contacts.test.ts` covers the RPC routing, validation, permission mapping and the view rules), `next build` passed (route `/projects/[id]/notes` present).
+- **Server checks of forbidden cases, run in the cloud DB inside one transaction that was rolled back on purpose** (fake users, sessions and two fake projects; verified afterwards: 0 notes, 0 contacts, 0 test projects, 6 profiles as before). Results: worker creates note OK and a retry returns the same result; manager editing or cancelling a worker's note FORBIDDEN; non-member create NOT_FOUND; unknown project NOT_FOUND; empty body VALIDATION; author edit OK; stale revision CONFLICT; owner edits another's note OK; RLS: worker sees 1 note, non-member 0; cancelled note disappears and cannot be edited (NOT_FOUND); worker create/update/remove contact FORBIDDEN; non-member contact NOT_FOUND; manager creates, updates and removes a contact OK, stored trimmed with an empty role as null; RLS hides removed contacts; on a finished project worker note create/edit/cancel and manager contact create are all PROJECT_READ_ONLY, owner can still write, members still read.
+- **Not run:** `tests/logic/project-notes/notes-contacts.cloud.test.ts` (written, typed and linted) could not run: the stored fake owner fixture no longer signs in (the existing `tests/logic/tasks` cloud suite fails the same way at `cloudOwner`, before any of my code). The SQL checks above replace it for this task. **Not checked:** the screens in a browser (no usable sign-in in this environment) at 360/375/390/768/1024/1280, RTL, no horizontal scroll. The layout reuses the task screen classes and shared components, but it is unverified visually. Hard delete of a project that has notes and contacts (cascade) was not exercised.
+
+## Open items
+
+- Regenerate `src/types/database.ts` and drop `untyped-db.ts`.
+- Visual check of the notes tab and the contacts card on phone and desktop by someone with a sign-in.
+- Repair or replace the cloud-test owner fixture (`supabase/.temp/p12-owner.json`).
