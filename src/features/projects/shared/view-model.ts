@@ -35,6 +35,15 @@ export function orNotEntered(value: string | null | undefined): string {
   return value && value.trim() ? value : NOT_ENTERED;
 }
 
+/**
+ * The database requires a primary contact (name and phone), but the wizard no longer does (A-45): a project created
+ * without any contact stores this placeholder, and the screens show "not entered" instead of it.
+ */
+export const NO_CONTACT = { name: 'לא הוזן', phone: '-' } as const;
+export function isPlaceholderContact(c: { name: string; phone: string }): boolean {
+  return c.name === NO_CONTACT.name && c.phone === NO_CONTACT.phone;
+}
+
 export function managersText(names: string[]): string {
   return names.length ? names.join(', ') : NO_MANAGER;
 }

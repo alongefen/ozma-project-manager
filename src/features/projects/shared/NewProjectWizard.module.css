@@ -38,3 +38,10 @@
 /* "הקודם" sits at the left end of the footer, opposite the primary button. */
 .backSlot { margin-inline-start: auto; display: flex; }
 .backSlot > * { flex: 1; }
+
+.contacts { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; max-height: 250px; overflow-y: auto; }
+.contact { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+@media (min-width: 1024px) {
+  .contact { grid-template-columns: 1fr 1fr 1fr auto; align-items: start; }
+  .contacts { max-height: 280px; }
+}

@@ -8,7 +8,7 @@ import { EditProjectSheet } from '../shared/EditProjectSheet';
 import { ProjectActions } from '../shared/ProjectActions';
 import { ProjectHardDelete } from '../shared/ProjectHardDelete';
 import { valuesFromDetails } from '../shared/form-model';
-import { actionsFor, coverSrc, dateText, isReadOnlyProject, managersText, orNotEntered, READ_ONLY_NOTICE, telHref } from '../shared/view-model';
+import { actionsFor, isPlaceholderContact, NOT_ENTERED, coverSrc, dateText, isReadOnlyProject, managersText, orNotEntered, READ_ONLY_NOTICE, telHref } from '../shared/view-model';
 import css from './ProjectDetailsMobile.module.css';
 
 /**
@@ -50,12 +50,14 @@ export function ProjectDetailsMobile({ d, isOwner, contacts }: { d: ProjectDetai
           <h3 className={css.title}>איש קשר</h3>
           {act.edit && <EditProjectSheet id={d.id} revision={d.revision} coverFileId={d.coverFileId} isOwner={isOwner} manage={act.manage} initial={valuesFromDetails(d)} icon contactOnly />}
         </div>
-        <dl className={css.list}>
+        {isPlaceholderContact(d.contact) ? <p>{NOT_ENTERED}</p> : (
+<dl className={css.list}>
           <div><dt>שם</dt><dd>{d.contact.name}</dd></div>
           <div><dt>תפקיד</dt><dd>{orNotEntered(d.contact.roleTitle)}</dd></div>
           <div><dt>טלפון</dt><dd>{tel ? <a className="ltr" href={tel}>{d.contact.phone}</a> : <span className="ltr">{d.contact.phone}</span>}</dd></div>
           <div><dt>מייל</dt><dd>{d.contact.email ? <a className="ltr" href={`mailto:${d.contact.email}`}>{d.contact.email}</a> : orNotEntered(null)}</dd></div>
         </dl>
+          )}
         <ExtraContacts projectId={d.id} initial={contacts} />
       </Card>
       {act.manage && (
