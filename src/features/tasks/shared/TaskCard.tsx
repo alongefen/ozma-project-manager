@@ -17,7 +17,12 @@ export function TaskCard({ task }: { task: TaskRow }) {
       </label>
       <div className="tk-card__main">
         <p className="tk-card__body">{task.body}</p>
-        {task.assigneeName && <p className="tk-card__assignee">אחראי: {task.assigneeName}</p>}
+        {task.assignees.length > 0 && (
+          <p className="tk-card__assignee" title={task.assignees.map(a => a.name).join(', ')}>
+            <span className="tk-asg-full">אחראים: {task.assignees.map(a => a.name).join(', ')}</span>
+            <span className="tk-asg-short">אחראי: {task.assignees[0].name}{task.assignees.length > 1 && <span className="tk-asg-more"> +{task.assignees.length - 1}</span>}</span>
+          </p>
+        )}
         {due && <p className={`tk-card__due${due.overdue ? ' tk-card__due--late' : ''}`}>{due.text}</p>}
       </div>
       {canWrite && (

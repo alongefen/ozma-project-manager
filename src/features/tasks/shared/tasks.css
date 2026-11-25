@@ -16,6 +16,15 @@
 .tk-card__body { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 16px; line-height: 1.5; }
 .tk-card__due { margin: 4px 0 0; font-size: 14px; color: var(--muted); unicode-bidi: plaintext; }
 .tk-card__assignee { margin: 4px 0 0; font-size: 14px; color: var(--muted); unicode-bidi: plaintext; }
+/* Phone: first name and "+N"; desktop: every name. */
+.tk-asg-full { display: none; }
+.tk-asg-more { font-weight: 700; }
+.tk-people { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 6px; }
+.tk-people legend { padding: 0; margin-bottom: 6px; font-weight: 700; font-size: 14px; }
+.tk-people__list { display: grid; gap: 2px; max-height: 220px; overflow-y: auto; border: 1px solid var(--line); border-radius: 10px; padding: 4px 8px; }
+.tk-people__item { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
+.tk-people__item input { width: 22px; height: 22px; flex: none; }
+.tk-people__role { color: var(--muted); font-size: 13px; }
 .tk-mine { min-height: 44px; padding-inline: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--nav-active-ink); font-weight: 700; cursor: pointer; }
 .tk-mine--start { justify-self: start; }
 .tk-mine[aria-pressed='true'] { background: var(--nav-active-bg); border-color: var(--blue); }
@@ -37,6 +46,8 @@
 .tk-count { text-align: end; }
 
 @media (min-width: 1024px) {
+  .tk-asg-full { display: inline; }
+  .tk-asg-short { display: none; }
   .tk-list { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
   .tk-card { grid-template-columns: auto 1fr auto; }
   .tk-card__actions { grid-column: auto; flex-wrap: nowrap; }

@@ -190,9 +190,12 @@ export interface ProjectsApi {
 export type TaskRow = {
   id: Uuid; projectId: Uuid; body: string; completed: boolean
   dueDate: IsoDate | null; createdAt: IsoDateTime; revision: number
-  assigneeId: Uuid | null; assigneeName: string | null
+  /** Active people responsible for the task (none, one or several; A-47). */
+  assignees: TaskPerson[]
 }
-export type TaskAssignee = { id: Uuid; name: string; role: ProjectRole }
+export type TaskPerson = { id: Uuid; name: string }
+/** Someone a task can be assigned to: an active member of the project or an active owner-level account (no membership row, role null). */
+export type TaskAssignee = { id: Uuid; name: string; role: ProjectRole | null; isOwner: boolean }
 
 export interface TasksApi {
   listTasks: Operation<
@@ -200,10 +203,10 @@ export interface TasksApi {
     { open: TaskRow[]; completed: TaskRow[]; openCount: number; completedCount: number; canWrite: boolean; assignees: TaskAssignee[] }
   >
   createTask: Operation<
-    { requestId: Uuid; projectId: Uuid; body: string; dueDate: IsoDate | null; completed: boolean; assigneeId?: Uuid | null },
+    { requestId: Uuid; projectId: Uuid; body: string; dueDate: IsoDate | null; completed: boolean; assigneeIds?: Uuid[] },
     Saved
   >
-  updateTask: Operation<Edit & { body: string; dueDate: IsoDate | null; assigneeId?: Uuid | null }, Saved>
+  updateTask: Operation<Edit & { body: string; dueDate: IsoDate | null; assigneeIds?: Uuid[] }, Saved>
   setTaskCompleted: Operation<Edit & { completed: boolean }, Saved>
   deleteTask: Operation<Edit, null>
 }

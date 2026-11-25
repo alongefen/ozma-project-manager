@@ -22,7 +22,7 @@ export default async function AccessPage({ params }: { params: Promise<{ id: str
   return (
     <Page narrow>
       <PageHeader title="הרשאות" sub={project.name} backHref={`/projects/${id}`} backLabel="חזרה לתיק הפרויקט" />
-      <AccessManager projectId={id} members={members.value} candidates={candidates} admins={admins} />
+      <AccessManager projectId={id} members={members.value.filter(m => m.isActive)} candidates={candidates} admins={admins} />
     </Page>
   );
 }

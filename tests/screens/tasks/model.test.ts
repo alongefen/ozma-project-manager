@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { TaskRow } from '@/types/contracts';
-import { MAX_BODY, dueInfo, onlyMine, parseDraft, withRevision, withToggled, withoutTask } from '@/features/tasks/shared/model';
+import { MAX_BODY, dueInfo, onlyMine, parseDraft, sameIds, withRevision, withToggled, withoutTask } from '@/features/tasks/shared/model';
 
 const row = (id: string, over: Partial<TaskRow> = {}): TaskRow => ({
-  id, projectId: '11111111-1111-4111-8111-111111111111', body: 'בדוי', completed: false, dueDate: null, createdAt: '2026-11-23T08:00:00.000Z', revision: 1, assigneeId: null, assigneeName: null, ...over,
+  id, projectId: '11111111-1111-4111-8111-111111111111', body: 'בדוי', completed: false, dueDate: null, createdAt: '2026-11-23T08:00:00.000Z', revision: 1, assignees: [], ...over,
 });
 
 describe('מעבר בין קבוצות', () => {
@@ -53,28 +53,34 @@ describe('תאריך יעד', () => {
 
 describe('טופס פתק', () => {
   it('רווחים בלבד נדחים ליד השדה', () => {
-    expect(parseDraft({ body: '   ', dueDate: '', assigneeId: '' })).toEqual({ ok: false, errors: { body: 'יש לכתוב את תוכן המשימה' } });
+    expect(parseDraft({ body: '   ', dueDate: '', assigneeIds: [] })).toEqual({ ok: false, errors: { body: 'יש לכתוב את תוכן המשימה' } });
   });
   it('מעל 2,000 תווים נדחה, בדיוק 2,000 עובר', () => {
-    expect(parseDraft({ body: 'א'.repeat(MAX_BODY + 1), dueDate: '', assigneeId: '' }).ok).toBe(false);
-    expect(parseDraft({ body: 'א'.repeat(MAX_BODY), dueDate: '', assigneeId: '' }).ok).toBe(true);
+    expect(parseDraft({ body: 'א'.repeat(MAX_BODY + 1), dueDate: '', assigneeIds: [] }).ok).toBe(false);
+    expect(parseDraft({ body: 'א'.repeat(MAX_BODY), dueDate: '', assigneeIds: [] }).ok).toBe(true);
   });
   it('גוזם, ויעד ריק הופך ל-null', () => {
-    expect(parseDraft({ body: ' לקנות ברגים ', dueDate: '', assigneeId: '' })).toEqual({ ok: true, body: 'לקנות ברגים', dueDate: null, assigneeId: null });
-    expect(parseDraft({ body: 'א', dueDate: '2026-12-01', assigneeId: '' })).toEqual({ ok: true, body: 'א', dueDate: '2026-12-01', assigneeId: null });
+    expect(parseDraft({ body: ' לקנות ברגים ', dueDate: '', assigneeIds: [] })).toEqual({ ok: true, body: 'לקנות ברגים', dueDate: null, assigneeIds: [] });
+    expect(parseDraft({ body: 'א', dueDate: '2026-12-01', assigneeIds: [] })).toEqual({ ok: true, body: 'א', dueDate: '2026-12-01', assigneeIds: [] });
   });
   it('תאריך לא תקין נדחה', () => {
-    expect(parseDraft({ body: 'א', dueDate: '1.12.26', assigneeId: '' }).ok).toBe(false);
+    expect(parseDraft({ body: 'א', dueDate: '1.12.26', assigneeIds: [] }).ok).toBe(false);
   });
 });
 
-describe('אחראי (A-46)', () => {
-  it('אחראי ריק הופך ל-null וערך נשמר', () => {
-    expect(parseDraft({ body: 'א', dueDate: '', assigneeId: 'u1' })).toMatchObject({ ok: true, assigneeId: 'u1' });
-    expect(parseDraft({ body: 'א', dueDate: '', assigneeId: '' })).toMatchObject({ ok: true, assigneeId: null });
+describe('אחראים (A-46, A-47)', () => {
+  it('רשימת אחראים נשמרת, וריקה מותרת', () => {
+    expect(parseDraft({ body: 'א', dueDate: '', assigneeIds: ['u1', 'u2'] })).toMatchObject({ ok: true, assigneeIds: ['u1', 'u2'] });
+    expect(parseDraft({ body: 'א', dueDate: '', assigneeIds: [] })).toMatchObject({ ok: true, assigneeIds: [] });
   });
-  it('המשימות שלי מסנן לפי האחראי', () => {
-    const list = [row('a', { assigneeId: 'u1' }), row('b', { assigneeId: 'u2' }), row('c')];
+  it('המשימות שלי: משימה נספרת אם אני בין האחראים', () => {
+    const p = (id: string) => ({ id, name: id });
+    const list = [row('a', { assignees: [p('u1'), p('u2')] }), row('b', { assignees: [p('u2')] }), row('c')];
     expect(onlyMine(list, 'u1').map(t => t.id)).toEqual(['a']);
+    expect(onlyMine(list, 'u2').map(t => t.id)).toEqual(['a', 'b']);
+  });
+  it('אותה רשימה בכל סדר נחשבת בלי שינוי', () => {
+    expect(sameIds(['a', 'b'], ['b', 'a'])).toBe(true);
+    expect(sameIds(['a'], ['a', 'b'])).toBe(false);
   });
 });
