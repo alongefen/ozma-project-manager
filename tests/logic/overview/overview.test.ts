@@ -51,6 +51,13 @@ describe('getHome counters and badges', () => {
     const two = fixture(false, cards, [], [{ id: 't1', project_id: cards[0].id }, { id: 't2', project_id: cards[1].id }]);
     expect(await two.api.getHome(two.ctx, {})).toMatchObject({ ok: true, value: { counters: { openTasks: 2, myTasksProjectId: null } } });
   });
+  it('the owner gets both numbers: all open tasks and their own (0 when none) (A-46)', async () => {
+    const cards = [card({ openTaskCount: 5 })];
+    const none = fixture(true, cards);
+    expect(await none.api.getHome(none.ctx, {})).toMatchObject({ ok: true, value: { counters: { openTasks: 5, allOpenTasks: 5, allTasksProjectId: cards[0].id, myOpenTasks: 0, myTasksProjectId: null } } });
+    const worker = fixture(false, cards);
+    expect(await worker.api.getHome(worker.ctx, {})).toMatchObject({ ok: true, value: { counters: { allOpenTasks: null, allTasksProjectId: null } } });
+  });
   it('shows zeros for a worker with no visible projects', async () => {
     const { api, ctx } = fixture(false, []);
     expect(await api.getHome(ctx, {})).toMatchObject({ ok: true, value: { counters: { activeProjects: 0, customers: 0, openTasks: 0 }, projects: [], financeCube: null } });
