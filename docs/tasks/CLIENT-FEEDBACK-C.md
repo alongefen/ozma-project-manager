@@ -50,3 +50,12 @@ Applied to the cloud database on 25.11.2026 after Alon's typed "כן" in this ch
 
 - In the people sheet the account actions (איפוס סיסמה, השבתת חשבון / הפעלה מחדש, הפיכה לאדמין / הסרת הרשאת אדמין) moved from the bottom into the top row beside "עריכת שם", above the scrolling project list. The reset-password form and the "last admin" / "your own account" notes open under that row. The old "חשבון" section is gone. Same rules and dialogs as before; no logic change.
 - Checked: unit screens + users logic (236 pass), tsc, eslint. Not checked in a browser at 360–1280 (the row wraps on narrow screens).
+
+## Follow-up 4 (A-47): several assignees; picker shows members AND admins
+
+Findings first: #147 already lists active admins (read-only) and all members on the project access page. What is still wrong there: members whose account is disabled still show ("חשבון מושבת"); Alon wants them hidden (UI only, no migration). The assignee picker (`list_project_assignees`) and `check_assignee` only knew membership rows, so admins could not be picked: that needs SQL.
+
+### D31 (awaiting Alon's typed "כן" in the task chat; nothing applied)
+- Migration `supabase/migrations/20261125150000_task_assignees.sql` (one file for both parts): new table `task_assignees(task_id, user_id, project_id)` (RLS read = project member and task not deleted; no write grants, writes only in the two functions; FK to tasks cascades so the A-44 hard delete needs no change), backfill from `tasks.assignee_id`, helpers `private.check_assignees` / `private.assignee_ids`, `create or replace` of `create_task` / `update_task`, and replacement of `list_project_assignees` (active members plus active owner-level accounts, new `is_owner` column). `tasks.assignee_id` stays and is kept equal to the first assignee.
+- The functions accept the new `userIds` array and the old `assigneeId`, so the app version running before the deploy keeps working between "migration applied" and "PR merged".
+- Rollback `supabase/rollback/20261125150000_task_assignees.down.sql`: restores the previous bodies of the three functions, drops the helpers and the table (multi-assignee rows are lost, `assignee_id` keeps each task's first assignee). No backup exists (Free plan). Cost: none.
