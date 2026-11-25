@@ -51,7 +51,7 @@ export const ProjectCardSchema = z.strictObject({"id": UuidSchema,"name": z.stri
 
 export const ProjectDetailsSchema = ProjectFieldsSchema.safeExtend(z.strictObject({"id": UuidSchema,"status": ProjectStatusSchema,"archived": z.boolean(),"revision": z.number().int().positive(),"coverFileId": z.union([UuidSchema,z.null()]),"managerNames": z.array(z.string()),"permissions": ProjectPermissionsSchema}).shape);
 
-export const TaskRowSchema = z.strictObject({"id": UuidSchema,"projectId": UuidSchema,"body": z.string(),"completed": z.boolean(),"dueDate": z.union([IsoDateSchema,z.null()]),"createdAt": IsoDateTimeSchema,"revision": z.number().int().positive()});
+export const TaskRowSchema = z.strictObject({"id": UuidSchema,"projectId": UuidSchema,"body": z.string(),"completed": z.boolean(),"dueDate": z.union([IsoDateSchema,z.null()]),"createdAt": IsoDateTimeSchema,"revision": z.number().int().positive(),"assigneeId": z.union([UuidSchema,z.null()]),"assigneeName": z.union([z.string(),z.null()])});
 
 export const DocumentCategorySchema = z.union([z.literal('specification'),z.literal('plans'),z.literal('additional_plans'),z.literal('renderings')]);
 
@@ -89,7 +89,7 @@ export const MonthBlockSchema = z.strictObject({"summary": MonthSummarySchema,"i
 
 export const FinanceBookSchema = z.strictObject({"projectId": UuidSchema,"projectName": z.string(),"filter": FinanceFilterSchema,"months": z.array(MonthBlockSchema),"period": MoneySummarySchema.safeExtend(z.strictObject({"balance": AgorotSchema}).shape),"filteredRows": z.strictObject({"income": AgorotSchema,"expense": AgorotSchema}),"workDays": z.number().finite(),"excelLink": z.strictObject({"url": z.union([z.url({protocol:/^https$/}).max(2000),z.null()]),"revision": z.number().int().positive()}),"canWrite": z.boolean(),"canCancel": z.boolean()});
 
-export const HomeDataSchema = z.strictObject({"counters": z.strictObject({"activeProjects": z.number().finite(),"reportsToday": z.number().finite(),"customers": z.number().finite(),"openTasks": z.number().finite()}),"projects": z.array(ProjectCardSchema),"financeCube": z.union([MoneySummarySchema.safeExtend(z.strictObject({"month": MonthSchema}).shape),z.null()])});
+export const HomeDataSchema = z.strictObject({"counters": z.strictObject({"activeProjects": z.number().finite(),"reportsToday": z.number().finite(),"customers": z.number().finite(),"openTasks": z.number().finite(),"myOpenTasks": z.number().finite(),"myTasksProjectId": z.union([UuidSchema,z.null()])}),"projects": z.array(ProjectCardSchema),"financeCube": z.union([MoneySummarySchema.safeExtend(z.strictObject({"month": MonthSchema}).shape),z.null()])});
 
 export const TransferMonthSchema = z.strictObject({"month": MonthSchema,"transferAmount": AgorotSchema,"projects": z.array(z.strictObject({"projectId": UuidSchema,"projectName": z.string(),"summary": MonthSummarySchema}))});
 
@@ -151,8 +151,8 @@ setProjectCover: EditSchema.safeExtend(z.strictObject({"fileId": UuidSchema}).sh
 } as const;
 export const TasksApiInputSchemas = {
 listTasks: z.strictObject({"projectId": UuidSchema}),
-createTask: z.strictObject({"requestId": UuidSchema,"projectId": UuidSchema,"body": z.string().trim().min(1).max(2000),"dueDate": z.union([IsoDateSchema,z.null()]),"completed": z.boolean()}),
-updateTask: EditSchema.safeExtend(z.strictObject({"body": z.string().trim().min(1).max(2000),"dueDate": z.union([IsoDateSchema,z.null()])}).shape),
+createTask: z.strictObject({"requestId": UuidSchema,"projectId": UuidSchema,"body": z.string().trim().min(1).max(2000),"dueDate": z.union([IsoDateSchema,z.null()]),"completed": z.boolean(),"assigneeId": z.union([UuidSchema,z.null()]).optional()}),
+updateTask: EditSchema.safeExtend(z.strictObject({"body": z.string().trim().min(1).max(2000),"dueDate": z.union([IsoDateSchema,z.null()]),"assigneeId": z.union([UuidSchema,z.null()]).optional()}).shape),
 setTaskCompleted: EditSchema.safeExtend(z.strictObject({"completed": z.boolean()}).shape),
 deleteTask: EditSchema,
 } as const;

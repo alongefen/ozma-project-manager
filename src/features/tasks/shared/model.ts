@@ -34,8 +34,8 @@ export function dueInfo(dueDate: IsoDate | null, today: IsoDate, completed: bool
   return { text: `יעד ${date}`, overdue: false };
 }
 
-export type TaskDraft = { body: string; dueDate: string };
-export type DraftResult = { ok: true; body: string; dueDate: IsoDate | null } | { ok: false; errors: { body?: string; dueDate?: string } };
+export type TaskDraft = { body: string; dueDate: string; assigneeId: string };
+export type DraftResult = { ok: true; body: string; dueDate: IsoDate | null; assigneeId: string | null } | { ok: false; errors: { body?: string; dueDate?: string } };
 
 export function parseDraft(draft: TaskDraft): DraftResult {
   const errors: { body?: string; dueDate?: string } = {};
@@ -45,7 +45,10 @@ export function parseDraft(draft: TaskDraft): DraftResult {
   const due = draft.dueDate.trim();
   if (due && !/^\d{4}-\d{2}-\d{2}$/.test(due)) errors.dueDate = 'תאריך לא תקין';
   if (errors.body || errors.dueDate) return { ok: false, errors };
-  return { ok: true, body, dueDate: (due || null) as IsoDate | null };
+  return { ok: true, body, dueDate: (due || null) as IsoDate | null, assigneeId: draft.assigneeId || null };
 }
 
-export const draftOf = (task: TaskRow | null): TaskDraft => ({ body: task?.body ?? '', dueDate: task?.dueDate ?? '' });
+export const draftOf = (task: TaskRow | null): TaskDraft => ({ body: task?.body ?? '', dueDate: task?.dueDate ?? '', assigneeId: task?.assigneeId ?? '' });
+
+/** "המשימות שלי": open tasks assigned to the signed-in user. Pure filter over the loaded list. */
+export const onlyMine = (tasks: TaskRow[], userId: string): TaskRow[] => tasks.filter(t => t.assigneeId === userId);

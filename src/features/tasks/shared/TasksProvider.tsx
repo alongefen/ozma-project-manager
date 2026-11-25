@@ -1,16 +1,16 @@
 'use client';
 import { createContext, useContext, useEffect, useRef, useState, useTransition, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Result, TaskRow } from '@/types/contracts';
+import type { Result, TaskAssignee, TaskRow } from '@/types/contracts';
 import { ConfirmDialog, Notice, Sheet } from '@/components/ui';
 import { createTask, deleteTask, setTaskCompleted, updateTask } from '../logic/actions';
 import { TaskForm } from './TaskForm';
-import { withRevision, withToggled, withoutTask, type TaskLists } from './model';
+import { onlyMine, withRevision, withToggled, withoutTask, type TaskLists } from './model';
 
-type Props = { projectId: string; initial: TaskLists; canWrite: boolean; canDelete: boolean; today: string; children?: ReactNode };
+type Props = { projectId: string; initial: TaskLists; canWrite: boolean; canDelete: boolean; today: string; assignees: TaskAssignee[]; userId: string; initialMine: boolean; children?: ReactNode };
 
 type Ctx = {
-  lists: TaskLists; canWrite: boolean; canDelete: boolean; today: string; busy: ReadonlySet<string>;
+  lists: TaskLists; mine: boolean; toggleMine: () => void; canWrite: boolean; canDelete: boolean; today: string; busy: ReadonlySet<string>;
   toggle: (task: TaskRow) => void;
   openCreate: () => void; openEdit: (task: TaskRow) => void; askDelete: (task: TaskRow) => void;
 };
@@ -21,7 +21,8 @@ export const useTasks = () => { const c = useContext(TasksContext); if (!c) thro
  * The one state of both layouts. Toggling is instant and rolls back with a message if the server refuses;
  * writes go only through the server actions, and the page refreshes afterwards so counts and revisions come from the server.
  */
-export function TasksProvider({ projectId, initial, canWrite, canDelete, today, children }: Props) {
+export function TasksProvider({ projectId, initial, canWrite, canDelete, today, assignees, userId, initialMine, children }: Props) {
+  const [mine, setMine] = useState(initialMine);
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [seen, setSeen] = useState(initial);
@@ -69,13 +70,13 @@ export function TasksProvider({ projectId, initial, canWrite, canDelete, today, 
     refresh();
   }
 
-  async function submit(fields: { body: string; dueDate: string | null }) {
+  async function submit(fields: { body: string; dueDate: string | null; assigneeId: string | null }) {
     setFormBusy(true); setFormError(null);
     const task = form?.task ?? null;
     const dueDate = fields.dueDate as TaskRow['dueDate'];
     const result = await guarded(() => task
-      ? updateTask({ id: task.id, expectedRevision: task.revision, body: fields.body, dueDate })
-      : createTask({ requestId, projectId, body: fields.body, dueDate, completed: false }));
+      ? updateTask({ id: task.id, expectedRevision: task.revision, body: fields.body, dueDate, assigneeId: fields.assigneeId })
+      : createTask({ requestId, projectId, body: fields.body, dueDate, completed: false, assigneeId: fields.assigneeId }));
     setFormBusy(false);
     if (!result.ok) {
       ambiguous.current = result.error.code === 'UNAVAILABLE';
@@ -104,8 +105,10 @@ export function TasksProvider({ projectId, initial, canWrite, canDelete, today, 
     refresh();
   }
 
+  // "המשימות שלי" narrows the open list to the signed-in user's tasks; the done group stays as is.
+  const shown: TaskLists = mine ? { open: onlyMine(lists.open, userId), completed: lists.completed } : lists;
   const value: Ctx = {
-    lists, canWrite, canDelete, today, busy, toggle,
+    lists: shown, mine, toggleMine: () => setMine(v => !v), canWrite, canDelete, today, busy, toggle,
     openCreate: () => { setFormError(null); if (!ambiguous.current) setRequestId(crypto.randomUUID()); setForm({ task: null }); },
     openEdit: task => { setFormError(null); setForm({ task }); },
     askDelete: task => { setRemoveError(null); setRemoving(task); },
@@ -117,7 +120,7 @@ export function TasksProvider({ projectId, initial, canWrite, canDelete, today, 
         {children}
       </div>
       <Sheet open={form !== null} onClose={() => setForm(null)} dismissible={!formBusy} title={form?.task ? 'עריכת משימה' : 'משימה חדשה'}>
-        {form && <TaskForm task={form.task} busy={formBusy} error={formError} onSubmit={submit} onCancel={() => setForm(null)} />}
+        {form && <TaskForm task={form.task} assignees={assignees} busy={formBusy} error={formError} onSubmit={submit} onCancel={() => setForm(null)} />}
       </Sheet>
       <ConfirmDialog open={removing !== null} title="מחיקת משימה" confirmLabel="מחיקה" busyLabel="מוחק…" busy={removeBusy} error={removeError} danger onConfirm={confirmDelete} onCancel={() => setRemoving(null)}>
         <p>המשימה תוסר מהרשימה. הוא נשמר בהיסטוריה ולא נמחק לצמיתות.</p>

@@ -15,6 +15,9 @@
 .tk-card__main { min-width: 0; }
 .tk-card__body { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 16px; line-height: 1.5; }
 .tk-card__due { margin: 4px 0 0; font-size: 14px; color: var(--muted); unicode-bidi: plaintext; }
+.tk-card__assignee { margin: 4px 0 0; font-size: 14px; color: var(--muted); unicode-bidi: plaintext; }
+.tk-mine { min-height: 44px; padding-inline: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--nav-active-ink); font-weight: 700; cursor: pointer; }
+.tk-mine[aria-pressed='true'] { background: var(--nav-active-bg); border-color: var(--blue); }
 .tk-card__due--late { color: var(--err-ink); font-weight: 700; }
 .tk-card__actions { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
 .tk-card__actions .ui-btn { min-height: 44px; }

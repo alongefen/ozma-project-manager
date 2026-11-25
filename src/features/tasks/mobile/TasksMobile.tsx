@@ -6,11 +6,12 @@ import { useTasks } from '../shared/TasksProvider';
 
 /** Phone (up to 1023): one column, new-note button, open group, then a collapsible done group. No tabs. */
 export function TasksMobile() {
-  const { lists, canWrite, openCreate } = useTasks();
+  const { lists, canWrite, openCreate, mine, toggleMine } = useTasks();
   const [showDone, setShowDone] = useState(false);
   return (
     <div className="tk tk-mobile m-only">
       {canWrite ? <Pin><Button block icon="add" onClick={openCreate}>משימה חדשה</Button></Pin> : <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}
+      <button type="button" className="tk-mine" aria-pressed={mine} onClick={toggleMine}>המשימות שלי</button>
       <TaskGroup headingId="tk-m-open" title="לביצוע" tasks={lists.open} empty="אין משימות לביצוע" />
       <button type="button" className="tk-toggle" aria-expanded={showDone} onClick={() => setShowDone(v => !v)}>
         {showDone ? 'הסתרת משימות שבוצעו' : `הצגת משימות שבוצעו (${lists.completed.length})`}

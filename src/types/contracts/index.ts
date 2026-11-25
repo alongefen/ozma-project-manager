@@ -190,18 +190,20 @@ export interface ProjectsApi {
 export type TaskRow = {
   id: Uuid; projectId: Uuid; body: string; completed: boolean
   dueDate: IsoDate | null; createdAt: IsoDateTime; revision: number
+  assigneeId: Uuid | null; assigneeName: string | null
 }
+export type TaskAssignee = { id: Uuid; name: string; role: ProjectRole }
 
 export interface TasksApi {
   listTasks: Operation<
     { projectId: Uuid },
-    { open: TaskRow[]; completed: TaskRow[]; openCount: number; completedCount: number; canWrite: boolean }
+    { open: TaskRow[]; completed: TaskRow[]; openCount: number; completedCount: number; canWrite: boolean; assignees: TaskAssignee[] }
   >
   createTask: Operation<
-    { requestId: Uuid; projectId: Uuid; body: string; dueDate: IsoDate | null; completed: boolean },
+    { requestId: Uuid; projectId: Uuid; body: string; dueDate: IsoDate | null; completed: boolean; assigneeId?: Uuid | null },
     Saved
   >
-  updateTask: Operation<Edit & { body: string; dueDate: IsoDate | null }, Saved>
+  updateTask: Operation<Edit & { body: string; dueDate: IsoDate | null; assigneeId?: Uuid | null }, Saved>
   setTaskCompleted: Operation<Edit & { completed: boolean }, Saved>
   deleteTask: Operation<Edit, null>
 }
@@ -334,6 +336,8 @@ export interface FinanceApi {
 export type HomeData = {
   counters: {
     activeProjects: number; reportsToday: number; customers: number; openTasks: number
+    /** Open tasks assigned to the signed-in user (A-46), and the project to open when they are all in one. */
+    myOpenTasks: number; myTasksProjectId: Uuid | null
   }
   projects: ProjectCard[]
   financeCube: (MoneySummary & { month: Month }) | null // owner only

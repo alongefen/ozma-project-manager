@@ -11,8 +11,9 @@ import '@/features/tasks/shared/tasks.css';
 export const metadata = { title: 'משימות' };
 
 /** Tasks of one project: two groups, tick to complete. Write controls follow the live permission; the database decides. */
-export default async function ProjectTasksPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ProjectTasksPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ mine?: string }> }) {
   const { id } = await params;
+  const { mine } = await searchParams;
   const [platform, context] = await Promise.all([getPlatform(), getContext()]);
   if (!context.ok) redirect(SIGN_IN_PATH);
   const result = await createTasksApi(platform).listTasks(context.value, { projectId: id });
@@ -22,9 +23,9 @@ export default async function ProjectTasksPage({ params }: { params: Promise<{ i
     if (code === 'UNAUTHENTICATED') redirect(SIGN_IN_PATH);
     return <StateMessage tone="error" backHref={`/projects/${id}`} backLabel="חזרה לתיק הפרויקט">המשימות אינן זמינות כרגע. נסו שוב בעוד רגע.</StateMessage>;
   }
-  const { open, completed, canWrite } = result.value;
+  const { open, completed, canWrite, assignees } = result.value;
   return (
-    <TasksProvider projectId={id} initial={{ open, completed }} canWrite={canWrite} canDelete={canWrite && context.value.actor.isOwner} today={context.value.today}>
+    <TasksProvider projectId={id} initial={{ open, completed }} canWrite={canWrite} canDelete={canWrite && context.value.actor.isOwner} today={context.value.today} assignees={assignees} userId={context.value.actor.userId} initialMine={mine === '1'}>
       <TasksMobile />
       <TasksDesktop />
     </TasksProvider>
