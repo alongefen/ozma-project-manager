@@ -151,7 +151,7 @@ export function AccessManager({ projectId, members: initial, candidates: initial
           </ConfirmDialog>
         );
       })()}
-      <Sheet open={adding} onClose={closeAdd} title="הוספת גישה" menus>
+      <Sheet open={adding} onClose={closeAdd} title="הוספת גישה">
         {candidates.length === 0 ? <p className={css.empty}>אין עוד משתמשים פעילים להוספה</p> : (
           <>
             <Select label="אדם" value={userId} onChange={setUserId} placeholder="בחירת אדם" options={candidates.map(c => ({ value: c.id, label: c.fullName }))} />

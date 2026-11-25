@@ -62,7 +62,7 @@ export function FilterPopup({ title = 'סינון', count, onApply, onClear, blo
           {panel}
         </div>
       )}
-      {open && !desktop && <Sheet open onClose={close} title={title} menus>{panel}</Sheet>}
+      {open && !desktop && <Sheet open onClose={close} title={title}>{panel}</Sheet>}
     </div>
   );
 }

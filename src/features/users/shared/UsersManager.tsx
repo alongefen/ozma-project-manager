@@ -64,7 +64,7 @@ export function UsersManager({ users: initial, projects, viewerId }: { users: Us
         say(`${name} נוסף. אפשר לשייך לפרויקטים`);
         setSelectedId(row.id);
       }} />
-      <Sheet open={!!selected} onClose={() => setSelectedId(null)} title={selected?.fullName ?? ''} menus>
+      <Sheet open={!!selected} onClose={() => setSelectedId(null)} title={selected?.fullName ?? ''}>
         {selected && <PersonPanel key={selected.id} user={selected} users={users} viewerId={viewerId} projects={projects} patchUser={patchUser} say={say} refresh={refresh} />}
       </Sheet>
       <div className={css.toastHost} aria-live="polite" role="status">
