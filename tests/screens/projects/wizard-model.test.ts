@@ -19,14 +19,14 @@ describe('new project wizard model', () => {
   });
   it('checks only the fields of the current step', () => {
     const empty = emptyValues();
-    expect(Object.keys(validateStep(empty, true, 0)).sort()).toEqual(['businessName', 'name', 'siteAddress']);
-    expect(Object.keys(validateStep(empty, true, 1)).sort()).toEqual(['contactName', 'contactPhone']);
-    expect(validateStep(empty, true, 2)).toEqual({});
-    expect(validateStep(ok(), true, 0)).toEqual({});
+    expect(Object.keys(validateStep(empty, 0)).sort()).toEqual(['businessName', 'name', 'siteAddress']);
+    expect(Object.keys(validateStep(empty, 1)).sort()).toEqual(['contactName', 'contactPhone']);
+    expect(validateStep(empty, 2)).toEqual({});
+    expect(validateStep(ok(), 0)).toEqual({});
   });
   it('rejects a bad email on the contact step and an end before the start on the first', () => {
-    expect(validateStep({ ...ok(), contactEmail: 'x' }, true, 1).contactEmail).toBeTruthy();
-    expect(validateStep({ ...ok(), startDate: '2026-05-10', endDate: '2026-05-01' }, true, 0).endDate).toBeTruthy();
+    expect(validateStep({ ...ok(), contactEmail: 'x' }, 1).contactEmail).toBeTruthy();
+    expect(validateStep({ ...ok(), startDate: '2026-05-10', endDate: '2026-05-01' }, 0).endDate).toBeTruthy();
   });
   it('finds the earliest step with an error, or -1', () => {
     expect(firstStepWithError({ contactPhone: 'x', name: 'y' })).toBe(0);

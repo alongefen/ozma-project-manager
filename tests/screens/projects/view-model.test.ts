@@ -7,18 +7,15 @@ const id = '11111111-1111-4111-8111-111111111111';
 
 describe('project file view model', () => {
   it('offers finance only when the database allowed it, and always links the other sections', () => {
-    expect(sectionsFor({ id, permissions: perms() }).map(s => s.key)).toEqual(['files', 'tasks', 'diary']);
+    expect(sectionsFor({ id, permissions: perms() }).map(s => s.key)).toEqual(['files', 'tasks', 'diary', 'notes']);
     const withFinance = sectionsFor({ id, permissions: perms({ viewFinance: true }) });
-    expect(withFinance.map(s => s.key)).toEqual(['files', 'tasks', 'diary', 'finance']);
+    expect(withFinance.map(s => s.key)).toEqual(['files', 'tasks', 'diary', 'notes', 'finance']);
     expect(withFinance.every(s => s.href.startsWith(`/projects/${id}/`))).toBe(true);
   });
   it('shows owner actions only to whoever has manageAccess, edit only to editDetails', () => {
-    expect(actionsFor({ permissions: perms() })).toEqual({ edit: false, manage: false, showBusinessNumber: false });
-    expect(actionsFor({ permissions: perms({ editDetails: true }) })).toEqual({ edit: true, manage: false, showBusinessNumber: false });
-    expect(actionsFor({ permissions: perms({ editDetails: true, manageAccess: true }), businessNumber: null })).toEqual({ edit: true, manage: true, showBusinessNumber: true });
-  });
-  it('hides the business number field unless the payload carried it (owner only)', () => {
-    expect(actionsFor({ permissions: perms({ editDetails: true }), businessNumber: undefined }).showBusinessNumber).toBe(false);
+    expect(actionsFor({ permissions: perms() })).toEqual({ edit: false, manage: false });
+    expect(actionsFor({ permissions: perms({ editDetails: true }) })).toEqual({ edit: true, manage: false });
+    expect(actionsFor({ permissions: perms({ editDetails: true, manageAccess: true }) })).toEqual({ edit: true, manage: true });
   });
   it('labels status and read-only states', () => {
     expect(statusLabel({ status: 'active', archived: false })).toBe('פעיל');

@@ -75,14 +75,14 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
     if (busy) return;
     setMessage(null);
     if (step < LAST_FORM_STEP) {
-      const found = validateStep(values, true, step);
+      const found = validateStep(values, step);
       setErrors(found);
       if (firstErrorField(found)) { setMessage('יש לתקן את השדות המסומנים'); focusIn(step, found); return; }
       setStep(step + 1);
       return;
     }
     if (step === LAST_FORM_STEP) {
-      const found = validateValues(values, true);
+      const found = validateValues(values);
       if (firstErrorField(found)) {
         setErrors(found);
         const target = firstStepWithError(found);
@@ -90,7 +90,7 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
       }
       setErrors({});
       setBusy(true);
-      const result = await createProject({ requestId, fields: toFields(values, true) });
+      const result = await createProject({ requestId, fields: toFields(values) });
       setBusy(false);
       if (!result.ok) {
         const server = mapServerErrors(result.error.fieldErrors);
@@ -168,7 +168,6 @@ export function NewProjectWizard({ defaultOpen = false, closeHref }: { defaultOp
                   <DateField label={FIELD_LABELS.startDate} value={values.startDate} onChange={v => setField('startDate', v)} error={errors.startDate} data-wizard-field="startDate" />
                   <DateField label={FIELD_LABELS.endDate} value={values.endDate} onChange={v => setField('endDate', v)} error={errors.endDate} data-wizard-field="endDate" />
                 </div>
-                <div className={css.twoWide}>{field('businessNumber', { ltr: true })}</div>
                 <button type="submit" className="sr-only" tabIndex={-1}>הבא</button>
               </form>
               <form id={`${formId}-1`} className={css.step} inert={step !== 1} aria-hidden={step !== 1} onSubmit={e => { e.preventDefault(); next(); }} noValidate>

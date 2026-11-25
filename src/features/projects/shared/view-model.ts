@@ -5,7 +5,7 @@ import type { ProjectDetails } from '@/types/contracts';
 export const NOT_ENTERED = 'לא הוזן';
 export const NO_MANAGER = 'לא שויך מנהל';
 
-export type Section = { key: 'tasks' | 'files' | 'diary' | 'finance'; label: string; href: string };
+export type Section = { key: 'tasks' | 'files' | 'diary' | 'notes' | 'finance'; label: string; href: string };
 
 /** Entry rows to the project's sections. Finance only when the database says this viewer may see it. */
 export function sectionsFor(d: Pick<ProjectDetails, 'id' | 'permissions'>): Section[] {
@@ -14,6 +14,7 @@ export function sectionsFor(d: Pick<ProjectDetails, 'id' | 'permissions'>): Sect
     { key: 'files', label: 'מסמכים', href: `${base}/files` },
     { key: 'tasks', label: 'משימות', href: `${base}/tasks` },
     { key: 'diary', label: 'יומן', href: `${base}/diary` },
+    { key: 'notes', label: 'הערות', href: `${base}/notes` },
   ];
   if (d.permissions.viewFinance) list.push({ key: 'finance', label: 'כספים', href: `${base}/finance` });
   return list;
@@ -51,11 +52,11 @@ export function dateText(iso: string | null): string {
   return y && m && d ? `${d}.${m}.${y}` : NOT_ENTERED;
 }
 
-export type Actions = { edit: boolean; manage: boolean; showBusinessNumber: boolean };
+export type Actions = { edit: boolean; manage: boolean };
 
 /** What the viewer may be offered. "manage" (status, archive, cover, assignment) is the owner's: manageAccess. */
-export function actionsFor(d: Pick<ProjectDetails, 'permissions' | 'businessNumber'>): Actions {
-  return { edit: d.permissions.editDetails, manage: d.permissions.manageAccess, showBusinessNumber: d.businessNumber !== undefined };
+export function actionsFor(d: Pick<ProjectDetails, 'permissions'>): Actions {
+  return { edit: d.permissions.editDetails, manage: d.permissions.manageAccess };
 }
 
 export function coverSrc(fileId: string | null): string | null {

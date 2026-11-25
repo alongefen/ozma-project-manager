@@ -1,0 +1,10 @@
+/* Extra contacts inside the project details contact card. */
+.ct { display: grid; gap: 12px; min-width: 0; }
+.ct-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; min-width: 0; }
+.ct-item { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding-top: 12px; border-top: 1px solid var(--line); min-width: 0; }
+.ct-item__main { display: grid; gap: 2px; min-width: 0; }
+.ct-item__name { font-weight: 700; overflow-wrap: anywhere; }
+.ct-item__role { font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
+.ct-item__phone { overflow-wrap: anywhere; }
+.ct-item__actions { display: flex; gap: 8px; flex: none; }
+.ct-form { display: grid; gap: 14px; }

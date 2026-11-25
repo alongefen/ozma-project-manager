@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { Card, Notice } from '@/components/ui';
 import type { ProjectDetails } from '@/types/contracts';
+import { ExtraContacts } from '../contacts/shared/ExtraContacts';
+import type { ContactsList } from '../contacts/logic/schemas';
+import '../contacts/shared/contacts.css';
 import { EditProjectSheet } from '../shared/EditProjectSheet';
 import { ProjectActions } from '../shared/ProjectActions';
 import { ProjectHardDelete } from '../shared/ProjectHardDelete';
@@ -9,7 +12,7 @@ import { actionsFor, coverSrc, dateText, isReadOnlyProject, managersText, orNotE
 import css from './ProjectDetailsDesktop.module.css';
 
 /** Desktop project file: name and status together, permissions at the top for the owner, inner navigation, details and contact (DESIGN S05). */
-export function ProjectDetailsDesktop({ d, isOwner }: { d: ProjectDetails; isOwner: boolean }) {
+export function ProjectDetailsDesktop({ d, isOwner, contacts }: { d: ProjectDetails; isOwner: boolean; contacts: ContactsList }) {
   const act = actionsFor(d);
   const cover = coverSrc(d.coverFileId);
   const tel = telHref(d.contact.phone);
@@ -38,7 +41,6 @@ export function ProjectDetailsDesktop({ d, isOwner }: { d: ProjectDetails; isOwn
               <div><dt>תחילה בפועל</dt><dd>{dateText(d.startDate)}</dd></div>
               <div><dt>סיום בפועל</dt><dd>{dateText(d.endDate)}</dd></div>
               <div><dt>מנהלים</dt><dd>{managersText(d.managerNames)}</dd></div>
-              {act.showBusinessNumber && <div><dt>מספר חברה</dt><dd><span className="ltr">{orNotEntered(d.businessNumber)}</span></dd></div>}
               <div className={css.wide}><dt>הערות</dt><dd className={css.notes}>{orNotEntered(d.accessNotes)}</dd></div>
             </dl>
           </Card>
@@ -62,6 +64,7 @@ export function ProjectDetailsDesktop({ d, isOwner }: { d: ProjectDetails; isOwn
             <div><dt>טלפון</dt><dd>{tel ? <a className="ltr" href={tel}>{d.contact.phone}</a> : <span className="ltr">{d.contact.phone}</span>}</dd></div>
             <div><dt>מייל</dt><dd>{d.contact.email ? <a className="ltr" href={`mailto:${d.contact.email}`}>{d.contact.email}</a> : orNotEntered(null)}</dd></div>
           </dl>
+          <ExtraContacts projectId={d.id} initial={contacts} />
         </Card>
       </div>
     </div>

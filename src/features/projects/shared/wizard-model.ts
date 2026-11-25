@@ -15,7 +15,7 @@ export const STEPS: { key: StepKey; label: string }[] = [
 export const LAST_FORM_STEP = 2;
 
 const FIELDS: Record<StepKey, FieldKey[]> = {
-  details: ['name', 'businessName', 'siteAddress', 'startDate', 'endDate', 'businessNumber'],
+  details: ['name', 'businessName', 'siteAddress', 'startDate', 'endDate'],
   contact: ['contactName', 'contactPhone', 'contactEmail', 'contactRole'],
   notes: ['accessNotes'],
   access: [],
@@ -28,8 +28,8 @@ export const stepFields = (index: number): FieldKey[] => FIELDS[STEPS[index].key
 export const stepOfField = (field: FieldKey): number => STEPS.findIndex(s => FIELDS[s.key].includes(field));
 
 /** Errors for the fields of one step only (the other steps may still be empty). */
-export function validateStep(values: FormValues, isOwner: boolean, index: number): FieldErrors {
-  const all = validateValues(values, isOwner);
+export function validateStep(values: FormValues, index: number): FieldErrors {
+  const all = validateValues(values);
   const own = new Set(stepFields(index));
   return Object.fromEntries(Object.entries(all).filter(([k]) => own.has(k as FieldKey))) as FieldErrors;
 }
