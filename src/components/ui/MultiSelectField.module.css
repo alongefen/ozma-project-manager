@@ -1,0 +1,18 @@
+/* Multi-value dropdown: chips with a remove button, then the opening button. Tokens come from app.css. */
+.box { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; width: 100%; min-width: 0; box-sizing: border-box; padding: 6px 8px; min-height: 44px; border: 1px solid var(--field-line); border-radius: 7px; background: var(--surface); }
+.box:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px var(--nav-active-bg); }
+.box[data-disabled] { opacity: .6; background: var(--gray-bg); }
+.chips { list-style: none; margin: 0; padding: 0; display: contents; }
+.chip { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; min-height: 32px; margin-block: 3px; padding-inline: 10px 2px; border-radius: 16px; background: var(--nav-active-bg); color: var(--nav-active-ink); font-size: 15px; font-weight: 700; }
+.chipText { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The visible circle is 32px; a pseudo-element extends the tap area to 44px. */
+.chipX { position: relative; display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; flex: none; }
+.chipX::before { content: ''; position: absolute; inset: -6px; }
+.chipX:hover:not(:disabled) { background: rgba(30, 40, 48, .12); }
+.chipX:focus-visible, .add:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.add { flex: 1 1 120px; min-height: 44px; padding: 4px 4px; display: flex; align-items: center; justify-content: space-between; gap: 8px; border: 0; background: transparent; color: var(--ink); font-size: 16px; text-align: start; cursor: pointer; min-width: 0; }
+.addText { color: var(--nav-active-ink); font-weight: 700; }
+.hint { color: var(--muted); font-size: 13px; }
+.tick { display: grid; place-items: center; width: 22px; height: 22px; border: 1.5px solid var(--field-line); border-radius: 6px; flex: none; }
+.tick[data-on='true'] { background: var(--blue); border-color: var(--blue); color: #fff; }
+.foot { display: flex; justify-content: flex-end; padding: 4px 8px 6px; border-top: 1px solid var(--line); }

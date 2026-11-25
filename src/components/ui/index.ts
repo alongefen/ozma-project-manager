@@ -15,6 +15,7 @@ export { Sheet } from './Sheet';
 export { Pin } from './Pin';
 export { DateField } from './DateField';
 export { SelectField } from './SelectField';
+export { MultiSelectField } from './MultiSelectField';
 export type { SelectOption } from './SelectField';
 export { InnerPageSkeleton } from './InnerPageSkeleton';
 export { IconButton } from './IconButton';

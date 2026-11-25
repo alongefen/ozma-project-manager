@@ -1,7 +1,7 @@
 'use client';
 import { useId, useState } from 'react';
 import type { TaskAssignee, TaskRow } from '@/types/contracts';
-import { DateField, FormActions, Notice } from '@/components/ui';
+import { DateField, FormActions, MultiSelectField, Notice } from '@/components/ui';
 import { ADMIN_LABEL, ROLE_LABEL } from '@/features/users/shared/view-model';
 import { MAX_BODY, draftOf, parseDraft, type TaskDraft } from './model';
 
@@ -32,21 +32,9 @@ export function TaskForm({ task, assignees, busy, error, onSubmit, onCancel }: {
       </div>
       <DateField label="תאריך יעד (רשות)" value={draft.dueDate} error={errors.dueDate}
         onChange={v => setDraft(d => ({ ...d, dueDate: v }))} />
-      <fieldset className="tk-people">
-        <legend>אחראים (רשות)</legend>
-        {assignees.length === 0 ? <p className="ui-field__hint">אין מי שאפשר לשייך</p> : (
-          <div className="tk-people__list">
-            {assignees.map(a => (
-              <label key={a.id} className="tk-people__item">
-                <input type="checkbox" checked={draft.assigneeIds.includes(a.id)}
-                  onChange={e => setDraft(d => ({ ...d, assigneeIds: e.target.checked ? [...d.assigneeIds, a.id] : d.assigneeIds.filter(x => x !== a.id) }))} />
-                <span>{a.name}</span>
-                <span className="tk-people__role">{a.isOwner ? ADMIN_LABEL : a.role ? ROLE_LABEL[a.role] : ''}</span>
-              </label>
-            ))}
-          </div>
-        )}
-      </fieldset>
+      <MultiSelectField label="אחראים (רשות)" placeholder="בחירת אחראים" unknownLabel="אחראי לשעבר" value={draft.assigneeIds}
+        options={assignees.map(a => ({ value: a.id, label: a.name, hint: a.isOwner ? ADMIN_LABEL : a.role ? ROLE_LABEL[a.role] : undefined }))}
+        onChange={ids => setDraft(d => ({ ...d, assigneeIds: ids }))} />
       {error && <Notice tone="error">{error}</Notice>}
       <FormActions placement="sheet" submitLabel={busy ? 'שומר…' : 'שמירה'} busy={busy} onCancel={onCancel} />
     </form>
