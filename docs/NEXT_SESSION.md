@@ -1,6 +1,6 @@
 # Next session
 
-25.11.2026. `origin/main`: `5ca8944`. Agent-facing doc, in English. Start here, then `git log --oneline -15` and `gh pr list`.
+25.11.2026. `origin/main`: `5dcd9e2`. Agent-facing doc, in English. Start here, then `git log --oneline -15` and `gh pr list`.
 
 ## State
 
@@ -8,8 +8,8 @@
 - **All screens P2.1-P2.8 and the polish rounds are merged** (UX-AUDIT #109/#112, selectors #92/#95, finance-all #104, users #105, documents/previews, print/export #90, skeletons #94, sticky headers #79, auto-upload #78, new-report fix #119, icons #118). Security: P3.1 (#116, `docs/qa/SECURITY.md`) and SECURITY-FIXES (#117: headers, pdf.js pin). Open finding: X17 login rate-limit probe not run; `pdfjs-dist` 6.x upgrade not done.
 - **Multiple owner-level accounts (A-43):** migration `multiple_owners` is applied to the production DB (PR #121) and `more_document_types` too. UI: "אדמין" label and owner management in the people screen (#124). The developer account is visible, owner-level. No backup exists (Free plan).
 - **GO-LIVE-PREP is merged (#114, #122): scripts only, dry runs only, nothing written to the cloud.** Runbook: [GO_LIVE](GO_LIVE.md). Dry-run counts (24.11): 294 profiles, 193 projects, 313 auth users (312 `@example.invalid`, 1 other = the current demo owner; the purge then needs `--include-real-users`). Ben: `office@hy-ozma-ltd.com`; developer owner: `alon@melo-digital.com`.
-- **Client change requests (25.11.2026, A-45).** CLIENT-FEEDBACK-A is running (session `feedback-a`): add a person to all projects, diary print by date range, hide completed tasks and finished projects by default, VAT note on income, non-owners see only active projects, remove the finance card from the projects page. No migration; it stops and reports if one is needed. **CLIENT-FEEDBACK-B is waiting for Alon's D31 approval:** two new tables (`project_contacts`, `project_notes`, with RLS and logic functions) and removing the company number from the project (UI only, the column stays). Start it after approval; it owns the project-details files. Rollback: `drop table` for both tables.
-- **Before A-45, no task session was running.** Working model is A-39: a task brief per [TEMPLATE](handoffs/TEMPLATE.md); at most two task sessions at once; the PM does not write code or poll.
+- **Client change requests (25.11.2026, A-45) are merged:** CLIENT-FEEDBACK-A (#143, `af5ffe5`, no migration) and CLIENT-FEEDBACK-B (#144, `5dcd9e2`, migration for `project_notes` and `project_contacts` applied to the production DB after Alon's yes; rollback = drop both tables). **Not verified:** no browser pass at 360-1280 and no cloud suites for either (the stored cloud-test owner fixture `supabase/.temp/p12-owner.json` no longer signs in; repair it). Known gaps of A item 6 (non-owners see only active projects), closing them needs a migration: a file of a finished project is still readable by id via `/api/storage/files/[id]`, and the home "reports today" count may include finished projects. B follow-up: regenerate `src/types/database.ts` and drop `untyped-db.ts`; hard delete of a project with notes/contacts not exercised.
+- **No task session is running.** Working model is A-39: a task brief per [TEMPLATE](handoffs/TEMPLATE.md); at most two task sessions at once; the PM does not write code or poll.
 
 ## Next (in this order)
 
