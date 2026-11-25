@@ -113,6 +113,8 @@ describe('כספי כל הפרויקטים: מסך', () => {
     expect(html).toContain('עריכת תנועה: תשלום לקוח');
     expect(html).not.toContain('עריכת תנועה: מקדמה');
     expect(html).not.toContain('קישור לקובץ Excel');
+    expect(html).not.toContain('פירוט חודשים');
+    expect(html).toContain('fin-monthrow');
     expect(html).toContain('תנועות מבוטלות (1)');
     expect(html).toContain('מחיקה סופית: טעות');
     expect(allExportHref({ period: 'all', search: 'x' }, B)).toBe(`/finance/export?period=all&search=x&project=${B}`);
