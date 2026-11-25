@@ -1,7 +1,7 @@
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { Json } from '../../src/types/database';
-import { actor, clients, membership, owner, project, rpc, value, type Client, type TestActor } from './support/cloud';
+import { actor, clients, login, membership, project, rpc, value, type Client, type TestActor } from './support/cloud';
 
 // HARD-DELETE (A-44) end to end with real JWTs and REAL storage objects. Fake data only (@example.invalid).
 // Runs only on a throwaway project created here; it never touches other projects or accounts.
@@ -24,7 +24,7 @@ async function realFile(projectId: string, uploader: TestActor, purpose: 'docume
   const { fileId, bucket, path } = files[0];
   const display = `${projectId}/${fileId}.jpg`;
   expect((await admin.storage.from(bucket).upload(path, png, { contentType: 'image/png' })).error).toBeNull();
-  expect((await admin.storage.from('display').upload(display, png, { contentType: 'image/png' })).error).toBeNull();
+  expect((await admin.storage.from('display').upload(display, png, { contentType: 'image/jpeg' })).error).toBeNull();
   await value(admin, 'system_finish_upload', { fileId, actorId: uploader.id, sessionId: uploader.sessionId, state: 'ready', mime: 'image/png', sizeBytes: 8, sha256: 'a'.repeat(64), displayState: 'ready', displayPath: display });
   return { id: fileId, paths: { bucket, path, display } };
 }
@@ -37,8 +37,16 @@ async function expectStorageGone(paths: Paths[]) {
 }
 
 const made: string[] = [];
+/** A fake owner-level account of our own (the shared helper bootstraps the first owner, which is no longer possible with real owners). */
+async function fakeOwner(): Promise<TestActor> {
+  const email = `hd-owner-${randomUUID()}@example.invalid`, password = randomBytes(32).toString('base64url');
+  const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+  if (error || !data.user) throw new Error('createUser failed');
+  await value(admin, 'system_add_owner' as never, { userId: data.user.id, fullName: 'אדמין בדוי למחיקה סופית' });
+  return login(email, password);
+}
 beforeAll(async () => {
-  ({ admin, anonymous } = clients()); ben = await owner(admin);
+  ({ admin, anonymous } = clients()); ben = await fakeOwner();
   manager = await actor(admin, ben.client, 'hdm'); worker = await actor(admin, ben.client, 'hdw');
 }, 120_000);
 afterAll(async () => { // leave nothing behind: every project made here is deleted by the feature itself if still present
@@ -131,9 +139,9 @@ describe.sequential('מחיקה סופית (HARD-DELETE, A-44)', () => {
     await value(ben.client, 'create_document', { projectId: p.id, fileId: doc.id, category: 'plans', access: { mode: 'all' } });
     await value(worker.client, 'create_entry', { requestId: randomUUID(), projectId: p.id, workDate: '2026-11-02', body: 'פנימי', fileIds: [diary.id] });
     await value(ben.client, 'create_transaction', { requestId: randomUUID(), projectId: p.id, fields: { year: 2026, month: 11, day: null, kind: 'expense', amount: 99, details: 'פנימי' } });
-    await value(ben.client, 'create_task', { requestId: randomUUID(), projectId: p.id, body: 'משימה', dueDate: null });
+    await value(ben.client, 'create_task', { requestId: randomUUID(), projectId: p.id, body: 'משימה', dueDate: null, completed: false });
     const now = (await ben.client.from('projects').select('revision').eq('id', p.id).single()).data!;
-    await value(ben.client, 'set_project_cover', { projectId: p.id, expectedRevision: now.revision, fileId: cover.id });
+    await value(ben.client, 'set_project_cover', { id: p.id, expectedRevision: now.revision, fileId: cover.id });
 
     const preview = await value<{ eligible: boolean; requiresName: boolean; counts: Record<string, number> }>(ben.client, 'hard_delete_preview', { kind: 'project', id: p.id });
     expect(preview).toMatchObject({ eligible: false, requiresName: true, counts: { reports: 1, documents: 1, transactions: 1, tasks: 1, files: 3 } });
@@ -175,7 +183,7 @@ describe.sequential('מחיקה סופית (HARD-DELETE, A-44)', () => {
       }
     }
     // a cancelled entry stays immutable for the old edit path
-    await deny(ben.client, 'correct_entry', { id: entry.id, expectedRevision: entry.revision + 1, body: 'y', fileIds: [] }, 'NOT_FOUND');
+    await deny(ben.client, 'correct_entry', { id: entry.id, expectedRevision: entry.revision + 1, body: 'y', fileIds: [] }, 'CONFLICT');
     // after a REFUSED hard delete (wrong name) nothing changed and the protections are intact
     await deny(ben.client, 'hard_delete_entry', { id: entry.id, confirmName: 'x' }, 'VALIDATION');
     expect((await ben.client.from('diary_versions').select('version').eq('entry_id', entry.id)).data!.length).toBeGreaterThanOrEqual(2);
