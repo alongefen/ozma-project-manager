@@ -56,7 +56,7 @@ export function ProjectDetailsMobile({ d, isOwner, contacts }: { d: ProjectDetai
           <div><dt>טלפון</dt><dd>{tel ? <a className="ltr" href={tel}>{d.contact.phone}</a> : <span className="ltr">{d.contact.phone}</span>}</dd></div>
           <div><dt>מייל</dt><dd>{d.contact.email ? <a className="ltr" href={`mailto:${d.contact.email}`}>{d.contact.email}</a> : orNotEntered(null)}</dd></div>
         </dl>
-          <ExtraContacts projectId={d.id} initial={contacts} />
+        <ExtraContacts projectId={d.id} initial={contacts} />
       </Card>
       {act.manage && (
         <Card className={`${css.card} ${css.danger}`}>

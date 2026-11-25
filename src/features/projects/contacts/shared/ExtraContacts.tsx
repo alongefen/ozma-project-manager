@@ -25,12 +25,11 @@ export function ExtraContacts({ projectId, initial }: { projectId: string; initi
   const [error, setError] = useState<string | null>(null);
   const [removing, setRemoving] = useState<ContactRow | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [requestId, setRequestId] = useState(() => crypto.randomUUID());
-  const ambiguous = useRef(false);
+  // A retry of the SAME contact after a lost answer keeps its request id; different content gets a new one.
+  const lost = useRef<{ requestId: string; key: string } | null>(null);
 
   function open(contact: ContactRow | null) {
     setDraft(draftOf(contact)); setErrors({}); setError(null);
-    if (!contact && !ambiguous.current) setRequestId(crypto.randomUUID());
     setForm({ contact });
   }
   async function submit(event: React.FormEvent) {
@@ -40,17 +39,18 @@ export function ExtraContacts({ projectId, initial }: { projectId: string; initi
     setErrors({}); setBusy(true); setError(null);
     const contact = form?.contact ?? null;
     const fields = { name: parsed.name, roleTitle: parsed.roleTitle, phone: parsed.phone };
+    const key = JSON.stringify(fields);
+    const rid = lost.current?.key === key ? lost.current.requestId : crypto.randomUUID();
     const result = await guarded(() => contact
       ? updateContact({ id: contact.id, expectedRevision: contact.revision, ...fields })
-      : createContact({ requestId, projectId, ...fields }));
+      : createContact({ requestId: rid, projectId, ...fields }));
     setBusy(false);
     if (!result.ok) {
-      ambiguous.current = result.error.code === 'UNAVAILABLE';
+      if (!contact) lost.current = result.error.code === 'UNAVAILABLE' ? { requestId: rid, key } : null;
       if (result.error.code === 'CONFLICT') { setForm(null); setMessage(errorText('CONFLICT')); refresh(); return; }
       setError(errorText(result.error.code)); return;
     }
-    ambiguous.current = false;
-    if (!contact) setRequestId(crypto.randomUUID());
+    lost.current = null;
     setForm(null); setMessage(null); refresh();
   }
   async function confirmRemove() {

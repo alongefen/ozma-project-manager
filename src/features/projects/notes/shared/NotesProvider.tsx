@@ -29,9 +29,8 @@ export function NotesProvider({ projectId, initial, children }: { projectId: str
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [removing, setRemoving] = useState<NoteRow | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [requestId, setRequestId] = useState(() => crypto.randomUUID());
-  // A retry after a lost answer keeps the same request id, so it cannot create twice.
-  const ambiguous = useRef(false);
+  // A retry of the SAME text after a lost answer keeps its request id, so it cannot create twice; different text gets a new one.
+  const lost = useRef<{ requestId: string; body: string } | null>(null);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -39,17 +38,17 @@ export function NotesProvider({ projectId, initial, children }: { projectId: str
     if (!parsed.ok) { setFieldError(parsed.error); return; }
     setFieldError(null); setBusy(true); setError(null);
     const note = form?.note ?? null;
+    const rid = lost.current?.body === parsed.body ? lost.current.requestId : crypto.randomUUID();
     const result = await guarded(() => note
       ? updateNote({ id: note.id, expectedRevision: note.revision, body: parsed.body })
-      : createNote({ requestId, projectId, body: parsed.body }));
+      : createNote({ requestId: rid, projectId, body: parsed.body }));
     setBusy(false);
     if (!result.ok) {
-      ambiguous.current = result.error.code === 'UNAVAILABLE';
+      if (!note) lost.current = result.error.code === 'UNAVAILABLE' ? { requestId: rid, body: parsed.body } : null;
       if (result.error.code === 'CONFLICT') { setForm(null); setMessage(errorText('CONFLICT')); refresh(); return; }
       setError(errorText(result.error.code)); return;
     }
-    ambiguous.current = false;
-    if (!note) setRequestId(crypto.randomUUID());
+    lost.current = null;
     setForm(null); setMessage(null); refresh();
   }
 
@@ -68,7 +67,7 @@ export function NotesProvider({ projectId, initial, children }: { projectId: str
 
   const value: Ctx = {
     ...initial,
-    openCreate: () => { setText(''); setError(null); setFieldError(null); if (!ambiguous.current) setRequestId(crypto.randomUUID()); setForm({ note: null }); },
+    openCreate: () => { setText(''); setError(null); setFieldError(null); setForm({ note: null }); },
     openEdit: note => { setText(note.body); setError(null); setFieldError(null); setForm({ note }); },
     askCancel: note => { setError(null); setRemoving(note); },
   };
