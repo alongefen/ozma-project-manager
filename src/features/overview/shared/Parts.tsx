@@ -8,12 +8,12 @@ import css from './Overview.module.css';
 export function Counters({ counters }: { counters: HomeData['counters'] }) {
   return (
     <div className={css.counters}>
-      {counterItems(counters).map(item => (
-        <Card key={item.key} className={css.counter}>
-          <span className={css.counterValue}>{item.value}</span>
-          <span className={css.counterLabel}>{item.label}</span>
-        </Card>
-      ))}
+      {counterItems(counters).map(item => {
+        const body = (<><span className={css.counterValue}>{item.value}</span><span className={css.counterLabel}>{item.label}</span></>);
+        return item.href
+          ? <Link key={item.key} href={item.href} className={`ui-card ${css.counter}`}>{body}</Link>
+          : <Card key={item.key} className={css.counter}>{body}</Card>;
+      })}
     </div>
   );
 }

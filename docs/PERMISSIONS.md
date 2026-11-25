@@ -95,9 +95,10 @@ P1.2 בונה את כולן, עם הגוף ועם בדיקה חיובית ושל
 | `create_document` | createDocument | `manage(p)`. קובץ document, ‏ready, שלו, מהפרויקט, שלא נוצל. **מי שמעלה חייב לשלוח גישה**, והנבחרים משויכים. החלפה רק `owner()` | `document.created`, ובהחלפה `document.replaced` |
 | `set_document_access` | setDocumentAccess | `owner()`. הנבחרים משויכים | `document.access_changed` |
 | `set_document_archived` | setDocumentArchived | `owner()` | `document.archive_changed` |
-| `create_task` | createTask | `work(p)` | אין |
-| `update_task` | updateTask | `work(p)`, לא נמחקה | אין |
+| `create_task` | createTask | `work(p)`; `assigneeId` אופציונלי: חבר פעיל באותו פרויקט (`private.check_assignee`), אחרת VALIDATION | אין |
+| `update_task` | updateTask | `work(p)`, לא נמחקה; `assigneeId` כמו ביצירה; חסר = ללא שינוי, `''` = ניקוי | אין |
 | `set_task_completed` | setTaskCompleted | `work(p)`, לא נמחקה | אין |
+| `list_project_assignees` | listTasks (קריאה) | `member(p)`; מחזירה מזהה, שם ותפקיד של חברים פעילים בפרויקט אחד, לשאר רשימה ריקה. נחוצה כי RLS מאפשר ללא-בעלים לקרוא רק את עצמם | אין |
 | `delete_task` | deleteTask | `owner()`. מחיקה רכה | `task.deleted` |
 | `hard_delete_preview` | previewHardDelete | `owner()`. קריאה בלבד: מה יימחק ואם מותר | אין |
 | `hard_delete_project` | hardDelete | `owner()`. רק פרויקט שהועבר לארכיון או הסתיים, ושם הפרויקט מוקלד. מוחק הכול בתוכו בעסקה אחת (A-44) | `project.deleted`, שם וספירות בלבד, בלי קישור לפרויקט |
@@ -191,7 +192,7 @@ P1.2 בונה את כולן, עם הגוף ועם בדיקה חיובית ושל
 | מזהה | פעולה | מסד | אחסון | שרת | ייצוא | בדיקה חיובית | בדיקה שלילית |
 |---|---|---|---|---|---|---|---|
 | P17 | צפייה במשימות ויצירה | קריאה `member(p)`, יצירה `work(p)` | אין | `listTasks`, `createTask` | אין | בן, מ ו-ע רואים ויוצרים | פרויקט אחר; יצירה של מ או ע בפרויקט שהסתיים |
-| P18 | עריכה וסימון של כל פתק | `work(p)` | אין | `updateTask`, `setTaskCompleted` | אין | ע עורך ומסמן פתק של מ | לא משויך; פתק מחוק; פרויקט שהסתיים |
+| P18 | עריכה וסימון של כל פתק, כולל שינוי וניקוי של האחראי (A-46) | `work(p)` | אין | `updateTask`, `setTaskCompleted` | אין | ע עורך ומסמן פתק של מ | לא משויך; פתק מחוק; פרויקט שהסתיים |
 | P19 | מחיקת פתק | `owner()` ב-`delete_task` | אין | `deleteTask` | אין | בן מוחק, והאירוע בלוג | מ, גם יוצר הפתק, או ע מוחקים |
 
 **הערות ואנשי קשר נוספים (A-45, CLIENT-FEEDBACK-B).** שתי טבלאות חדשות, קריאה דרך RLS ב-`member(p)` וכתיבה רק בפונקציות. מספר החברה הוסר מהמסכים בלבד; העמודה נשארת.

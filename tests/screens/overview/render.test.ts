@@ -17,7 +17,7 @@ import { projectBadges, transferViews } from '@/features/overview/shared/view-mo
 
 const card = { id: 'p1', name: 'בניין בדוי', businessName: 'חברה בדויה', siteAddress: 'רחוב 1', status: 'active' as const, archived: false, coverFileId: null, reportCount: 3, openTaskCount: 2 };
 const cube = { month: { year: 2026, month: 11 }, income: 1_000_000, expense: 400_000, tax: 100_000, totalExpense: 500_000, netProfit: 500_000, profitPercentTenths: 500 };
-const home = (financeCube: HomeData['financeCube']): HomeData => ({ counters: { activeProjects: 1, reportsToday: 3, customers: 1, openTasks: 2 }, projects: [card], financeCube });
+const home = (financeCube: HomeData['financeCube']): HomeData => ({ counters: { activeProjects: 1, reportsToday: 3, customers: 1, openTasks: 2, myOpenTasks: 0, myTasksProjectId: null }, projects: [card], financeCube });
 const summary = (month: number, tax: number) => ({ year: 2026, month, income: 100, expense: 50, tax, totalExpense: 50 + tax, netProfit: 50 - tax, profitPercentTenths: 0, balance: 0 });
 const months: TransferMonth[] = [
   { month: { year: 2026, month: 10 }, transferAmount: 1000, projects: [{ projectId: 'p1', projectName: 'בניין בדוי', summary: summary(10, 1000) }] },

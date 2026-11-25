@@ -15,12 +15,12 @@ const month = (year: number, m: number, income: number, expense: number, tax: nu
 });
 const denied = { ok: false, error: { code: 'NOT_FOUND', message: 'x' } } as const;
 
-function fixture(owner: boolean, cards: ProjectCard[], totals: { projectId: string; projectName: string; month: MonthSummary }[] = []) {
+function fixture(owner: boolean, cards: ProjectCard[], totals: { projectId: string; projectName: string; month: MonthSummary }[] = [], mineRows: { id: string; project_id: string }[] = []) {
   const listProjects = vi.fn().mockResolvedValue({ ok: true, value: cards });
   const getSummary = vi.fn().mockResolvedValue({ ok: true, value: { reportCount: 3, workDays: 1, byProject: [] } });
   const getAllProjectTotals = vi.fn().mockResolvedValue({ ok: true, value: totals });
   const requireOwner = vi.fn().mockResolvedValue(owner ? { ok: true, value: null } : denied);
-  const platform = { format, permissions: { requireOwner } } as unknown as Platform;
+  const platform = { format, permissions: { requireOwner }, fetchAll: vi.fn().mockResolvedValue(mineRows) } as unknown as Platform;
   const api = createOverviewApi(platform, {
     projects: { listProjects } as unknown as ProjectsApi,
     diary: { getSummary } as unknown as DiaryApi,
@@ -38,11 +38,18 @@ describe('getHome counters and badges', () => {
       card({ businessName: 'עסק "ב"', openTaskCount: 1 }),
       card({ businessName: 'עסק ארכיון', openTaskCount: 9, archived: true }),
     ];
-    const { api, ctx, getSummary } = fixture(false, cards);
+    const { api, ctx, getSummary } = fixture(true, cards);
     const result = await api.getHome(ctx, {});
-    expect(result).toMatchObject({ ok: true, value: { counters: { activeProjects: 2, reportsToday: 3, customers: 2, openTasks: 6 }, financeCube: null } });
+    expect(result).toMatchObject({ ok: true, value: { counters: { activeProjects: 2, reportsToday: 3, customers: 2, openTasks: 6 } } });
     if (result.ok) expect(result.value.projects.map(p => p.id)).toEqual(cards.slice(0, 3).map(p => p.id));
     expect(getSummary).toHaveBeenCalledWith(ctx, { from: '2026-11-22', to: '2026-11-22' });
+  });
+  it('a non-owner counts only the open tasks assigned to them, and links the project when all are in one (A-46)', async () => {
+    const cards = [card({ openTaskCount: 5 }), card({ openTaskCount: 4 })];
+    const one = fixture(false, cards, [], [{ id: 't1', project_id: cards[0].id }, { id: 't2', project_id: cards[0].id }, { id: 'x', project_id: randomUUID() }]);
+    expect(await one.api.getHome(one.ctx, {})).toMatchObject({ ok: true, value: { counters: { openTasks: 2, myOpenTasks: 2, myTasksProjectId: cards[0].id } } });
+    const two = fixture(false, cards, [], [{ id: 't1', project_id: cards[0].id }, { id: 't2', project_id: cards[1].id }]);
+    expect(await two.api.getHome(two.ctx, {})).toMatchObject({ ok: true, value: { counters: { openTasks: 2, myTasksProjectId: null } } });
   });
   it('shows zeros for a worker with no visible projects', async () => {
     const { api, ctx } = fixture(false, []);
