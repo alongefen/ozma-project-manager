@@ -47,3 +47,9 @@ Alon, 24.11.2026: `/finance` must look and behave like a project's finance tab (
 
 - Alon: the "פירוט חודשים" table under the main table added nothing. Removed it from the shared desktop finance screen (so the project tab matches). For the whole period, the main table is now split by month: a month row (month name linking to that month, net profit and month balance, income, total expense) followed by that month's movements, newest month first. A single-month view has no month rows (its summary is above). Day/search narrowing hides months with no matching rows. Phone is unchanged (its month list already was the summary).
 - Checked: tsc, eslint, `tests/screens tests/shell` pass (new assertion: no "פירוט חודשים", month rows present). Not checked: browser at 1024/1280, print (print view already has month rows).
+
+## Round 4 — tax in the month rows, transfer table removed (25.11.2026, branch `claude/finance-tax-rows`)
+
+- Alon: "שארית חודש" was unclear; each month row now shows "מס להעברה" (the month's tax, sum of per-project taxes on `/finance`) instead. The phone's month list shows it too.
+- The table Alon meant was the one under "העברות מס לפי חודש": removed from `/finance` (desktop table and phone cards, with its heading and its separate read). Its figures are now in each month row. `TransferMobile/Desktop` stay in `features/overview` (still tested, no longer used by a page).
+- Checked: tsc, eslint, `tests/screens tests/shell` pass. Not checked: browser. Not independently reviewed (small UI change).
