@@ -9,6 +9,21 @@ export function Counters({ counters }: { counters: HomeData['counters'] }) {
   return (
     <div className={css.counters}>
       {counterItems(counters).map(item => {
+        if (item.parts) {
+          return (
+            <Card key={item.key} className={css.counter}>
+              <span className={css.counterLabel}>{item.label}</span>
+              <span className={css.counterSplit}>
+                {item.parts.map(part => {
+                  const inner = (<><span className={css.counterValue}>{part.value}</span><span className={css.counterLabel}>{part.label}</span></>);
+                  return part.href
+                    ? <Link key={part.label} href={part.href} className={css.counterPart}>{inner}</Link>
+                    : <span key={part.label} className={css.counterPart}>{inner}</span>;
+                })}
+              </span>
+            </Card>
+          );
+        }
         const body = (<><span className={css.counterValue}>{item.value}</span><span className={css.counterLabel}>{item.label}</span></>);
         return item.href
           ? <Link key={item.key} href={item.href} className={`ui-card ${css.counter}`}>{body}</Link>

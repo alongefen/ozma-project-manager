@@ -338,6 +338,8 @@ export type HomeData = {
     activeProjects: number; reportsToday: number; customers: number; openTasks: number
     /** Open tasks assigned to the signed-in user (A-46), and the project to open when they are all in one. */
     myOpenTasks: number; myTasksProjectId: Uuid | null
+    /** Owner only (null for everyone else): open tasks of everyone, and the project to open when they are all in one. */
+    allOpenTasks: number | null; allTasksProjectId: Uuid | null
   }
   projects: ProjectCard[]
   financeCube: (MoneySummary & { month: Month }) | null // owner only

@@ -3,13 +3,22 @@ import { monthLabel, percent, shekels } from '@/features/finance/shared/present'
 
 /** Presentation only. Every figure arrives already calculated by the overview and finance logic (no sums here). */
 
-export type CounterItem = { key: string; label: string; value: number; href?: string };
+export type CounterPart = { label: string; value: number; href?: string };
+/** `parts` (owner's open-tasks card): two labelled numbers in one card, each with its own link. */
+export type CounterItem = { key: string; label: string; value: number; href?: string; parts?: CounterPart[] };
+const tasksHref = (projectId: string | null, mine: boolean) => projectId ? `/projects/${projectId}/tasks${mine ? '?mine=1' : ''}` : undefined;
 export function counterItems(counters: HomeData['counters']): CounterItem[] {
   return [
     { key: 'active', label: 'פרויקטים פעילים', value: counters.activeProjects },
     { key: 'reports', label: 'דיווחים היום', value: counters.reportsToday },
-    // Not-owner counts only tasks assigned to them (A-46); the card opens that project's tasks, filtered to "mine", when they are all in one.
-    { key: 'tasks', label: 'משימות פתוחות', value: counters.openTasks, href: counters.myTasksProjectId ? `/projects/${counters.myTasksProjectId}/tasks?mine=1` : undefined },
+    // Anyone but the owner counts only tasks assigned to them (A-46); the owner sees both numbers. A number is a link only when its
+    // tasks are all in one project (there is no tasks page across projects).
+    counters.allOpenTasks === null
+      ? { key: 'tasks', label: 'משימות פתוחות', value: counters.openTasks, href: tasksHref(counters.myTasksProjectId, true) }
+      : { key: 'tasks', label: 'משימות פתוחות', value: counters.allOpenTasks, parts: [
+          { label: 'כולם', value: counters.allOpenTasks, href: tasksHref(counters.allTasksProjectId, false) },
+          { label: 'שלי', value: counters.myOpenTasks, href: tasksHref(counters.myTasksProjectId, true) },
+        ] },
   ];
 }
 

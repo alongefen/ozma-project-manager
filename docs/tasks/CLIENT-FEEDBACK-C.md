@@ -34,3 +34,9 @@ Applied to the cloud database on 25.11.2026 after Alon's typed "כן" in this ch
 ### Review (one reviewer pass) and open items
 - Fixed: an unchanged assignee is no longer sent on edit (a task whose assignee left the project stays editable); the home read of own assignments is skipped for owners; the "mine" button uses a CSS class.
 - Open for the PM / Alon: owner-level accounts have no membership row, so they cannot be assigned or appear in the picker (as the brief says: members only). The phone counter counts open tasks on every visible project, as the old total did. No unit test for the stale-assignee edit or for the server-side refusals.
+
+## Follow-up 1 (Alon, via PM): owner sees both numbers
+
+- Open-tasks card: the owner now sees "כולם" (all open tasks) and "שלי" (assigned to them, 0 when none) in one card; manager/worker still see their own single number. New counters `allOpenTasks` / `allTasksProjectId` (owner only, null otherwise). No migration.
+- Each number links to the tasks page ("שלי" with the `?mine=1` filter on) **only when its tasks are all in one project**; there is no tasks page across projects, so with several projects the number is not a link. A cross-project tasks screen would be a new feature: open item for the PM / Alon.
+- Checked: unit screens + logic (973 pass), tsc, eslint. Not checked in a browser (360–1280).

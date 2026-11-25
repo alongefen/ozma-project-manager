@@ -30,8 +30,7 @@ export function createOverviewQueries(platform: Platform, deps: OverviewDeps): O
       const customers = new Set(visible.map(card => platform.format.searchKey(card.businessName)));
       // Open tasks assigned to the signed-in user (A-46), among projects they can see. RLS already hides the rest.
       let mine: string[] = [];
-      // The owner's card shows the total, so the owner needs no read of their own assignments.
-      if (!ctx.actor.isOwner) try {
+      try {
         const rows = await platform.fetchAll(async (from, to) => {
           const { data, error } = await (ctx.db as unknown as SupabaseClient).from('tasks').select('id,project_id')
             .eq('assignee_id', ctx.actor.userId).eq('completed', false).is('deleted_at', null).order('id').range(from, to);
@@ -42,6 +41,7 @@ export function createOverviewQueries(platform: Platform, deps: OverviewDeps): O
         mine = rows.filter(row => visibleIds.has(row.project_id)).map(row => row.project_id);
       } catch { return failure('UNAVAILABLE'); }
       const mineProjects = new Set(mine);
+      const withOpen = visible.filter(card => card.openTaskCount > 0);
       const totalOpen = visible.reduce((sum, card) => sum + card.openTaskCount, 0);
       let financeCube: Cube | null = null;
       if (ctx.actor.isOwner) {
@@ -64,10 +64,12 @@ export function createOverviewQueries(platform: Platform, deps: OverviewDeps): O
           activeProjects: visible.filter(card => card.status === 'active').length,
           reportsToday: summary.value.reportCount,
           customers: customers.size,
-          // The owner sees every open task; anyone else sees the open tasks assigned to them (A-46).
+          // The owner sees every open task and, separately, their own; anyone else sees only the open tasks assigned to them (A-46).
           openTasks: ctx.actor.isOwner ? totalOpen : mine.length,
           myOpenTasks: mine.length,
           myTasksProjectId: mineProjects.size === 1 ? [...mineProjects][0] : null,
+          allOpenTasks: ctx.actor.isOwner ? totalOpen : null,
+          allTasksProjectId: ctx.actor.isOwner && withOpen.length === 1 ? withOpen[0].id : null,
         },
         projects: visible,
         financeCube,
