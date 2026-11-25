@@ -12,7 +12,7 @@ export function TaskForm({ task, assignees, busy, error, onSubmit, onCancel }: {
   const id = useId();
   const [draft, setDraft] = useState<TaskDraft>(draftOf(task));
   const [errors, setErrors] = useState<{ body?: string; dueDate?: string }>({});
-  // A person who left the project stays listed only while they are the current value, so saving does not silently clear it.
+  // A person who left the project stays listed only while they are the current value; an unchanged value is not sent, so editing the text still works.
   const options = [
     { value: '', label: 'ללא אחראי' },
     ...(task?.assigneeId && !assignees.some(a => a.id === task.assigneeId) ? [{ value: task.assigneeId, label: 'אחראי לשעבר' }] : []),

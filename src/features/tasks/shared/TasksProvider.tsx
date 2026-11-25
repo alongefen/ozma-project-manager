@@ -75,7 +75,8 @@ export function TasksProvider({ projectId, initial, canWrite, canDelete, today, 
     const task = form?.task ?? null;
     const dueDate = fields.dueDate as TaskRow['dueDate'];
     const result = await guarded(() => task
-      ? updateTask({ id: task.id, expectedRevision: task.revision, body: fields.body, dueDate, assigneeId: fields.assigneeId })
+      ? updateTask({ id: task.id, expectedRevision: task.revision, body: fields.body, dueDate, // Unchanged assignee is not sent, so a task whose assignee left the project can still be edited.
+          ...(fields.assigneeId === task.assigneeId ? {} : { assigneeId: fields.assigneeId }) })
       : createTask({ requestId, projectId, body: fields.body, dueDate, completed: false, assigneeId: fields.assigneeId }));
     setFormBusy(false);
     if (!result.ok) {

@@ -11,7 +11,7 @@ export function TasksMobile() {
   return (
     <div className="tk tk-mobile m-only">
       {canWrite ? <Pin><Button block icon="add" onClick={openCreate}>משימה חדשה</Button></Pin> : <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}
-      <button type="button" className="tk-mine" aria-pressed={mine} onClick={toggleMine}>המשימות שלי</button>
+      <button type="button" className="tk-mine tk-mine--start" aria-pressed={mine} onClick={toggleMine}>המשימות שלי</button>
       <TaskGroup headingId="tk-m-open" title="לביצוע" tasks={lists.open} empty="אין משימות לביצוע" />
       <button type="button" className="tk-toggle" aria-expanded={showDone} onClick={() => setShowDone(v => !v)}>
         {showDone ? 'הסתרת משימות שבוצעו' : `הצגת משימות שבוצעו (${lists.completed.length})`}

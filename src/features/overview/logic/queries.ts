@@ -30,7 +30,8 @@ export function createOverviewQueries(platform: Platform, deps: OverviewDeps): O
       const customers = new Set(visible.map(card => platform.format.searchKey(card.businessName)));
       // Open tasks assigned to the signed-in user (A-46), among projects they can see. RLS already hides the rest.
       let mine: string[] = [];
-      try {
+      // The owner's card shows the total, so the owner needs no read of their own assignments.
+      if (!ctx.actor.isOwner) try {
         const rows = await platform.fetchAll(async (from, to) => {
           const { data, error } = await (ctx.db as unknown as SupabaseClient).from('tasks').select('id,project_id')
             .eq('assignee_id', ctx.actor.userId).eq('completed', false).is('deleted_at', null).order('id').range(from, to);

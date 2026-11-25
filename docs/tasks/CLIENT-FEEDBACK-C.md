@@ -30,3 +30,7 @@ Applied to the cloud database on 25.11.2026 after Alon's typed "כן" in this ch
 ### Checked
 - `vitest` unit: `tests/screens`, `tests/logic` (970 pass, 5 skipped), `tsc`, `eslint` clean. New tests: draft assignee parsing, `onlyMine`, home counter per person.
 - **Not checked:** server refusals on the cloud (assignee from another project, finished project, non-owner on a finished project) — no cloud tests were run (they need a PM window and Alon's yes); the logic is in the SQL helper and `require_project`. Not checked in a browser at 360–1280 and RTL. The stored cloud-test owner fixture was not used.
+
+### Review (one reviewer pass) and open items
+- Fixed: an unchanged assignee is no longer sent on edit (a task whose assignee left the project stays editable); the home read of own assignments is skipped for owners; the "mine" button uses a CSS class.
+- Open for the PM / Alon: owner-level accounts have no membership row, so they cannot be assigned or appear in the picker (as the brief says: members only). The phone counter counts open tasks on every visible project, as the old total did. No unit test for the stale-assignee edit or for the server-side refusals.
