@@ -88,7 +88,7 @@ export function FinanceDesktop({ book, filteredRows, today }: Props) {
                       <tr className="fin-monthrow">
                         <th scope="rowgroup" colSpan={all ? 3 : 2}>
                           <Link href={href({ period: { year: sm.year, month: sm.month } })}>{monthLabel(sm)}</Link>
-                          <span className="fin-monthrow__sub">רווח נקי <span className="fin-num">{shekels(sm.netProfit)}</span> · שארית חודש <span className="fin-num">{shekels(sm.balance)}</span></span>
+                          <span className="fin-monthrow__sub">רווח נקי <span className="fin-num">{shekels(sm.netProfit)}</span> · מס להעברה <span className="fin-num">{shekels(sm.tax)}</span></span>
                         </th>
                         <td className="fin-num">{shekels(sm.income)}</td><td className="fin-num">{shekels(sm.totalExpense)}</td><td className="no-print" />
                       </tr>

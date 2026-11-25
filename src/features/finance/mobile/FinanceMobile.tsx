@@ -88,7 +88,7 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
             <li key={`${s.year}-${s.month}`}>
               <Link className="fin-item" href={href({ period: { year: s.year, month: s.month } })}>
                 <span className="fin-item__top"><strong>{monthLabel(s)}</strong><span className="fin-num">רווח נקי {shekels(s.netProfit)}</span></span>
-                <span className="fin-item__sub">הכנסות <span className="fin-num">{shekels(s.income)}</span> · הוצאה <span className="fin-num">{shekels(s.totalExpense)}</span></span>
+                <span className="fin-item__sub">הכנסות <span className="fin-num">{shekels(s.income)}</span> · הוצאה <span className="fin-num">{shekels(s.totalExpense)}</span> · מס להעברה <span className="fin-num">{shekels(s.tax)}</span></span>
               </Link>
             </li>
           ))}
