@@ -10,6 +10,10 @@ export interface PreparedReport {
   warnings: ReportWarning[];
 }
 
+/** The sentinel range the diary print screen sends for "all reports of the project". */
+const ALL_FROM = "2000-01-01";
+const ALL_TO = "2099-12-31";
+
 export function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]!);
 }
@@ -76,7 +80,8 @@ export async function prepareReport(part: ReportPart): Promise<PreparedReport> {
       ${attachments.join("\n")}
     </article>`);
   }
-  const scope = part.scope.kind === "range" ? `טווח: ${dateText(part.scope.from)} – ${dateText(part.scope.to)}` :
+  const scope = part.scope.kind === "range" && part.scope.from <= ALL_FROM && part.scope.to >= ALL_TO ? "כל הדיווחים של הפרויקט" :
+    part.scope.kind === "range" ? `טווח: ${dateText(part.scope.from)} – ${dateText(part.scope.to)}` :
     part.scope.kind === "day" ? `תאריך: ${dateText(part.scope.date)}` : "דיווח בודד";
   const html = `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">

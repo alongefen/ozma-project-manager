@@ -74,6 +74,12 @@ export function createDiaryQueries(platform: Platform): Queries {
       .order('work_date', { ascending: false }).order('entered_at', { ascending: false }).order('id', { ascending: false }).limit(51);
     query = input.cancelled ? query.not('cancelled_at', 'is', null) : query.is('cancelled_at', null);
     if (input.projectId) query = query.eq('project_id', input.projectId);
+    else if (!ctx.actor.isOwner) {
+      // Item 6: the all-projects diary leaves out finished projects for everyone but owner-level accounts.
+      const finished = await ctx.db.from('projects').select('id').eq('status', 'completed');
+      if (finished.error) throw finished.error;
+      if (finished.data.length) query = query.not('project_id', 'in', `(${finished.data.map(row => row.id).join(',')})`);
+    }
     if (input.from) query = query.gte('work_date', input.from);
     if (input.to) query = query.lte('work_date', input.to);
     if (cursor) query = query.or(`work_date.lt.${cursor.date},and(work_date.eq.${cursor.date},entered_at.lt.${cursor.entered}),and(work_date.eq.${cursor.date},entered_at.eq.${cursor.entered},id.lt.${cursor.id})`);

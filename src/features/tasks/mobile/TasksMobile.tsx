@@ -7,7 +7,7 @@ import { useTasks } from '../shared/TasksProvider';
 /** Phone (up to 1023): one column, new-note button, open group, then a collapsible done group. No tabs. */
 export function TasksMobile() {
   const { lists, canWrite, openCreate } = useTasks();
-  const [showDone, setShowDone] = useState(true);
+  const [showDone, setShowDone] = useState(false);
   return (
     <div className="tk tk-mobile m-only">
       {canWrite ? <Pin><Button block icon="add" onClick={openCreate}>משימה חדשה</Button></Pin> : <Notice>הפרויקט זמין לצפייה והדפסה בלבד.</Notice>}

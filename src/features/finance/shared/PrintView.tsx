@@ -28,7 +28,7 @@ export function PrintView({ book, filteredRows }: { book: FinanceBook; filteredR
         {filter.search && ` · חיפוש: ${filter.search}`}
       </p>
       <div className="fin-kpis">
-        <div><span>הכנסות בתקופה</span><strong className="fin-num">{shekels(book.period.income)}</strong></div>
+        <div><span>הכנסות בתקופה (לא כולל מע״מ)</span><strong className="fin-num">{shekels(book.period.income)}</strong></div>
         <div><span>סה״כ הוצאה כולל מס 3%</span><strong className="fin-num">{shekels(book.period.totalExpense)}</strong></div>
         <div><span>רווח נקי</span><strong className="fin-num">{shekels(book.period.netProfit)}</strong></div>
       </div>
@@ -36,13 +36,13 @@ export function PrintView({ book, filteredRows }: { book: FinanceBook; filteredR
       <h2>פירוט תנועות</h2>
       {blocks.length === 0 ? <p>אין תנועות בתקופה</p> : (
         <table className="fin-table">
-          <thead><tr><th scope="col">תאריך</th>{all && <th scope="col">פרויקט</th>}<th scope="col">פרטים / ספק</th><th scope="col">הכנסה</th><th scope="col">הוצאה</th></tr></thead>
+          <thead><tr><th scope="col">תאריך</th>{all && <th scope="col">פרויקט</th>}<th scope="col">פרטים / ספק</th><th scope="col">הכנסה (לא כולל מע״מ)</th><th scope="col">הוצאה</th></tr></thead>
           {blocks.map(({ block, rows }) => (
             <tbody key={`${block.summary.year}-${block.summary.month}`}>
               <tr className="fin-print__month">
                 <th colSpan={cols} scope="colgroup">
                   {monthLabel(block.summary)}
-                  {!narrowed && <span> · הכנסות {shekels(block.summary.income)} · סה״כ הוצאה {shekels(block.summary.totalExpense)} · שארית חודש {shekels(block.summary.balance)}</span>}
+                  {!narrowed && <span> · הכנסות (לא כולל מע״מ) {shekels(block.summary.income)} · סה״כ הוצאה {shekels(block.summary.totalExpense)} · שארית חודש {shekels(block.summary.balance)}</span>}
                 </th>
               </tr>
               {rows.map(row => (

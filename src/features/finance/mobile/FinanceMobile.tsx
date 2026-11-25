@@ -59,7 +59,7 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
             {!all && <IconButton plain label="קישור לקובץ Excel" aria-expanded={panel === 'link'} onClick={() => toggle('link')}><LinkIcon /></IconButton>}
           </div>
         </div>
-        <div className="fin-msum__row"><span>הכנסות</span><strong className="fin-num">{shekels(book.period.income)}</strong></div>
+        <div className="fin-msum__row"><span>הכנסות (לא כולל מע״מ)</span><strong className="fin-num">{shekels(book.period.income)}</strong></div>
         <div className="fin-msum__row"><span>סה״כ הוצאה כולל מס 3%</span><strong className="fin-num">{shekels(book.period.totalExpense)}</strong></div>
         <div className="fin-msum__row fin-msum__row--net"><span>רווח נקי</span><strong className="fin-num">{shekels(book.period.netProfit)}</strong></div>
         <SummaryDetails book={book} balanceLabel={period === 'all' ? 'שארית בסוף התקופה' : 'שארית חודש'} />
@@ -88,7 +88,7 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
             <li key={`${s.year}-${s.month}`}>
               <Link className="fin-item" href={href({ period: { year: s.year, month: s.month } })}>
                 <span className="fin-item__top"><strong>{monthLabel(s)}</strong><span className="fin-num">רווח נקי {shekels(s.netProfit)}</span></span>
-                <span className="fin-item__sub">הכנסות <span className="fin-num">{shekels(s.income)}</span> · הוצאה <span className="fin-num">{shekels(s.totalExpense)}</span> · מס להעברה <span className="fin-num">{shekels(s.tax)}</span></span>
+                <span className="fin-item__sub">הכנסות (לא כולל מע״מ) <span className="fin-num">{shekels(s.income)}</span> · הוצאה <span className="fin-num">{shekels(s.totalExpense)}</span> · מס להעברה <span className="fin-num">{shekels(s.tax)}</span></span>
               </Link>
             </li>
           ))}
@@ -124,7 +124,7 @@ export function FinanceMobile({ book, filteredRows, today }: Props) {
             )}
           </ul>
           {filtered && (
-            <p className="fin-filteredsum">סיכום התנועות המוצגות: הכנסה <b className="fin-num">{totalsReady ? shekels(filteredRows.income) : '…'}</b> · הוצאה <b className="fin-num">{totalsReady ? shekels(filteredRows.expense) : '…'}</b></p>
+            <p className="fin-filteredsum">סיכום התנועות המוצגות: הכנסה (לא כולל מע״מ) <b className="fin-num">{totalsReady ? shekels(filteredRows.income) : '…'}</b> · הוצאה <b className="fin-num">{totalsReady ? shekels(filteredRows.expense) : '…'}</b></p>
           )}
         </>
       )}

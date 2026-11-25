@@ -58,11 +58,11 @@ describe('חיבור הספר למנוע Excel', () => {
     expect(artifact.contentType).toBe(contentType);
     expect(artifact.stream).toBeInstanceOf(ReadableStream);
     const rows = await sheetRows(await new Response(artifact.stream).arrayBuffer());
-    const totals = [['הכנסות', 9876.54], ['הוצאות', 3456.78], ['מס', 123.45], ['סה״כ הוצאות', 3580.23],
+    const totals = [['הכנסות (לא כולל מע״מ)', 9876.54], ['הוצאות', 3456.78], ['מס', 123.45], ['סה״כ הוצאות', 3580.23],
       ['רווח נקי', 6296.31], ['אחוז רווח', 0.637], ['שארית', 8123.45]];
     expect(pairsAfter(rows, 'סיכום תקופה', 7)).toEqual(totals);
     expect(pairsAfter(rows, 'סיכום חודש', 7)).toEqual(totals);
-    expect(pairsAfter(rows, 'סיכום שורות מסוננות', 2)).toEqual([['הכנסות', 98.45], ['הוצאות', 49.88]]);
+    expect(pairsAfter(rows, 'סיכום שורות מסוננות', 2)).toEqual([['הכנסות (לא כולל מע״מ)', 98.45], ['הוצאות', 49.88]]);
     const delivered = [...book.months[0].incomeRows, ...book.months[0].expenseRows].map(row => [row.details, row.amount / 100]);
     const details = new Set(delivered.map(row => row[0]));
     expect(rows.filter(row => details.has(row[2] as string)).map(row => [row[2], row[3]])).toEqual(delivered);

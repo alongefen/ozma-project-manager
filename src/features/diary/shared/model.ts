@@ -57,10 +57,14 @@ export function parseDraft(draft: Draft): DraftResult {
 }
 
 /** The PDF route (GET /api/reports/diary). `download` asks for a file instead of opening in the browser. */
-export function reportUrl(scope: { kind: 'entry'; entryId: string } | { kind: 'day'; projectId: string; date: string }, opts: { part?: number; download?: boolean } = {}): string {
+export const ALL_REPORTS_FROM = '2000-01-01';
+export const ALL_REPORTS_TO = '2099-12-31';
+type UrlScope = { kind: 'entry'; entryId: string } | { kind: 'day'; projectId: string; date: string } | { kind: 'range'; projectId: string; from: string; to: string };
+export function reportUrl(scope: UrlScope, opts: { part?: number; download?: boolean } = {}): string {
   const q = new URLSearchParams({ kind: scope.kind });
   if (scope.kind === 'entry') q.set('entryId', scope.entryId);
-  else { q.set('projectId', scope.projectId); q.set('date', scope.date); }
+  else if (scope.kind === 'day') { q.set('projectId', scope.projectId); q.set('date', scope.date); }
+  else { q.set('projectId', scope.projectId); q.set('from', scope.from); q.set('to', scope.to); }
   if (opts.part && opts.part > 1) q.set('part', String(opts.part));
   if (opts.download) q.set('download', '1');
   return `/api/reports/diary?${q}`;

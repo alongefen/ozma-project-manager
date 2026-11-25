@@ -46,6 +46,9 @@ describe('הרשאות במסך', () => {
       h(TasksProvider, { projectId: 'p', initial: { open: [], completed: [] }, canWrite: true, canDelete: false, today: '2026-11-23' }, h(TasksMobile)),
     );
     expect(html).toContain('אין משימות לביצוע');
-    expect(html).toContain('עוד אין משימות שבוצעו');
+    // Completed tasks are hidden on entry (item 3); the toggle says how many there are.
+    expect(html).not.toContain('עוד אין משימות שבוצעו');
+    expect(html).toContain('הצגת משימות שבוצעו (0)');
+    expect(html).toContain('aria-expanded="false"');
   });
 });

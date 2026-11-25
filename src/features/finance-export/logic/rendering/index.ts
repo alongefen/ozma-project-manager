@@ -58,7 +58,7 @@ export async function renderFinanceWorkbook(book: FinanceBook): Promise<Uint8Arr
 
   function summary(label: string, value: MoneySummary & { balance: number }): void {
     heading(label);
-    amount('הכנסות', value.income);
+    amount('הכנסות (לא כולל מע״מ)', value.income);
     amount('הוצאות', value.expense);
     amount('מס', value.tax);
     amount('סה״כ הוצאות', value.totalExpense);
@@ -96,13 +96,13 @@ export async function renderFinanceWorkbook(book: FinanceBook): Promise<Uint8Arr
   add([]);
   summary('סיכום תקופה', book.period);
   heading('סיכום שורות מסוננות');
-  amount('הכנסות', book.filteredRows.income);
+  amount('הכנסות (לא כולל מע״מ)', book.filteredRows.income);
   amount('הוצאות', book.filteredRows.expense);
 
   for (const month of book.months) {
     add([]);
     heading(`חודש ${monthLabel(month.summary)}`);
-    transactions('הכנסות', month.incomeRows);
+    transactions('הכנסות (לא כולל מע״מ)', month.incomeRows);
     transactions('הוצאות', month.expenseRows);
     summary('סיכום חודש', month.summary);
   }

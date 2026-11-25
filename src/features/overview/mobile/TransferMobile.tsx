@@ -23,7 +23,7 @@ export function TransferMobile({ months, embedded = false }: { months: TransferM
                 <li key={l.projectId} className={m.line}>
                   <strong>{l.name}</strong>
                   <dl className={css.cubeRows}>
-                    <div><dt>הכנסות</dt><dd className={css.num}>{l.income}</dd></div>
+                    <div><dt>הכנסות (לא כולל מע״מ)</dt><dd className={css.num}>{l.income}</dd></div>
                     <div><dt>הוצאות</dt><dd className={css.num}>{l.expense}</dd></div>
                     <div><dt>מס להעברה</dt><dd className={css.num}>{l.tax}</dd></div>
                     <div><dt>רווח נקי</dt><dd className={css.num}>{l.net}</dd></div>

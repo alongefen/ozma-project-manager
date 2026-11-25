@@ -60,9 +60,9 @@ describe('נתיב הורדת הכספים', () => {
   it('מורשה מקבל שורות מסוננות עם סיכומי חודש ותקופה מלאים', async () => {
     server();
     const rows = await expectDownload(await get(`projectId=${projectId}&period=2026-12&day=2&search=${encodeURIComponent('ייצוא')}`), 'כספים-2026-12.xlsx');
-    expect(pairsAfter(rows, 'סיכום תקופה', 2)).toEqual([['הכנסות', 3000.5], ['הוצאות', 40]]);
-    expect(pairsAfter(rows, 'סיכום חודש', 2)).toEqual([['הכנסות', 3000.5], ['הוצאות', 40]]);
-    expect(pairsAfter(rows, 'סיכום שורות מסוננות', 2)).toEqual([['הכנסות', 1000.5], ['הוצאות', 0]]);
+    expect(pairsAfter(rows, 'סיכום תקופה', 2)).toEqual([['הכנסות (לא כולל מע״מ)', 3000.5], ['הוצאות', 40]]);
+    expect(pairsAfter(rows, 'סיכום חודש', 2)).toEqual([['הכנסות (לא כולל מע״מ)', 3000.5], ['הוצאות', 40]]);
+    expect(pairsAfter(rows, 'סיכום שורות מסוננות', 2)).toEqual([['הכנסות (לא כולל מע״מ)', 1000.5], ['הוצאות', 0]]);
     expect(rows).toContainEqual([2, 'הכנסה', '=1+1 ייצוא', 1000.5]);
     expect(rows.flat()).not.toContain('מחוץ לסינון');
     expect(rows.flat()).not.toContain('הוצאה בדויה');
