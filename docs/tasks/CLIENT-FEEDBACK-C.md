@@ -11,4 +11,9 @@
 
 ## Part 2: optional task assignee
 
-Pending: SQL + rollback, then Alon's "כן" in the task chat (D31).
+D31 (awaiting Alon's typed "כן" in the task chat; nothing applied):
+- What: nullable `tasks.assignee_id` (FK profiles, restrict), index, helper `private.check_assignee`, `create or replace` of `create_task` / `update_task`. Why: client request. Cost: none (Free plan). No backup exists.
+- Migration: `supabase/migrations/20261125120000_task_assignee.sql`. Rollback: `supabase/rollback/20261125120000_task_assignee.down.sql` (restores the previous function bodies, drops helper, index, column; destroys stored assignees).
+- Contract: `assigneeId` optional in both functions; omitted = unchanged on update; `''` = none (`private.keys` rejects JSON null for this key and is not changed). Value must be an active profile with a membership on the same project, else VALIDATION. Finished projects stay read-only (`require_project` unchanged).
+- Known gap: a member removed from the project later stays as assignee until the task is edited (display only).
+- UI (counter per person, "המשימות שלי", row/form) is built after the migration is applied.
