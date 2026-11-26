@@ -18,6 +18,9 @@ test.beforeAll(async () => {
   server = await createServer({
     root, configFile: false, envDir: false,
     resolve: { alias: { '@': `${root}src` } },
+    // The virtual entry is not crawlable before navigation. Prebundle its browser
+    // dependencies so discovery cannot reload the first test mid-upload.
+    optimizeDeps: { include: ['react', 'react-dom', 'react-dom/client', 'react/jsx-dev-runtime', 'tus-js-client', 'zod'] },
     oxc: { jsx: { runtime: 'automatic' } },
     server: { host: '127.0.0.1', port: 0 },
     plugins: [{
@@ -50,6 +53,7 @@ test.beforeAll(async () => {
           import { UploadForm } from '@/features/files/shared/UploadForm';
           import { EntryForm } from '@/features/diary/shared/EntryForm';
           import { CoverControl } from '@/features/projects/shared/CoverControl';
+          import { Sheet } from '@/components/ui/Sheet';
           import '@/styles/app.css';
           import '@/features/files/shared/files.css';
           import '@/features/diary/shared/diary.css';
@@ -61,7 +65,9 @@ test.beforeAll(async () => {
             : mode === 'diary' ? h(EntryForm, { projects: [{ id: '${projectId}', name: 'פרויקט בדיקה' }], canMove: true, today: '2026-11-26', onDone() {}, onCancel() {} })
             : mode === 'cover' ? h(CoverControl, { id: '${projectId}', revision: 1, coverFileId: null })
             : h(FileUpload, { ...props, purpose: 'diary', camera: true });
-          createRoot(document.getElementById('root')).render(view);
+          const wrapped = new URLSearchParams(location.search).has('sheet')
+            ? h(Sheet, { open: true, title: 'דיווח חדש', onClose() {} }, view) : view;
+          createRoot(document.getElementById('root')).render(wrapped);
         `;
       },
       transform(_code, id) {
@@ -84,7 +90,7 @@ test.beforeAll(async () => {
 test.afterAll(async () => { await server?.close(); });
 
 type UploadRequest = { purpose: string; projectId: string; files: { clientId: string; name: string; mime: string; sizeBytes: number }[] };
-async function fixture(page: Page, consumer = 'shared', options: { beginError?: boolean; completeError?: boolean; hold?: boolean } = {}) {
+async function fixture(page: Page, consumer = 'shared', options: { beginError?: boolean; completeError?: boolean; hold?: boolean; sheet?: boolean } = {}) {
   page.on('pageerror', error => console.error('Harness page error:', error.message));
   const begun: UploadRequest[] = [];
   const bytes: Buffer[] = [];
@@ -121,10 +127,53 @@ async function fixture(page: Page, consumer = 'shared', options: { beginError?: 
     if (url.pathname.startsWith('/api/')) return route.abort();
     return route.continue();
   });
-  await page.goto(`${origin}/harness?consumer=${consumer}`);
+  await page.goto(`${origin}/harness?consumer=${consumer}${options.sheet ? '&sheet=1' : ''}`);
   await expect(page.locator('input[type=file]').first()).toBeAttached();
   return { begun, bytes, release };
 }
+
+for (const width of [360, 375, 390, 768, 1024, 1280]) {
+  test(`transient success at ${width}px: removing three diary images leaves no completed cards`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await fixture(page, 'diary', { sheet: true });
+    await page.clock.install();
+    await page.locator('input[type=file]').first().setInputFiles([
+      photo, { ...photo, name: 'second.jpg' }, { ...photo, name: 'third.jpg' },
+    ]);
+    await expect(page.locator('.dr-file-row')).toHaveCount(3);
+    await expect(page.locator('.upload__item--done')).toHaveCount(0);
+    const toast = page.getByRole('status').filter({ hasText: '3 קבצים הועלו' });
+    await expect(toast).toBeVisible();
+    expect(await toast.evaluate(el => getComputedStyle(el).position)).toBe('fixed');
+    expect(await toast.evaluate(el => getComputedStyle(el).pointerEvents)).toBe('none');
+    const box = (await toast.boundingBox())!;
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y).toBeLessThan(100);
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(width);
+    for (let i = 0; i < 3; i++) await page.getByRole('button', { name: /^הסרת .+ מהדיווח$/ }).first().click();
+    await expect(page.locator('.dr-file-row')).toHaveCount(0);
+    await expect(page.locator('.upload__item')).toHaveCount(0);
+    await page.clock.fastForward(2600);
+    await expect(toast).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  });
+}
+
+test('a repeated identical success gets a fresh dismissal timer', async ({ page }) => {
+  await fixture(page, 'shared', { sheet: true });
+  await page.clock.install();
+  await page.locator('input[type=file]').first().setInputFiles(photo);
+  const toast = page.getByRole('status').filter({ hasText: 'הקובץ הועלה' });
+  await expect(toast).toBeVisible();
+  await page.clock.fastForward(2000);
+  await page.locator('input[type=file]').first().setInputFiles(photo);
+  await expect.poll(() => page.evaluate(() => (window as unknown as { uploaded?: unknown[] }).uploaded?.length ?? 0)).toBe(2);
+  await page.clock.fastForward(1000);
+  await expect(toast).toBeVisible();
+  await page.clock.fastForward(1600);
+  await expect(toast).toHaveCount(0);
+});
 
 for (const width of [390, 1280]) {
   test.describe(`selection at ${width}px`, () => {
@@ -134,12 +183,12 @@ for (const width of [390, 1280]) {
       const chooser = page.waitForEvent('filechooser');
       await page.locator('button').filter({ hasText: 'בחירת קבצים' }).click();
       await (await chooser).setFiles([photo, { ...photo, name: 'second.jpg' }]);
-      await expect(page.locator('.upload__item--done')).toHaveCount(2);
+      await expect.poll(() => page.evaluate(() => (window as unknown as { uploaded?: unknown[] }).uploaded?.length ?? 0)).toBe(2);
       expect(begun[0]).toMatchObject({ purpose: 'diary', projectId, files: [{ name: 'synthetic.jpg', mime: 'image/jpeg', sizeBytes: 8 }, { name: 'second.jpg', mime: 'image/jpeg', sizeBytes: 8 }] });
       expect(bytes).toEqual([photo.buffer, photo.buffer]);
       await expect(page.locator('input[type=file]').first()).toHaveValue('');
       await page.locator('input[type=file]').first().setInputFiles(photo);
-      await expect(page.locator('.upload__item--done')).toHaveCount(3);
+      await expect.poll(() => page.evaluate(() => (window as unknown as { uploaded?: unknown[] }).uploaded?.length ?? 0)).toBe(3);
       expect(begun).toHaveLength(2);
       expect(await page.evaluate(() => (window as unknown as { uploaded: unknown[] }).uploaded.length)).toBe(3);
     });
@@ -153,10 +202,10 @@ for (const width of [390, 1280]) {
       const camera = await chooser;
       expect(camera.isMultiple()).toBe(false);
       await camera.setFiles(photo);
-      await expect(page.locator('.upload__item--done')).toHaveCount(1);
+      await expect(page.getByRole('status').filter({ hasText: 'הקובץ הועלה' })).toBeVisible();
       expect(begun).toHaveLength(1);
       await page.locator('input[capture]').setInputFiles([]);
-      await expect(page.locator('.upload__item')).toHaveCount(1);
+      await expect(page.locator('.upload__item')).toHaveCount(0);
       expect(begun).toHaveLength(1);
     });
 
@@ -170,7 +219,7 @@ for (const width of [390, 1280]) {
         }
         if (consumer === 'diary') await page.getByLabel('מה בוצע').fill('דיווח בדיקה');
         await page.locator('input[type=file]').first().setInputFiles(photo);
-        await expect(page.locator('.upload__item--done')).toHaveCount(1);
+        await expect(page.getByRole('status').filter({ hasText: 'הקובץ הועלה' })).toBeVisible();
         expect(begun[0].purpose).toBe(consumer);
         if (consumer === 'document') expect(await page.evaluate(() => (window as unknown as { uploaded: unknown[] }).uploaded.length)).toBe(1);
         if (consumer === 'cover') {
@@ -195,7 +244,7 @@ test('visible progress locks diary submit until completion', async ({ page }) =>
   await expect(page.locator('.upload__bar')).toBeVisible();
   await expect(page.getByRole('button', { name: 'מעלה קבצים…', exact: true })).toBeDisabled();
   release();
-  await expect(page.locator('.upload__item--done')).toHaveCount(1);
+  await expect(page.getByRole('status').filter({ hasText: 'הקובץ הועלה' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'שמירת הדיווח', exact: true })).toBeEnabled();
 });
 

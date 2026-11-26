@@ -95,7 +95,7 @@ Two separate actions, never one combined "print / PDF" control.
 ## Uploads
 
 - Uploading starts the moment a file is picked. There is no separate "upload" button; use `FileUpload` and never build another picker.
-- Each file shows progress, success, or an error with "retry" and "remove". Only completed files are handed to the form, so a retry never attaches a duplicate.
+- Each in-flight file shows progress; failures remain inline with "retry" and "remove". Accepted files are handed to the form and shown in its attachment list, with a floating success message that disappears after 2.5 seconds instead of a persistent success card. A later success restarts the timer. A retry never attaches a duplicate.
 - A form with an upload passes `onBusyChange` and blocks submit (and a document sheet blocks close and edits to its choices) while a file is in flight.
 - If a file needs a mandatory choice (document category and access), the choice comes first and the picker stays locked until it is valid. Never default it.
 
