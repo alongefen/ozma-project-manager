@@ -12,7 +12,7 @@ Existing live DB, Preview only, no cloud writes in first dispatch. No auth-user/
 
 - LEADS-DATA — `01a217f9-687b-77f2-8aea-061e47cf23d4`, host `local`, worktree `/Users/alongefen/.codex/worktrees/fe2a/ozma-project-manager`.
 - LEADS-ISOLATION — `01a217f9-ba14-7922-8e83-c27dc4de4747`, host `local`, worktree `/Users/alongefen/.codex/worktrees/1ee1/ozma-project-manager`.
-- Dispatch bootstrap snapshot `000e30e18ef025efe75957e24af3916e14ad0882` on `codex/leads-foundation`, rebased onto `6f87ea1`. ISOLATION completed and selectively integrated as `7b08b8c` from `48a58c7`; one GPT-6.1 Sol reviewer found no actionable issues. DATA remains active in a compact snapshot. No actual route/action/nav or deployed leads Preview verification yet. Resume with compact bounded waits, not polling loops.
+- Dispatch bootstrap snapshot `000e30e18ef025efe75957e24af3916e14ad0882` on `codex/leads-foundation`, rebased onto `6f87ea1`. ISOLATION completed and selectively integrated as `7b08b8c` from `48a58c7`; one GPT-6.1 Sol reviewer found no actionable issues. DATA delivered `a67ad3e`, integrated as `8931860`; 50 local tests and TypeScript/lint reported passing, GPT-6.1 Sol review found one P2 SQL/Zod email mismatch, with LEADS-DATA-FIX ready in parallel with UI. D31 held until corrected. UI ready using `docs/tasks/LEADS-UI.md`; no cloud writes authorized. No actual route/action/nav or deployed leads Preview verification yet. Resume with compact bounded waits, not polling loops.
 
 ## Working rule update — A-48, 26.11.2026
 

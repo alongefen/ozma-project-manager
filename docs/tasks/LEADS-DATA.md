@@ -91,3 +91,10 @@ Requested future approval: apply exactly this additive migration, then generate 
 - No cloud SQL, migration application, DB write, auth-user change, seed/reset, Preview request, production deployment, main merge, broad/cloud suite or secret/env-value read performed. Migration body and permission/rollback changes remain proposals. No screen/layout work, so viewport checks do not apply to this DATA dispatch.
 - A-39 reviewer: **pending**. Sonnet is unavailable in this harness's listed model options; no alternate reviewer was silently substituted and no independent review is claimed.
 - Next owner: LEADS feature manager integrates the DATA commit alongside ISOLATION, arranges actual Sonnet review, obtains concrete D31/window approval, then queues UI/Preview verification. Main release remains held for explicit Alon approval.
+
+
+## Feature-manager integration and review — 26 November 2026
+
+- Source `a67ad3e60b5104b2bcc19cd501cb292284dd580a` integrated as `8931860`; original 50-test/TypeScript/lint evidence preserved on unchanged files.
+- One reviewer on the explicitly authorized GPT-6.1 Sol fallback found P2 SQL/Zod email parity: direct RPC can save `a@b.c` or `a..b@example.com`, rejected by LeadRowSchema and therefore breaking list mapping. D31 application is held until corrected; narrow fix task `LEADS-DATA-FIX` owns migration email validation and its regression checks. UI may proceed against unchanged contracts.
+- No other actionable finding in the reviewed scope; hosted SQL compilation, permissions and concurrency remain unverified. Original reviewer will inspect only the concrete changed fix, not rerun the full review.

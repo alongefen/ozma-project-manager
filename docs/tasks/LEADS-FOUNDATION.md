@@ -149,7 +149,7 @@ The feature manager maintains the shared coordination docs; task chats keep thei
 2. Prepare additive schema/RLS/RPC and rollback proposal; obtain concrete D31 approval before cloud application. Confirm how forbidden-action testing can use existing approved identities without creating/changing users.
 3. Implement contracts/data/logic and affected unit checks; isolated cloud writes only in an allocated window and only for uniquely identified fake lead rows, after required approval. Never run broad seed/reset/cloud suites.
 4. Implement shared UI and both views. Verify six widths (360, 375, 390, 768, 1024, 1280), RTL, keyboard/sheet behaviour, no horizontal scroll and create-button placement. Verify production gate for direct URLs/actions/navigation and permitted/forbidden reads/writes separately.
-5. One Sonnet reviewer under A-39. Sonnet is not exposed by the current agent tool's model options; report the limitation before review and obtain a supported review arrangement rather than silently substituting another model.
+5. One reviewer under A-39: Sonnet when available, otherwise GPT-6.1 Sol (`gpt-6.1-sol`) per Alon's explicit subsequent instruction merged in main `189d65d`.
 6. Record affected tests and regression evidence, run required CI, inspect Preview configuration without secrets and verify Preview on the existing service. No automatic merge; stop for Alon's explicit release approval.
 
 ### Verification in this build chat
@@ -166,4 +166,4 @@ Alon authorized required file edits on isolated feature branches, waived the all
 - LEADS-UI: queued until DATA contracts and ISOLATION guard are committed; then shared model, both shells, guarded navigation and local/browser checks.
 - LEADS-INTEGRATION: queued after implementation; concrete D31 request, authorized bounded cloud verification, one integrated Preview/CI report, and STOP before main merge for release approval.
 
-Reviewer model constraint remains explicit: current agent model options do not include Sonnet. Implementers may build and run affected local tests, but must report review as pending unless an actual Sonnet reviewer is available. Never silently substitute or claim review passed.
+Reviewer fallback now authorized by Alon: use GPT-6.1 Sol (`gpt-6.1-sol`) if Sonnet is unavailable, per AGENTS/main `189d65d`. ISOLATION integrated and reviewed; DATA integrated as `8931860`, one P2 email-validation parity fix pending. UI brief uses the actual committed interfaces and may proceed on local fixtures while cloud D31 remains closed.

@@ -25,9 +25,10 @@
 | Task | State and coordination | Completion gate |
 |---|---|---|
 | LEADS-FOUNDATION | Scope closed with Alon; this chat is now feature construction manager. File-allocation approval explicitly waived for isolated feature branches. [Spec](tasks/LEADS-FOUNDATION.md), [construction plan](handoffs/LEADS-CONSTRUCTION.md). | Concrete D31 before DB application; verified Preview and explicit Alon release approval before main merge. |
-| LEADS-DATA | Dispatch now: contracts, additive DB/rollback proposal, feature logic and affected local tests. [Brief](tasks/LEADS-DATA.md). | No live SQL/test writes in initial dispatch; return commit/interface/D31 proposal. |
+| LEADS-DATA | Integrated `8931860` from `a67ad3e`: contracts, additive DB/rollback proposal and feature logic; 50 local tests, TypeScript/lint reported passing; GPT-6.1 Sol review found P2 persisted-email mismatch; correction dispatched before D31. [Brief](tasks/LEADS-DATA.md). | No live SQL/test writes in initial dispatch; return commit/interface/D31 proposal. |
 | LEADS-ISOLATION | Integrated `7b08b8c`: server Preview/admin helper, 17 passing local tests and focused ESLint reported; one GPT-6.1 Sol review, no actionable findings. Preview readiness partial, actual route/action/nav enforcement queued. [Brief](tasks/LEADS-ISOLATION.md). | No production activation/config changes; return guard contract/checks. |
-| LEADS-UI | Queued after DATA contracts and ISOLATION guard. Both shells, shared model, guarded nav and UI checks. | No invented interface; use actual committed outputs. |
+| LEADS-DATA-FIX | Narrow SQL/Zod email parity fix and regression test, independent of UI. [Brief](tasks/LEADS-DATA-FIX.md). | Original reviewer rechecks concrete fix; no cloud SQL. |
+| LEADS-UI | Ready for dispatch with committed DATA/ISOLATION contracts: guarded actions, both shells, model, guarded nav and local UI checks. [Brief](tasks/LEADS-UI.md). | No invented interface; use actual committed outputs. |
 | LEADS-INTEGRATION | Queued: authorized bounded cloud tests, reviewed PR, CI and Preview evidence. | No automatic/main merge or production deployment. Use GPT-6.1 Sol when Sonnet is unavailable, per Alon and main AGENTS `189d65d`. |
 
 ### PM-MERGE-EFFICIENCY — A-48, 26.11.2026
