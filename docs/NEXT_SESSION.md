@@ -10,11 +10,11 @@ Existing live DB, Preview only, no cloud writes in first dispatch. No auth-user/
 
 ### Current execution chats
 
-- LEADS-DATA-FIX — `01a21848-3714-7682-822c-2c56c489b5b9`, host `local`, worktree `/Users/alongefen/.codex/worktrees/ef76/ozma-project-manager`. Completed source `6becf18`, integrated `b72c22a`; original DATA reviewer confirmed P2 resolved, no further finding. 23 focused tests/lint reported, no cloud SQL.
-- LEADS-UI — `01a21849-5832-7fa0-8454-bf913467bf68`, host `local`, worktree `/Users/alongefen/.codex/worktrees/35ff/ozma-project-manager`. Guarded actions/routes/navigation and both screen shells, local fake fixtures only; one Sonnet or authorized GPT-6.1 Sol reviewer.
-- Dispatch snapshot `fb357e17a502ae72b9f1d5c3880d3dfb614f2b66`; UI remains in progress; DATA-FIX completed and reviewed. No hosted verification claim.
-- Completed predecessors: DATA chat `01a217f9-687b-77f2-8aea-061e47cf23d4` delivered `a67ad3e`, integrated `8931860`; ISOLATION chat `01a217f9-ba14-7922-8e83-c27dc4de4747` delivered `48a58c7`, integrated `7b08b8c`, reviewed without findings.
-- Alon approved the concrete migration/bounded fake-lead tests/access-only rollback in `docs/tasks/LEADS-CLOUD.md`. Dispatch CLOUD phase 1 for exact migration/diagnostics/types, alongside local-only UI. Fake-lead writes wait for UI readiness; no second permission question for the same approved scope. Main release remains unapproved. Resume with bounded compact wait_threads snapshots, not polling loops. No new duplicate task chats.
+- LEADS-CLOUD — `01a21858-9862-77b2-8880-c92ed8af5843`, host `local`, worktree `/Users/alongefen/.codex/worktrees/4d4f/ozma-project-manager`. Dispatch snapshot `92e7c3e9778c8f05f73af7d54fb1058ede030481`; phase 1 authorized exact migration/preflight/diagnostics/generated types. Exclusive leads migration/metadata window assigned; task must report release. No fake-lead writes until UI readiness.
+- LEADS-UI — `01a21849-5832-7fa0-8454-bf913467bf68`, host `local`, worktree `/Users/alongefen/.codex/worktrees/35ff/ozma-project-manager`. Local-only guarded actions/routes/navigation and both shells; latest compact snapshot reports duplicate/retry/status rollback/Escape checks passed and archive/delete browser checks in progress. Not yet a final delivered/reviewed commit.
+- DATA-FIX complete: `6becf18` integrated `b72c22a`; original DATA reviewer confirmed P2 resolved. DATA `a67ad3e` integrated `8931860`; ISOLATION `48a58c7` integrated `7b08b8c`, reviewed. Prior task chats idle; do not open duplicates.
+- Alon approved the concrete change on 26 November 2026 as recorded in LEADS-CLOUD. Approval covers exact migration, generated types/read diagnostics, up to 20 marked fake leads with retained soft-deleted records, containment rollback on failure. It does not authorize feature release/main merge.
+- Next manager action: read compact CLOUD and UI completion snapshots; verify actual migration application and history, integrate generated types and reviewed UI, then coordinate approved bounded fake-lead/Preview end-to-end verification. No repeated approval for this same scope; stop on drift/new changes/cost. No deployed success claim before actual evidence. No polling loop.
 
 ## Working rule update — A-48, 26.11.2026
 
