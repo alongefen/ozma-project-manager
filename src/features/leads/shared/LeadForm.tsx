@@ -1,13 +1,15 @@
 'use client';
-import { useRef, useState } from 'react';
-import { ConfirmDialog, DateField, FormActions, Notice, SelectField, TextField } from '@/components/ui';
+import { useId, useRef, useState, type ReactNode, type DialogHTMLAttributes } from 'react';
+import { ConfirmDialog, DateField, FormActions, Notice, SelectField, Sheet, TextField } from '@/components/ui';
 import { LeadFieldsSchema, leadMarketingCompanies, leadMarketingCompanyLabels, leadSources, leadSourceLabels, leadStatuses, leadStatusLabels, leadTriStateLabels, type LeadFields, type LeadRow } from '@/types/contracts/leads';
 import * as actions from '../logic/actions';
 import { errorText, fieldsFromForm, newFields } from './model';
 import css from './Leads.module.css';
 
-type Props={row:LeadRow|null;today:string;onSaved:()=>void;onCancel:()=>void;onBusy:(busy:boolean)=>void;onConflict:()=>void};
-export function LeadForm({row,today,onSaved,onCancel,onBusy,onConflict}:Props) {
+// Contain close events from the nested duplicate dialog before they reach the editor.
+const nestedDialogEvents: Pick<DialogHTMLAttributes<HTMLDivElement>, 'onClose'> = { onClose: event => event.stopPropagation() };
+type Props={row:LeadRow|null;today:string;onSaved:()=>void;onClose:()=>void; extraActions?:ReactNode; locked:boolean;onBusy:(busy:boolean)=>void;onConflict:()=>void};
+export function LeadForm({row,today,onSaved,onClose,onBusy,onConflict,extraActions,locked}:Props) {
  const [fields] = useState<LeadFields>(()=>row??newFields(today));
  const requestId=useRef<string|null>(null);
  const inFlight=useRef(false);
@@ -17,7 +19,7 @@ export function LeadForm({row,today,onSaved,onCancel,onBusy,onConflict}:Props) {
  const [errors,setErrors]=useState<Record<string,string>>({});
  const [duplicates,setDuplicates]=useState(0);
  const [uncertain,setUncertain]=useState(false);
- const [cancel,setCancel]=useState(false);
+ const formId=useId();
  const mark=(value:boolean)=>{inFlight.current=value;setBusy(value);onBusy(value);};
  async function save(values:LeadFields,allowDuplicate=false) {
   if(inFlight.current)return;
@@ -33,7 +35,14 @@ export function LeadForm({row,today,onSaved,onCancel,onBusy,onConflict}:Props) {
  }
  const options=(labels:Record<string,string>)=>Object.entries(labels).map(([value,label])=>({value,label}));
  const fieldError=(name:string)=>errors[name];
- return <><form className={css.form} noValidate onSubmit={e=>{e.preventDefault();if(uncertain&&pending.current){void save(pending.current,duplicates>0);return;}const parsed=LeadFieldsSchema.safeParse(fieldsFromForm(new FormData(e.currentTarget)));if(!parsed.success){setErrors(Object.fromEntries(parsed.error.issues.map(i=>[String(i.path[0]),'יש למלא ערך תקין.'])));return;}setErrors({});void save(parsed.data);}}>
+ return <Sheet open title={row?'פרטי ליד':'ליד חדש'} dismissible={!locked} onClose={onClose} onEscape={onClose}
+ footer={<FormActions placement="sheet" form={formId} hideCancel spread busy={locked} submitLabel={busy?'שומר…':uncertain?'ניסיון נוסף':'שמירה'} extra={extraActions}/>}
+ ><div {...nestedDialogEvents} onKeyDown={event=>{
+  if(event.key!=='Escape')return;
+  const target=event.target as HTMLElement;
+  if(target.closest('dialog')!==event.currentTarget.closest('dialog')||event.currentTarget.querySelector(':popover-open'))return;
+  event.preventDefault();event.stopPropagation();if(!locked)onClose();
+ }}><form id={formId} className={css.form} noValidate onSubmit={e=>{e.preventDefault();if(uncertain&&pending.current){void save(pending.current,duplicates>0);return;}const parsed=LeadFieldsSchema.safeParse(fieldsFromForm(new FormData(e.currentTarget)));if(!parsed.success){setErrors(Object.fromEntries(parsed.error.issues.map(i=>[String(i.path[0]),'יש למלא ערך תקין.'])));return;}setErrors({});void save(parsed.data);}}>
  <fieldset disabled={busy||uncertain} className={css.fields}>
  <TextField label="שם" name="name" required maxLength={200} defaultValue={fields.name} error={fieldError('name')}/>
  <TextField label="טלפון" name="phone" type="tel" ltr required maxLength={80} defaultValue={fields.phone} error={fieldError('phone')}/>
@@ -52,9 +61,7 @@ export function LeadForm({row,today,onSaved,onCancel,onBusy,onConflict}:Props) {
  </fieldset>
  {error&&<Notice tone="error">{error}</Notice>}
  {uncertain&&<Notice>התשובה לא התקבלה. ניסיון נוסף ישלח את אותם פרטים בבטחה.</Notice>}
- <FormActions placement="sheet" busy={busy} submitLabel={busy?'שומר…':uncertain?'ניסיון נוסף':'שמירה'} onCancel={()=>{if(!inFlight.current)setCancel(true);}}/>
  </form>
  <ConfirmDialog open={duplicates>0} title="ייתכן שהליד כבר קיים" confirmLabel="יצירה בכל זאת" busy={busy} error={error} onConfirm={()=>{if(pending.current)void save(pending.current,true);}} onCancel={()=>{setDuplicates(0);setError(null);}}><p>נמצאו {duplicates} לידים עם אותו טלפון, כולל בארכיון. הפרטים שהזנת נשמרו.</p></ConfirmDialog>
- <ConfirmDialog open={cancel} title="ביטול עריכת ליד" confirmLabel="ביטול העריכה" onConfirm={onCancel} onCancel={()=>setCancel(false)}><p>השינויים בטופס לא יישמרו. שום ליד קיים לא נמחק.</p></ConfirmDialog>
- </>;
+ </div></Sheet>;
 }

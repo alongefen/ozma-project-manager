@@ -1,6 +1,6 @@
 'use client';
-import { createContext, useContext, useRef, useState, type DialogHTMLAttributes } from 'react';
-import { Button, ConfirmDialog, Notice, Pin, Sheet, StateMessage } from '@/components/ui';
+import { createContext, useContext, useRef, useState } from 'react';
+import { Button, ConfirmDialog, DeleteIcon, IconButton, Notice, Pin, StateMessage } from '@/components/ui';
 import type { LeadFilters as Filters, LeadRow, LeadStatus } from '@/types/contracts/leads';
 import * as actions from '../logic/actions';
 import { emptyFilters, errorText, leadsModel } from './model';
@@ -13,8 +13,6 @@ import css from './Leads.module.css';
 type Context={rows:LeadRow[];today:string;busy:boolean;setStatus:(row:LeadRow,status:LeadStatus)=>void;open:(row:LeadRow)=>void};
 const LeadsContext=createContext<Context|null>(null);
 export function useLeads(){const value=useContext(LeadsContext);if(!value)throw new Error('LeadsProvider missing');return value;}
-// React close events bubble from nested dialogs; contain them before the edit Sheet.
-const nestedDialogEvents: Pick<DialogHTMLAttributes<HTMLDivElement>, 'onClose'> = { onClose: event => event.stopPropagation() };
 type Confirmation={row:LeadRow;kind:'archive'|'restore'|'delete'};
 export function LeadsProvider({initial,today}:{initial:LeadRow[];today:string}) {
  const [rows,setRows]=useState(initial);
@@ -57,22 +55,13 @@ export function LeadsProvider({initial,today}:{initial:LeadRow[];today:string}) 
  }
  function ask(kind:Confirmation['kind']){if(form?.row&&!lock.current){setConfirmError(null);setConfirm({row:form.row,kind});}}
  return <LeadsContext.Provider value={{rows:model.rows,today,busy,setStatus,open:row=>{if(!lock.current)setForm({row});}}}><div className={css.root}>
- <Pin><div className={css.toolbar}><Button icon="add" className="ui-lead" disabled={busy} onClick={()=>{if(!lock.current)setForm({row:null});}}>ליד חדש</Button><LeadFilters filters={filters} setFilters={setFilters}/></div></Pin>
- {error&&<Notice tone="error">{error}</Notice>}
  <LeadSummary model={model}/>
+ <Pin><div className={css.toolbar}><Button icon="add" className="ui-lead" disabled={busy} onClick={()=>{if(!lock.current)setForm({row:null});}}>ליד חדש</Button><LeadFilters filters={filters} setFilters={setFilters} statuses={model.statuses}/></div></Pin>
+ {error&&<Notice tone="error">{error}</Notice>}
  {!model.total?<StateMessage backHref="/projects" backLabel="חזרה לפרויקטים">{rows.length?'לא נמצאו לידים התואמים לסינון.':'עדיין אין לידים.'}</StateMessage>:<><LeadsMobile/><LeadsDesktop/></>}
- <Sheet open={!!form} title={form?.row?'פרטי ליד':'ליד חדש'} dismissible={!busy} onClose={()=>{if(form&&!lock.current)setClosing(true);}}>
- {form&&<div {...nestedDialogEvents} onKeyDown={event=>{
-  // Ask before cancelling without letting Escape close the controlled editor first.
-  // Nested confirmations and open shared pickers retain their own Escape behaviour.
-  if(event.key!=='Escape')return;
-  const target=event.target as HTMLElement;
-  if(target.closest('dialog')!==event.currentTarget.closest('dialog')||event.currentTarget.querySelector(':popover-open'))return;
-  event.preventDefault();event.stopPropagation();if(!lock.current)setClosing(true);
- }}><LeadForm row={form.row} today={today} onBusy={mark} onCancel={()=>setForm(null)} onConflict={()=>{setForm(null);setError(errorText('CONFLICT'));void reload();}} onSaved={()=>{setForm(null);void reload();}}/>
- {form.row&&<div className={css.actions}><Button variant="secondary" disabled={busy} onClick={()=>ask(form.row?.archivedAt?'restore':'archive')}>{form.row.archivedAt?'החזרה מהארכיון':'העברה לארכיון'}</Button><Button variant="secondary" disabled={busy} onClick={()=>ask('delete')}>מחיקת ליד</Button></div>}</div>}
- </Sheet>
+ {form&&<LeadForm row={form.row} today={today} locked={busy} onBusy={mark} onClose={()=>{if(!lock.current)setClosing(true);}} onConflict={()=>{setForm(null);setError(errorText('CONFLICT'));void reload();}} onSaved={()=>{setForm(null);void reload();}} extraActions={form.row&&<><Button variant="secondary" disabled={busy} onClick={()=>ask(form.row?.archivedAt?'restore':'archive')}>{form.row.archivedAt?'החזרה מהארכיון':'העברה לארכיון'}</Button><IconButton tone="danger" label={`מחיקת ליד: ${form.row.name}`} disabled={busy} onClick={()=>ask('delete')}><DeleteIcon/></IconButton></>}/>}
+
  <ConfirmDialog open={closing} title="ביטול עריכת ליד" confirmLabel="ביטול העריכה" onConfirm={()=>{setClosing(false);setForm(null);}} onCancel={()=>setClosing(false)}><p>השינויים בטופס לא יישמרו. שום ליד קיים לא נמחק.</p></ConfirmDialog>
- <ConfirmDialog open={!!confirm} title={confirm?.kind==='delete'?'מחיקת ליד':confirm?.kind==='restore'?'החזרה מהארכיון':'העברה לארכיון'} confirmLabel={confirm?.kind==='delete'?'מחיקה':confirm?.kind==='restore'?'החזרה':'העברה לארכיון'} danger busy={busy} error={confirmError} onConfirm={()=>void mutate()} onCancel={()=>setConfirm(null)}><p>{confirm?.row.name}: {confirm?.kind==='delete'?'הליד יוסר מהרשימות; הרשומה והפרטים נשמרים במסד. אין שחזור מהמסך הזה.':'שום דבר לא נמחק. ניתן להחזיר את הליד מהארכיון.'}</p></ConfirmDialog>
+ <ConfirmDialog open={!!confirm} title={confirm?.kind==='delete'?'מחיקת ליד':confirm?.kind==='restore'?'החזרה מהארכיון':'העברה לארכיון'} confirmLabel={confirm?.kind==='delete'?'מחיקה':confirm?.kind==='restore'?'החזרה':'העברה לארכיון'} danger busy={busy} error={confirmError} onConfirm={()=>void mutate()} onCancel={()=>setConfirm(null)}><p>{confirm?.row.name}: שינויים שלא נשמרו בטופס לא יישמרו. {confirm?.kind==='delete'?'הליד יוסר מהרשימות; הרשומה והפרטים נשמרים במסד. אין שחזור מהמסך הזה.':'שום דבר לא נמחק. ניתן להחזיר את הליד מהארכיון.'}</p></ConfirmDialog>
  </div></LeadsContext.Provider>;
 }

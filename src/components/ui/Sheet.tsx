@@ -7,7 +7,7 @@ import css from './Sheet.module.css';
  * centred pop-up on desktop. Built on the native dialog (focus trap, Escape, inert background).
  * Children mount only while open, so every opening starts from a clean state.
  */
-export function Sheet({ open, onClose, title, children, dismissible = true }: { open: boolean; /** False while a request is running: Escape, the X and the backdrop do nothing, so its result always has somewhere to show. */ dismissible?: boolean; onClose: () => void; title: string; children: ReactNode }) {
+export function Sheet({ open, onClose, title, children, footer, onEscape, dismissible = true }: { open: boolean; /** False while a request is running: Escape, the X and the backdrop do nothing, so its result always has somewhere to show. */ dismissible?: boolean; onClose: () => void; title: string; children: ReactNode; /** Outside the scrolling body; omitted by existing callers. */ footer?: ReactNode; /** Controlled dismissal, including focus in the footer. */ onEscape?: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   useEffect(() => {
@@ -21,7 +21,7 @@ export function Sheet({ open, onClose, title, children, dismissible = true }: { 
   }, [open]);
   const close = () => { if (dismissible) onClose(); };
   return (
-    <dialog ref={ref} className={css.dialog} aria-labelledby={titleId} onClose={onClose} onCancel={e => { if (!dismissible) e.preventDefault(); }} onClick={e => { if (e.target === e.currentTarget) close(); }}>
+    <dialog ref={ref} className={css.dialog} aria-labelledby={titleId} onClose={onClose} onCancel={e => { if (e.target !== e.currentTarget) return; if (!dismissible || onEscape) e.preventDefault(); if (dismissible && onEscape) onEscape(); }} onClick={e => { if (e.target === e.currentTarget) close(); }}>
       {open && (
         <div className={css.panel}>
           <header className={css.head}>
@@ -31,6 +31,7 @@ export function Sheet({ open, onClose, title, children, dismissible = true }: { 
             </button>
           </header>
           <div className={css.body}>{children}</div>
+          {footer && <footer className={css.footer}>{footer}</footer>}
         </div>
       )}
     </dialog>

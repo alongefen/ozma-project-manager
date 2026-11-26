@@ -1,0 +1,3 @@
+.spread { flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 8px; }
+.spread.spread > * { flex: 0 0 auto; }
+.extra { display: flex; align-items: center; gap: 8px; white-space: nowrap; margin-inline-start: auto; }
