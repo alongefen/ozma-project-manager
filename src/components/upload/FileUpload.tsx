@@ -94,10 +94,9 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
     }
   }
 
-  async function add(files: FileList | null) {
-    if (!files) return;
+  async function add(picked: File[]) {
+    if (picked.length === 0) return;
     setNotice(null);
-    const picked = Array.from(files);
     const inspected = await Promise.all(picked.map(inspect));
     const fresh: Item[] = [];
     const added: Item[] = [];
@@ -151,9 +150,9 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
         <Button variant="secondary" disabled={disabled || busy} onClick={() => picker.current?.click()}>{label}</Button>
         {camera && <Button variant="secondary" disabled={disabled || busy} onClick={() => shooter.current?.click()}>צילום</Button>}
         <input ref={picker} className="sr-only" type="file" tabIndex={-1} aria-label={label} accept={accept} multiple={limit > 1}
-          onChange={e => { const picked = e.target.files; e.target.value = ''; void add(picked); }} />
+          onChange={e => { const picked = Array.from(e.target.files ?? []); e.target.value = ''; void add(picked); }} />
         {camera && <input ref={shooter} className="sr-only" type="file" tabIndex={-1} aria-label="צילום" accept="image/*" capture="environment"
-          onChange={e => { const picked = e.target.files; e.target.value = ''; void add(picked); }} />}
+          onChange={e => { const picked = Array.from(e.target.files ?? []); e.target.value = ''; void add(picked); }} />}
       </div>
       {notice && <Notice>{notice}</Notice>}
       {items.length > 0 && (

@@ -22,3 +22,6 @@ Not causes (checked in code): `accept` list and 20-file limit are fine; tus chun
 
 ## Ask the client
 Phone model and OS version, browser (Safari/Chrome), whether the picked photo came from the gallery or Google Photos/iCloud, and the exact Hebrew message shown under the file. After deploy: ask them to retry and send the message; the Vercel logs (`[upload]`) must be read within 1 hour of the attempt.
+
+## Follow-up: regression in #158 (found 26.11.2026)
+The pick handler cleared `input.value` and only then read the FileList; the list is live, so it was empty and no upload started. Fixed by copying to an array before clearing. Verified in Chromium with real file inputs: all four picker/camera checks fail against #158 and pass with #160 at 390/1280px. The isolated browser suite also covers document/diary/cover consumers, repeat selection, cancellation, original bytes, visible progress and errors (14 passing checks). See UPLOAD-GALLERY-VERIFY.md for reproduction commands and remaining gates. This does not prove the original intermittent phone failure is resolved.
