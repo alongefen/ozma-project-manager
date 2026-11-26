@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Upload } from 'tus-js-client';
 import { Button, Notice } from '@/components/ui';
 import type { FilePurpose, FileRef, Result, UploadTarget } from '@/types/contracts';
-import { MAX_FILES, acceptFor, checkFile, formatSize } from './rules';
+import { MAX_FILES, acceptFor, checkFile, declaredMime, formatSize, messageForStatus, resolveMime, sniffMime } from './rules';
 
 type Status = 'uploading' | 'done' | 'error';
 type Item = { key: string; file: File; mime: string | null; status: Status; progress: number; error?: string; ref?: FileRef };
@@ -24,11 +24,19 @@ export type FileUploadProps = {
 const newId = () => crypto.randomUUID();
 
 async function post<T>(url: string, body?: unknown): Promise<Result<T>> {
+  let response: Response;
   try {
-    const response = await fetch(url, { method: 'POST', headers: body ? { 'Content-Type': 'application/json' } : undefined, body: body ? JSON.stringify(body) : undefined });
+    response = await fetch(url, { method: 'POST', headers: body ? { 'Content-Type': 'application/json' } : undefined, body: body ? JSON.stringify(body) : undefined });
+  } catch (error) {
+    console.warn('[upload] request failed (network)', url.replace(/[0-9a-f-]{36}/g, ':id'), error);
+    return { ok: false, error: { code: 'UNAVAILABLE', message: 'אין חיבור. נסו שוב' } };
+  }
+  try {
     return (await response.json()) as Result<T>;
   } catch {
-    return { ok: false, error: { code: 'UNAVAILABLE', message: 'אין חיבור. נסו שוב' } };
+    // The server answered with something that is not our JSON (platform timeout page, 413, 5xx): say so instead of "no connection".
+    console.warn('[upload] non-JSON response', response.status, url.replace(/[0-9a-f-]{36}/g, ':id'));
+    return { ok: false, error: { code: 'UNAVAILABLE', message: messageForStatus(response.status) } };
   }
 }
 
@@ -43,7 +51,11 @@ function sendTus(file: File, mime: string, t: Extract<UploadTarget['target'], { 
       headers: { apikey: t.publishableKey, 'x-signature': t.token },
       metadata: { bucketName: t.bucket, objectName: t.path, contentType: mime },
       onProgress: (sent, total) => onProgress(total ? Math.round((sent / total) * 100) : 0),
-      onError: () => reject(new Error('upload')),
+      onError: error => {
+        const status = (error as { originalResponse?: { getStatus(): number } }).originalResponse?.getStatus();
+        console.warn('[upload] tus failed', { status, name: error.name, message: error.message, size: file.size, mime });
+        reject(Object.assign(new Error('upload'), { status }));
+      },
       onSuccess: () => resolve(),
     });
     task.start();
@@ -66,22 +78,40 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
   const latest = useRef(onUploaded);
   useEffect(() => { latest.current = onUploaded; });
 
+  const itemsRef = useRef<Item[]>([]);
+  useEffect(() => { itemsRef.current = items; });
   const patch = (key: string, change: Partial<Item>) => setItems(list => list.map(i => (i.key === key ? { ...i, ...change } : i)));
 
-  function add(files: FileList | null) {
+  /** Reads the first bytes so the declared type matches the real content. An unreadable file (cloud-only, removed) fails here with a clear message. */
+  async function inspect(file: File): Promise<{ mime: string | null; unreadable: boolean }> {
+    const resolved = resolveMime(file);
+    try {
+      const head = new Uint8Array(await file.slice(0, 128).arrayBuffer());
+      return { mime: declaredMime(resolved, sniffMime(head), purpose), unreadable: false };
+    } catch (error) {
+      console.warn('[upload] cannot read picked file', { name: file.name, size: file.size, type: file.type }, error);
+      return { mime: resolved, unreadable: true };
+    }
+  }
+
+  async function add(files: FileList | null) {
     if (!files) return;
     setNotice(null);
-    const next = [...items];
+    const picked = Array.from(files);
+    const inspected = await Promise.all(picked.map(inspect));
     const fresh: Item[] = [];
-    const counted = () => next.filter(i => i.mime).length;
-    for (const file of Array.from(files)) {
+    const added: Item[] = [];
+    const counted = () => itemsRef.current.concat(added).filter(i => i.mime).length;
+    for (const [index, file] of picked.entries()) {
       if (counted() >= limit) { setNotice(limit === 1 ? 'אפשר לבחור קובץ אחד בלבד' : `אפשר לבחור עד ${limit} קבצים בכל פעם`); break; }
-      const check = checkFile(file, purpose);
+      const { mime: sniffed, unreadable } = inspected[index];
+      const base = checkFile({ name: file.name, type: sniffed ?? file.type, size: file.size }, purpose);
+      const check = unreadable ? { ok: false as const, reason: 'לא ניתן לקרוא את הקובץ. אם הוא בענן (Google Photos / iCloud), יש להוריד אותו קודם למכשיר' } : base;
       const item: Item = { key: newId(), file, mime: check.ok ? check.mime : null, status: check.ok ? 'uploading' : 'error', progress: 0, error: check.ok ? undefined : check.reason };
-      next.push(item);
+      added.push(item);
       if (check.ok) fresh.push(item);
     }
-    setItems(next);
+    setItems(list => [...list, ...added]);
     // Upload starts the moment a file is chosen; there is no separate upload button.
     if (fresh.length > 0) void run(fresh);
   }
@@ -104,7 +134,7 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
         await sendTus(item.file, item.mime!, target.value, progress => patch(item.key, { progress }));
         const done = await post<FileRef>(`/api/storage/uploads/${target.value.fileId}/complete`);
         if (done.ok) { finished.push(done.value); patch(item.key, { status: 'done', progress: 100, ref: done.value }); }
-        else patch(item.key, { status: 'error', error: done.error.message });
+        else patch(item.key, { status: 'error', error: done.error.code === 'VALIDATION' ? 'הקובץ לא עבר בדיקה (פגום או לא תואם לסוג שלו). אפשר לנסות קובץ אחר' : done.error.message });
       } catch {
         patch(item.key, { status: 'error', error: 'ההעלאה נכשלה. אפשר לנסות שוב' });
       }
@@ -121,9 +151,9 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
         <Button variant="secondary" disabled={disabled || busy} onClick={() => picker.current?.click()}>{label}</Button>
         {camera && <Button variant="secondary" disabled={disabled || busy} onClick={() => shooter.current?.click()}>צילום</Button>}
         <input ref={picker} className="sr-only" type="file" tabIndex={-1} aria-label={label} accept={accept} multiple={limit > 1}
-          onChange={e => { add(e.target.files); e.target.value = ''; }} />
+          onChange={e => { const picked = e.target.files; e.target.value = ''; void add(picked); }} />
         {camera && <input ref={shooter} className="sr-only" type="file" tabIndex={-1} aria-label="צילום" accept="image/*" capture="environment"
-          onChange={e => { add(e.target.files); e.target.value = ''; }} />}
+          onChange={e => { const picked = e.target.files; e.target.value = ''; void add(picked); }} />}
       </div>
       {notice && <Notice>{notice}</Notice>}
       {items.length > 0 && (
