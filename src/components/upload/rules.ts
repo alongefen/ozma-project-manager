@@ -20,7 +20,7 @@ const OFFICE_EXTENSIONS = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
 
 /** Mime types and extensions the file picker offers for a purpose. */
 export const acceptFor = (purpose: FilePurpose): string =>
-  [...ACCEPTED_MIME, '.heic', '.heif', ...(purpose === 'document' ? [...OFFICE_MIME, ...OFFICE_EXTENSIONS.map(e => `.${e}`)] : [])].join(',');
+  [...ACCEPTED_MIME, '.heic', '.heif', '.dng', 'image/dng', 'image/x-adobe-dng', ...(purpose === 'document' ? [...OFFICE_MIME, ...OFFICE_EXTENSIONS.map(e => `.${e}`)] : [])].join(',');
 
 /** Some phones report an empty type for HEIC, so fall back to the extension. */
 export function resolveMime(file: { name: string; type: string }): string | null {
