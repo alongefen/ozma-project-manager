@@ -4,7 +4,7 @@
 
 Alon closed the screenshot-based scope, authorized necessary file edits on isolated branches without an allocation gate, and appointed chat `01a217e2-212a-7a72-a84d-2b0339c37e9a` the feature construction manager. [Final spec](tasks/LEADS-FOUNDATION.md), [plan](handoffs/LEADS-CONSTRUCTION.md). Worktree `/Users/alongefen/.codex/worktrees/leads-foundation/ozma-project-manager`, branch `codex/leads-foundation`. Refreshed origin/main: `6f87ea1`; incoming upload-toast changes inspected; no code tests run for management docs.
 
-Dispatch two independent task chats: LEADS-DATA (contracts, additive SQL/rollback proposal, logic/local checks) and LEADS-ISOLATION (server production/Preview guard, local checks and read-only Preview readiness). No duplicate leads implementation chat found in current recent inventory/worktrees. UI waits for their committed interfaces; integration/cloud verification follows concrete D31 approval. Keep two task chats maximum. Use compact wait_threads snapshots on resumption, not polling loops. Required Sonnet reviewer is currently unavailable in exposed agent model options; do not silently substitute or call review passed.
+Dispatch two independent task chats: LEADS-DATA (contracts, additive SQL/rollback proposal, logic/local checks) and LEADS-ISOLATION (server production/Preview guard, local checks and read-only Preview readiness). No duplicate leads implementation chat found in current recent inventory/worktrees. UI waits for their committed interfaces; integration/cloud verification follows concrete D31 approval. Keep two task chats maximum. Use compact wait_threads snapshots on resumption, not polling loops. Alon authorized GPT-6.1 Sol (`gpt-6.1-sol`) fallback for unavailable Sonnet; rule merged in main `189d65d` / PR #165 and brought into the feature branch.
 
 Existing live DB, Preview only, no cloud writes in first dispatch. No auth-user/client-data changes, seed/reset, external integrations, auto-merge, main merge or production deployment. Alon's explicit feature-release approval remains required. Child tasks keep their own notes; this manager maintains shared docs. Next owner: DATA/ISOLATION task chats; manager resumes from their commits to prepare UI and present concrete D31 request.
 
@@ -12,7 +12,7 @@ Existing live DB, Preview only, no cloud writes in first dispatch. No auth-user/
 
 - LEADS-DATA — `01a217f9-687b-77f2-8aea-061e47cf23d4`, host `local`, worktree `/Users/alongefen/.codex/worktrees/fe2a/ozma-project-manager`.
 - LEADS-ISOLATION — `01a217f9-ba14-7922-8e83-c27dc4de4747`, host `local`, worktree `/Users/alongefen/.codex/worktrees/1ee1/ozma-project-manager`.
-- Both created and active; bootstrap snapshot `000e30e18ef025efe75957e24af3916e14ad0882` on `codex/leads-foundation`, rebased onto `6f87ea1`. No completion/review/Preview claim yet. Initial progress snapshot requested; resume with compact bounded wait on these IDs.
+- Dispatch bootstrap snapshot `000e30e18ef025efe75957e24af3916e14ad0882` on `codex/leads-foundation`, rebased onto `6f87ea1`. ISOLATION completed and selectively integrated as `7b08b8c` from `48a58c7`; one GPT-6.1 Sol reviewer found no actionable issues. DATA remains active in a compact snapshot. No actual route/action/nav or deployed leads Preview verification yet. Resume with compact bounded waits, not polling loops.
 
 ## Working rule update — A-48, 26.11.2026
 

@@ -53,3 +53,11 @@ Branch: `codex/leads-isolation`, created from the required manager snapshot `000
 - Project metadata reports SSO protection enabled for `all_except_custom_domains`. Protected Preview access has not been exercised. The project reports Node `26.x`, whereas package engines request `>=24 <25`; no configuration was changed. Integration should resolve/verify the actual feature build runtime if this discrepancy affects its build.
 - The available environment-list endpoint can return values and has no metadata-only projection, so it was deliberately not called. The existence/value/scope of `LEADS_PREVIEW_ENABLED`, the runtime `VERCEL_ENV`, and Preview backend configuration remain **unverified**. No env values, secrets, logs or deployment content were fetched or printed. A later authorized configuration step must ensure server-only Preview enablement, followed by actual guarded Preview checks.
 - No deployment, env/config edit, service creation, cost, DB access/write, auth change, seed/reset, push, PR or main merge. Feature release remains blocked until Alon's explicit approval.
+
+
+## Integration and fallback review — feature manager, 26 November 2026
+
+- Integrated source commit `48a58c742bc641808536897e4eebb6c47937a52f` into `codex/leads-foundation` as `7b08b8c`, without changing the three TypeScript files. Exact code/test diff against the source commit is empty; prior 17-test and ESLint evidence retained under A-48.
+- Alon authorized GPT-6.1 Sol fallback when Sonnet is unavailable; AGENTS update merged separately to main in `189d65d` (PR #165). The historical pending-Sonnet statements above no longer block this review.
+- One reviewer subagent ran on `gpt-6.1-sol`, reviewed the source commit against its parent and reported no actionable findings. Source/test review only; no duplicate suite execution or cloud access. The server-only import is mocked by unit tests, so client-build enforcement remains for integration.
+- Helper-level work reviewed. Actual route/action/nav guards, active-context derivation, RLS/RPC server refusals and deployed Preview checks remain required; no claim they are implemented or verified. No main merge/release of this feature.
