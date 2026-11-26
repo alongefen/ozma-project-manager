@@ -56,6 +56,8 @@ begin
    continue;
   end if;
   if jsonb_typeof(v)<>'string' then perform private.fail('VALIDATION',k); end if;
+  -- Email is not trimmed by LeadFieldsSchema; reject surrounding whitespace too.
+  if k='email' then continue; end if;
   f:=jsonb_set(f,array[k],to_jsonb(regexp_replace(v #>> '{}','^[[:space:]]+|[[:space:]]+$','','g')));
  end loop;
  if f->'name'<>'null'::jsonb and length(f->>'name') not between 1 and 200 then perform private.fail('VALIDATION','name'); end if;
@@ -70,7 +72,8 @@ begin
  if f->'marketingCompany'<>'null'::jsonb and not (f->>'marketingCompany')=any(array['new_company','previous_company']::text[]) then perform private.fail('VALIDATION','marketingCompany'); end if;
  if f->'status'<>'null'::jsonb and not (f->>'status')=any(array['new','called','qualified','proposal_sent','won','irrelevant','denies_inquiry','no_answer']::text[]) then perform private.fail('VALIDATION','status'); end if;
  if f->'notes'<>'null'::jsonb and length(f->>'notes') not between 1 and 10000 then perform private.fail('VALIDATION','notes'); end if;
- if f->'email'<>'null'::jsonb and (f->>'email') !~ '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$' then perform private.fail('VALIDATION','email'); end if;
+ -- Pinned Zod 4.6.7 email pattern; C collation keeps ASCII ranges locale-independent.
+ if f->'email'<>'null'::jsonb and (f->>'email') collate "C" !~ '^(?:[A-Za-z0-9_''+\-]+\.)*[A-Za-z0-9_''+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$' then perform private.fail('VALIDATION','email'); end if;
  foreach k in array array['inquiryDate','followUpDate'] loop
   if f->k<>'null'::jsonb then
    if f->>k !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' then perform private.fail('VALIDATION',k); end if;
