@@ -9,6 +9,7 @@ import { MobileHeader } from '@/components/shell/mobile/MobileHeader';
 import { DesktopSidebar } from '@/components/shell/desktop/DesktopSidebar';
 import { DesktopHeader } from '@/components/shell/desktop/DesktopHeader';
 import { SignOutButton } from '@/features/auth/SignOutButton';
+import { isLeadsAvailable } from '@/features/leads/logic/availability';
 import { Notice } from '@/components/ui';
 
 export const metadata: Metadata = { title: { default: 'חי עוצמה בבנייה', template: '%s | חי עוצמה' } };
@@ -38,7 +39,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const roleLabel = actor.isOwner ? 'מנהל מערכת' : 'משתמש';
   return (
     <>
-      <DesktopSidebar items={desktopNav(actor.isOwner)} fullName={actor.fullName} roleLabel={roleLabel} />
+      <DesktopSidebar items={desktopNav(actor.isOwner, isLeadsAvailable(actor.isOwner))} fullName={actor.fullName} roleLabel={roleLabel} />
       <div className="app-main">
         <DesktopHeader fullName={actor.fullName}>
           <SignOutButton />

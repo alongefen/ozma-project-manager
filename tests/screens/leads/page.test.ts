@@ -1,0 +1,14 @@
+import { beforeEach, afterEach, expect, it, vi } from 'vitest';
+vi.mock('server-only',()=>({}));
+const m=vi.hoisted(()=>({context:vi.fn(),platform:vi.fn(),factory:vi.fn(),list:vi.fn()}));
+vi.mock('@/components/shell/request',()=>({getContext:m.context,getPlatform:m.platform}));
+vi.mock('@/features/leads/logic',()=>({createLeadsApi:m.factory}));
+vi.mock('@/features/leads/shared/LeadsProvider',()=>({LeadsProvider:()=>null}));
+vi.mock('next/navigation',()=>({notFound:()=>{throw new Error('404');}}));
+import Page from '@/app/(app)/leads/page';
+const context=(isOwner:boolean)=>({ok:true,value:{actor:{isOwner},today:'2026-11-26'}});
+beforeEach(()=>{vi.clearAllMocks();vi.stubEnv('VERCEL_ENV','preview');vi.stubEnv('LEADS_PREVIEW_ENABLED','true');m.context.mockResolvedValue(context(true));m.platform.mockResolvedValue({});m.factory.mockReturnValue({listLeads:m.list});m.list.mockResolvedValue({ok:true,value:[]});});
+afterEach(()=>vi.unstubAllEnvs());
+for(const denied of ['production','non-owner','failed-context','flag-off'])it(`${denied} route performs zero lead reads`,async()=>{if(denied==='production')vi.stubEnv('VERCEL_ENV','production');if(denied==='non-owner')m.context.mockResolvedValue(context(false));if(denied==='failed-context')m.context.mockResolvedValue({ok:false,error:{code:'UNAUTHENTICATED'}});if(denied==='flag-off')vi.stubEnv('LEADS_PREVIEW_ENABLED','false');await expect(Page()).rejects.toThrow('404');expect(m.factory).not.toHaveBeenCalled();expect(m.platform).not.toHaveBeenCalled();expect(m.list).not.toHaveBeenCalled();});
+it('allowed Preview loads all archives and passes server day',async()=>{const el=await Page();expect(m.list).toHaveBeenCalledWith((await m.context()).value,{archive:'all'});expect(el.props.children[1].props.today).toBe('2026-11-26');});
+it('never renders a partial list on failure',async()=>{m.list.mockResolvedValue({ok:false,error:{code:'UNAVAILABLE'}});await expect(Page()).rejects.toThrow('unavailable');});

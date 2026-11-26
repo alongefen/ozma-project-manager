@@ -5,8 +5,8 @@ import { AccountCard } from '@/features/account/shared/AccountCard';
 import type { Actor } from '@/types/contracts';
 
 /** Desktop "more" (direct link only): two panels. Sign-out lives in the desktop header. */
-export function MoreDesktop({ actor }: { actor: Actor }) {
-  const links = moreLinks(actor.isOwner);
+export function MoreDesktop({ actor, leadsAvailable = false }: { actor: Actor; leadsAvailable?: boolean }) {
+  const links = moreLinks(actor.isOwner, leadsAvailable);
   return (
     <div className="more d-only">
       <Card panel>

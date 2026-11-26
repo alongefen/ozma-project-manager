@@ -1,0 +1,12 @@
+import { expect, it } from 'vitest';
+import { leadsModel, emptyFilters, fieldsFromForm, newFields } from '@/features/leads/shared/model';
+import { LeadFieldsSchema } from '@/types/contracts/leads';
+import { row,today } from './fixtures';
+const rows=[row(1,{followUpDate:today,marketingCompany:'new_company',companyName:'בדוי'}),row(2,{status:'won',followUpDate:today}),row(3,{status:'no_answer',followUpDate:'2026-01-01'}),row(4,{archivedAt:'2026-11-26T00:00:00Z',status:'qualified'}),row(5,{status:'irrelevant',followUpDate:today}),row(6,{status:'denies_inquiry',followUpDate:today})];
+it('all summaries/status percentages use the filtered population',()=>{const m=leadsModel(rows,{...emptyFilters(),statuses:['new'],marketingCompany:'new_company',search:'בדוי',dueOnly:true},today);expect([m.total,m.due,m.won]).toEqual([1,1,0]);expect(m.statuses.find(s=>s.status==='new')).toEqual({status:'new',count:1,percent:100});expect(m.statuses.filter(s=>s.percent>0)).toHaveLength(1);});
+it('due includes no answer and excludes terminal statuses',()=>{expect(leadsModel(rows,{...emptyFilters(),dueOnly:true},today).rows.map(r=>r.id)).toEqual([rows[2].id,rows[0].id]);});
+it('archive all, archived and active remain complete',()=>{expect(leadsModel(rows,emptyFilters(),today).total).toBe(5);expect(leadsModel(rows,{...emptyFilters(),archive:'all'},today).total).toBe(6);expect(leadsModel(rows,{...emptyFilters(),archive:'archived'},today).rows).toEqual([rows[3]]);});
+it('zero population produces zero percentages',()=>{const m=leadsModel(rows,{...emptyFilters(),search:'missing'},today);expect([m.total,m.due,m.won]).toEqual([0,0,0]);expect(m.statuses.every(s=>s.percent===0)).toBe(true);});
+it('newest date then stable ID descending',()=>{expect(leadsModel([row(1),row(2),row(3,{inquiryDate:'2026-11-25'})],emptyFilters(),today).rows.map(r=>r.id)).toEqual([row(2).id,row(1).id,row(3).id]);});
+it('empty optionals are null and only required fields start invalid',()=>{const f=new FormData();Object.entries({...newFields(today),name:'בדיקה',phone:'0500000000'}).forEach(([k,v])=>f.set(k,v??''));const parsed=LeadFieldsSchema.parse(fieldsFromForm(f));expect(parsed.email).toBeNull();expect(parsed.marketingCompany).toBeNull();expect(parsed.inquiryDate).toBe(today);expect(LeadFieldsSchema.safeParse(newFields(today)).success).toBe(false);});
+it('parses live search text before applying shared filter rules',()=>{expect(leadsModel(rows,{...emptyFilters(),search:'  ליד בדוי 1  '},today).total).toBe(1);});

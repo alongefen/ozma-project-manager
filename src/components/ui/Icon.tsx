@@ -1,6 +1,7 @@
 import type { IconName } from '@/lib/navigation';
 
 const PATHS: Record<IconName, string> = {
+  leads: 'M4 5h16v16H4zM8 3v4M16 3v4M8 11h8M8 16h5',
   projects: 'M3 21V9l9-6 9 6v12M9 21v-6h6v6',
   diary: 'M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM9 8h6M9 12h6M9 16h4',
   report: 'M12 5v14M5 12h14',

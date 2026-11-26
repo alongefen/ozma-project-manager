@@ -12,13 +12,26 @@
 3. פיצ׳רים. כל משימה מוסרת תצוגת טלפון ותצוגת מחשב יחד.
 4. מסך הבית והסיכום של כל הפרויקטים, אחרי שיש נתונים.
 
-התוכנית לפי תלות, מקביליות ושערים (A-04). לידים אינם בשלב הזה (A-01).
+התוכנית המקורית לפי תלות, מקביליות ושערים (A-04). בסיס לידים נפתח כשלב המשך ב-A-49; אינטגרציות חיצוניות עדיין בחוץ.
 
 **ארכיטקטורה וסטאק:** אושרו ב-G1: Next.js, Supabase בענן ו-Vercel. הנתיבים והבעלות להלן לפי ARCHITECTURE 5.1 ו-9.1. בלי Supabase מקומי ובלי Docker.
 
-**עיצוב (A-23):** האפיון המתוקן של P0.3 אושר ב-GU (A-24). עיצוב המחשב זהה לדמו שנמסר; האקסל לנתונים ולחישובים בלבד. דרישות ההזנה והחישובים נשארות. הטלפון נשאר ממשק ייעודי כאפליקציה עם ניווט תחתון ודיווח אמצעי ובולט. אין החזרת לידים או התנהגות דמו שבוטלה.
+**עיצוב (A-23):** האפיון המתוקן של P0.3 אושר ב-GU (A-24). עיצוב המחשב זהה לדמו שנמסר; האקסל לנתונים ולחישובים בלבד. דרישות ההזנה והחישובים נשארות. הטלפון נשאר ממשק ייעודי כאפליקציה עם ניווט תחתון ודיווח אמצעי ובולט. אין החזרת התנהגות דמו שבוטלה; בסיס הלידים החדש מוגדר בנפרד ב-A-49.
 
 ## עדכון המעקב הנוכחי
+
+### LEADS-FOUNDATION — A-49, 26.11.2026
+
+| Task | State and coordination | Completion gate |
+|---|---|---|
+| LEADS-FOUNDATION | Scope closed with Alon; this chat is now feature construction manager. File-allocation approval explicitly waived for isolated feature branches. [Spec](tasks/LEADS-FOUNDATION.md), [construction plan](handoffs/LEADS-CONSTRUCTION.md). | Concrete D31 before DB application; verified Preview and explicit Alon release approval before main merge. |
+| LEADS-DATA | Integrated `8931860` from `a67ad3e`: contracts, additive DB/rollback proposal and feature logic; 50 local tests, TypeScript/lint reported passing; GPT-6.1 Sol review P2 email mismatch resolved by `b72c22a`, original reviewer confirmed. [Brief](tasks/LEADS-DATA.md). | No live SQL/test writes in initial dispatch; return commit/interface/D31 proposal. |
+| LEADS-ISOLATION | Integrated `7b08b8c`: server Preview/admin helper, 17 passing local tests and focused ESLint reported; one GPT-6.1 Sol review, no actionable findings. Preview readiness partial, actual route/action/nav enforcement queued. [Brief](tasks/LEADS-ISOLATION.md). | No production activation/config changes; return guard contract/checks. |
+| LEADS-DATA-FIX | Complete: source `6becf18` integrated `b72c22a`; P2 resolved in original reviewer recheck. 23 focused tests/lint reported. [Brief](tasks/LEADS-DATA-FIX.md). | D31 approved; cloud application delegated separately. |
+| LEADS-UI | Completed source `698f7cc`, integrated `0adaab9`: 107 affected unit checks/typecheck/lint and one reviewer with six-width browser fixture evidence reported. Guarded actions, both shells/model/navigation ready; hosted flows still pending. [Brief](tasks/LEADS-UI.md). | No invented interface; use actual committed outputs. |
+| LEADS-CLOUD | Active chat `01a21858-9862-77b2-8880-c92ed8af5843`, snapshot `92e7c3e`: approved exact migration/preflight/diagnostics/types, exclusive leads window. [Task](tasks/LEADS-CLOUD.md). | Return actual migration/history/results and release window; no fake writes until UI readiness. |
+| LEADS-PREVIEW | Ready to dispatch reviewed integration PR/CI and existing-service branch-scoped Preview readiness, no DB writes. [Task](tasks/LEADS-PREVIEW.md). | HOLD before main merge; protected/hosted verification must be evidenced separately. |
+| LEADS-INTEGRATION | Concrete D31 request prepared in [LEADS-CLOUD](tasks/LEADS-CLOUD.md); Alon approved the exact migration/bounded fake-lead tests/containment rollback on 26 November 2026. CLOUD phase 1 dispatches migration/diagnostics/types; fake writes wait for UI readiness, then Preview/CI evidence. | No automatic/main merge or production deployment. Use GPT-6.1 Sol when Sonnet is unavailable, per Alon and main AGENTS `189d65d`. |
 
 ### PM-MERGE-EFFICIENCY — A-48, 26.11.2026
 

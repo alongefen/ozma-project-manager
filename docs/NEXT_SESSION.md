@@ -1,5 +1,21 @@
 # Next session
 
+## LEADS-FOUNDATION — construction management, 26.11.2026
+
+Alon closed the screenshot-based scope, authorized necessary file edits on isolated branches without an allocation gate, and appointed chat `01a217e2-212a-7a72-a84d-2b0339c37e9a` the feature construction manager. [Final spec](tasks/LEADS-FOUNDATION.md), [plan](handoffs/LEADS-CONSTRUCTION.md). Worktree `/Users/alongefen/.codex/worktrees/leads-foundation/ozma-project-manager`, branch `codex/leads-foundation`. Refreshed origin/main: `6f87ea1`; incoming upload-toast changes inspected; no code tests run for management docs.
+
+Dispatch two independent task chats: LEADS-DATA (contracts, additive SQL/rollback proposal, logic/local checks) and LEADS-ISOLATION (server production/Preview guard, local checks and read-only Preview readiness). No duplicate leads implementation chat found in current recent inventory/worktrees. UI waits for their committed interfaces; integration/cloud verification follows concrete D31 approval. Keep two task chats maximum. Use compact wait_threads snapshots on resumption, not polling loops. Alon authorized GPT-6.1 Sol (`gpt-6.1-sol`) fallback for unavailable Sonnet; rule merged in main `189d65d` / PR #165 and brought into the feature branch.
+
+Existing live DB, Preview only, no cloud writes in first dispatch. No auth-user/client-data changes, seed/reset, external integrations, auto-merge, main merge or production deployment. Alon's explicit feature-release approval remains required. Child tasks keep their own notes; this manager maintains shared docs. Next owners: DATA-FIX and UI task chats; manager integrates their commits and presents the reviewed concrete D31 request.
+
+### Current execution chats
+
+- LEADS-CLOUD — `01a21858-9862-77b2-8880-c92ed8af5843`, host `local`, worktree `/Users/alongefen/.codex/worktrees/4d4f/ozma-project-manager`. Dispatch snapshot `92e7c3e9778c8f05f73af7d54fb1058ede030481`; phase 1 authorized exact migration/preflight/diagnostics/generated types. Exclusive leads migration/metadata window assigned; task must report release. No fake-lead writes until UI readiness.
+- LEADS-UI — `01a21849-5832-7fa0-8454-bf913467bf68`, host `local`, worktree `/Users/alongefen/.codex/worktrees/35ff/ozma-project-manager`. Completed reviewed source `698f7cc`, integrated `0adaab9` with identical UI code/tests; 107 affected checks and six-width fixture browser evidence retained. Actual protected Preview/hosted verification pending.
+- DATA-FIX complete: `6becf18` integrated `b72c22a`; original DATA reviewer confirmed P2 resolved. DATA `a67ad3e` integrated `8931860`; ISOLATION `48a58c7` integrated `7b08b8c`, reviewed. Prior task chats idle; do not open duplicates.
+- Alon approved the concrete change on 26 November 2026 as recorded in LEADS-CLOUD. Approval covers exact migration, generated types/read diagnostics, up to 20 marked fake leads with retained soft-deleted records, containment rollback on failure. It does not authorize feature release/main merge.
+- Next manager action: prepare Preview PR/CI in parallel with CLOUD; verify actual migration/history before integrating generated types and coordinating the approved bounded fake-lead/Preview verification. UI is already integrated. No repeated approval for this same scope; stop on drift/new changes/cost. No deployed success claim before actual evidence. No polling loop.
+
 ## Working rule update — A-48, 26.11.2026
 
 Alon requested fewer duplicate merge checks and immediate notification when a PR merges. Updated AGENTS.md, task brief template and PM brief: preserve valid evidence, inspect incoming changes before selecting reruns, batch docs before final CI, put late approval/results/SHA in the PR body rather than triggering another bookkeeping commit. Required CI remains mandatory; no workflow changes. Send merge link/SHA immediately after GitHub confirmation, then continue authorized deployment/main checks/sync and report their outcome separately. [Task](tasks/PM-MERGE-EFFICIENCY.md). Docs-only; no code tests required. Alon explicitly requested merging this instruction update to main.
