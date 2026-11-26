@@ -8,6 +8,12 @@ Dispatch two independent task chats: LEADS-DATA (contracts, additive SQL/rollbac
 
 Existing live DB, Preview only, no cloud writes in first dispatch. No auth-user/client-data changes, seed/reset, external integrations, auto-merge, main merge or production deployment. Alon's explicit feature-release approval remains required. Child tasks keep their own notes; this manager maintains shared docs. Next owner: DATA/ISOLATION task chats; manager resumes from their commits to prepare UI and present concrete D31 request.
 
+### Active task chats
+
+- LEADS-DATA — `01a217f9-687b-77f2-8aea-061e47cf23d4`, host `local`, worktree `/Users/alongefen/.codex/worktrees/fe2a/ozma-project-manager`.
+- LEADS-ISOLATION — `01a217f9-ba14-7922-8e83-c27dc4de4747`, host `local`, worktree `/Users/alongefen/.codex/worktrees/1ee1/ozma-project-manager`.
+- Both created and active; bootstrap snapshot `000e30e18ef025efe75957e24af3916e14ad0882` on `codex/leads-foundation`, rebased onto `6f87ea1`. No completion/review/Preview claim yet. Initial progress snapshot requested; resume with compact bounded wait on these IDs.
+
 ## Working rule update — A-48, 26.11.2026
 
 Alon requested fewer duplicate merge checks and immediate notification when a PR merges. Updated AGENTS.md, task brief template and PM brief: preserve valid evidence, inspect incoming changes before selecting reruns, batch docs before final CI, put late approval/results/SHA in the PR body rather than triggering another bookkeeping commit. Required CI remains mandatory; no workflow changes. Send merge link/SHA immediately after GitHub confirmation, then continue authorized deployment/main checks/sync and report their outcome separately. [Task](tasks/PM-MERGE-EFFICIENCY.md). Docs-only; no code tests required. Alon explicitly requested merging this instruction update to main.
