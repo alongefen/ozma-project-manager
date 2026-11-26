@@ -10,11 +10,11 @@ Existing live DB, Preview only, no cloud writes in first dispatch. No auth-user/
 
 ### Current execution chats
 
-- LEADS-DATA-FIX — `01a21848-3714-7682-822c-2c56c489b5b9`, host `local`, worktree `/Users/alongefen/.codex/worktrees/ef76/ozma-project-manager`. Focused P2 email SQL/Zod parity correction; no cloud SQL. Reuse the original DATA reviewer for the changed lines.
+- LEADS-DATA-FIX — `01a21848-3714-7682-822c-2c56c489b5b9`, host `local`, worktree `/Users/alongefen/.codex/worktrees/ef76/ozma-project-manager`. Completed source `6becf18`, integrated `b72c22a`; original DATA reviewer confirmed P2 resolved, no further finding. 23 focused tests/lint reported, no cloud SQL.
 - LEADS-UI — `01a21849-5832-7fa0-8454-bf913467bf68`, host `local`, worktree `/Users/alongefen/.codex/worktrees/35ff/ozma-project-manager`. Guarded actions/routes/navigation and both screen shells, local fake fixtures only; one Sonnet or authorized GPT-6.1 Sol reviewer.
-- Both dispatched from snapshot `fb357e17a502ae72b9f1d5c3880d3dfb614f2b66`; initial snapshots confirm active work. No completion/hosted verification claim.
+- Dispatch snapshot `fb357e17a502ae72b9f1d5c3880d3dfb614f2b66`; UI remains in progress; DATA-FIX completed and reviewed. No hosted verification claim.
 - Completed predecessors: DATA chat `01a217f9-687b-77f2-8aea-061e47cf23d4` delivered `a67ad3e`, integrated `8931860`; ISOLATION chat `01a217f9-ba14-7922-8e83-c27dc4de4747` delivered `48a58c7`, integrated `7b08b8c`, reviewed without findings.
-- Next manager action: integrate focused fix, recheck original review finding, then present the concrete D31 proposal/containment rollback. UI is independent and stays local until cloud authorization. Resume with bounded compact wait_threads snapshots, not polling loops. No new duplicate task chats.
+- Next manager action: await Alon approval of the concrete migration/bounded fake-lead tests/access-only rollback in `docs/tasks/LEADS-CLOUD.md`; do not execute before approval. UI is independent and stays local until cloud authorization. Resume with bounded compact wait_threads snapshots, not polling loops. No new duplicate task chats.
 
 ## Working rule update — A-48, 26.11.2026
 
