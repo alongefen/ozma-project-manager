@@ -1,9 +1,11 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Upload } from 'tus-js-client';
 import { Button, Notice } from '@/components/ui';
 import type { FilePurpose, FileRef, Result, UploadTarget } from '@/types/contracts';
 import { MAX_FILES, acceptFor, checkFile, declaredMime, formatSize, messageForStatus, resolveMime, sniffMime } from './rules';
+import css from './UploadToast.module.css';
 
 type Status = 'uploading' | 'done' | 'error';
 type Item = { key: string; file: File; mime: string | null; status: Status; progress: number; error?: string; ref?: FileRef };
@@ -71,6 +73,10 @@ function sendTus(file: File, mime: string, t: Extract<UploadTarget['target'], { 
 export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'בחירת קבצים', disabled, onBusyChange }: FileUploadProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
+  const [root, setRoot] = useState<HTMLDivElement | null>(null);
+  const [toast, setToast] = useState<{ id: string; count: number } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
   const picker = useRef<HTMLInputElement>(null);
   const shooter = useRef<HTMLInputElement>(null);
   const limit = MAX_FILES[purpose];
@@ -138,14 +144,22 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
         patch(item.key, { status: 'error', error: 'ההעלאה נכשלה. אפשר לנסות שוב' });
       }
     }));
-    if (finished.length > 0) latest.current(finished);
+    if (finished.length > 0) {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+      setToast({ id: newId(), count: finished.length });
+      toastTimer.current = setTimeout(() => setToast(null), 2500);
+      latest.current(finished);
+    }
   }
 
   const busy = items.some(i => i.status === 'uploading');
   useEffect(() => { onBusyChange?.(busy); }, [busy, onBusyChange]);
   const accept = acceptFor(purpose);
+  // Accepted files live in the consumer's attachment list. Keep accounting here,
+  // but do not leave a second success card after the consumer removes a file.
+  const visibleItems = items.filter(i => i.status !== 'done');
   return (
-    <div className="upload">
+    <div className="upload" ref={setRoot}>
       <div className="upload__actions">
         <Button variant="secondary" disabled={disabled || busy} onClick={() => picker.current?.click()}>{label}</Button>
         {camera && <Button variant="secondary" disabled={disabled || busy} onClick={() => shooter.current?.click()}>צילום</Button>}
@@ -155,16 +169,22 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
           onChange={e => { const picked = Array.from(e.target.files ?? []); e.target.value = ''; void add(picked); }} />}
       </div>
       {notice && <Notice>{notice}</Notice>}
-      {items.length > 0 && (
+      {toast && createPortal(
+        <div className={css.host} role="status" aria-live="polite" aria-atomic="true">
+          <div key={toast.id} className={css.message}>{toast.count === 1 ? 'הקובץ הועלה' : `${toast.count} קבצים הועלו`}</div>
+        </div>,
+        // Stay in a modal's top layer, outside its animated/scrolling panel.
+        root?.closest('dialog') ?? document.body,
+      )}
+      {visibleItems.length > 0 && (
         <ul className="upload__list">
-          {items.map(item => (
-            <li key={item.key} className={`upload__item${item.status === 'error' ? ' upload__item--error' : ''}${item.status === 'done' ? ' upload__item--done' : ''}`}>
+          {visibleItems.map(item => (
+            <li key={item.key} className={`upload__item${item.status === 'error' ? ' upload__item--error' : ''}`}>
               <div className="upload__name">
                 <span className="ltr">{item.file.name}</span>
                 <div className="upload__meta">
                   {formatSize(item.file.size)} ·{' '}
                   {item.status === 'uploading' && `מעלה ${item.progress}%`}
-                  {item.status === 'done' && 'הועלה'}
                   {item.status === 'error' && item.error}
                 </div>
                 {item.status === 'uploading' && <div className="upload__bar"><span style={{ width: `${item.progress}%` }} /></div>}

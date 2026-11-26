@@ -1,0 +1,23 @@
+# UPLOAD-SUCCESS-TOAST
+
+## Request and serial ownership
+On 26 November 2026 Alon confirmed the deployed upload fix works on his phone. He reported that after uploading and then removing three diary images, the completed upload cards still remain, and explicitly requested a floating success message that disappears quickly instead of persistent cards. The screenshot is evidence of the client-visible issue, not test data to copy or commit.
+
+This is a serial shared-upload follow-up on `codex/upload-success-toast`, from current origin/main, reusing the existing clean isolated upload worktree. No competing upload implementation appeared in the current chat inventory. Owned: `src/components/upload/FileUpload.tsx`, `src/components/upload/UploadToast.module.css`, `tests/screens/files/upload-selection.spec.ts`, this task file, and the upload-specific rule in `docs/UI_CONVENTIONS.md`. No other feature implementation, shared PM tracker, dependency, database or service changes.
+
+## Design and plan
+- Use the existing app toast pattern: compact dark floating message at the top, polite status announcement, no focus movement or pointer interception. Dismiss after 2500ms; a later success restarts the timer. Remain visible above native Sheet dialogs.
+- Once accepted uploads are delivered to the parent, stop rendering their persistent success rows. Keep uploaded references in the form and preserve existing file-count accounting, limits, bytes, callbacks, progress, errors and retries.
+- Keep progress/error rows inline. The form remains authoritative for the list of attached files and their removal. Cover/document success semantics remain with their existing consumers.
+- RED: browser upload three diary images, remove all three, verify no stale completed cards; check floating success dismissal and repeated-success timer reset.
+- GREEN: implement the scoped UI change; update prior browser assertions to observe accepted-file callbacks/consumer effects rather than persistent success cards. Verify actual native-dialog rendering and RTL/no overflow at 360, 375, 390, 768, 1024, 1280.
+- Run affected unit/browser checks, lint/types and required CI; one independent reviewer. Required Sonnet is unavailable in the current Codex subagent catalog; identify the actual reviewer model and do not claim a Sonnet review. Prior #160 exceptions do not silently authorize this separate PR's review/deployment gates.
+
+## Evidence and remaining gates
+- RED: Chromium at 390px against #160 produced three stale `.upload__item--done` rows after successful upload; the new regression expected zero and failed with received 3.
+- GREEN: 21 isolated Chromium checks passed, including native Sheet upload/removal of three images at all six widths (360, 375, 390, 768, 1024, 1280), viewport-fixed placement, non-intercepting pointer behavior, auto-dismissal, identical repeated-success timer reset, and previous picker/camera/progress/error/consumer checks. No completed success cards remain after success or attachment removal.
+- Native Sheet animation creates a temporary transform containing block. Portaling the toast to the closest dialog root (or document body outside a modal) keeps it out of the scrolling/animated panel while retaining the modal top layer. The six-width tests caught the initially displaced toast.
+- The Vite virtual entry prebundles existing browser dependencies to prevent a first-navigation reload when react-dom is discovered. This changes test fixture configuration only; no dependency or repository-wide test config changed.
+- 13 affected upload unit tests, focused ESLint and `tsc --noEmit` passed under Node 24.22.3. Required full CI and the one independent review are pending. No unchanged full suite was manually repeated (A-48).
+- Browser command/config: same explicit /tmp/ozma-upload.playwright.config.ts documented in UPLOAD-GALLERY-VERIFY.md, from this existing worktree. The spec remains outside default CI discovery; its 21 checks were run explicitly with synthetic begin/TUS/complete responses and stubbed consumer actions. No Next/auth/live-storage acceptance was performed.
+- User-confirmed real-phone success applies to #160 only; this toast change has not been tested on a physical device. Sonnet is unavailable; the available Codex review will be labeled accurately and will not be silently treated as a task-specific Sonnet exception. No deployment, cloud writes, migrations or customer-data access is included. User-confirmed phone upload acceptance applies to #160; the original intermittent gallery cause is still unproven. Any new production release requires the applicable D31 approval.
