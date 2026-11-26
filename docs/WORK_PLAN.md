@@ -12,13 +12,19 @@
 3. פיצ׳רים. כל משימה מוסרת תצוגת טלפון ותצוגת מחשב יחד.
 4. מסך הבית והסיכום של כל הפרויקטים, אחרי שיש נתונים.
 
-התוכנית לפי תלות, מקביליות ושערים (A-04). לידים אינם בשלב הזה (A-01).
+התוכנית המקורית לפי תלות, מקביליות ושערים (A-04). בסיס לידים נפתח כשלב המשך ב-A-49; אינטגרציות חיצוניות עדיין בחוץ.
 
 **ארכיטקטורה וסטאק:** אושרו ב-G1: Next.js, Supabase בענן ו-Vercel. הנתיבים והבעלות להלן לפי ARCHITECTURE 5.1 ו-9.1. בלי Supabase מקומי ובלי Docker.
 
-**עיצוב (A-23):** האפיון המתוקן של P0.3 אושר ב-GU (A-24). עיצוב המחשב זהה לדמו שנמסר; האקסל לנתונים ולחישובים בלבד. דרישות ההזנה והחישובים נשארות. הטלפון נשאר ממשק ייעודי כאפליקציה עם ניווט תחתון ודיווח אמצעי ובולט. אין החזרת לידים או התנהגות דמו שבוטלה.
+**עיצוב (A-23):** האפיון המתוקן של P0.3 אושר ב-GU (A-24). עיצוב המחשב זהה לדמו שנמסר; האקסל לנתונים ולחישובים בלבד. דרישות ההזנה והחישובים נשארות. הטלפון נשאר ממשק ייעודי כאפליקציה עם ניווט תחתון ודיווח אמצעי ובולט. אין החזרת התנהגות דמו שבוטלה; בסיס הלידים החדש מוגדר בנפרד ב-A-49.
 
 ## עדכון המעקב הנוכחי
+
+### LEADS-FOUNDATION — A-49, 26.11.2026
+
+| Task | State and ownership | Completion gate |
+|---|---|---|
+| LEADS-FOUNDATION | Brief prepared; no task chat launched. Await Alon's screenshots in the build chat before defining fields, actions, permissions or implementation ownership. Current ownership: `docs/tasks/LEADS-FOUNDATION.md` only. PM owns shared docs; no code/SQL/navigation ownership allocated yet. [Brief](handoffs/LEADS-FOUNDATION.md). | Agree screenshot-based scope and exact file ownership; data/RLS/RPC first, then phone and desktop UI; one reviewer and affected checks. Concrete migration/cloud-test/deployment approvals under D31 remain pending. No external integrations. |
 
 ### PM-MERGE-EFFICIENCY — A-48, 26.11.2026
 

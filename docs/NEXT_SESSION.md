@@ -1,5 +1,11 @@
 # Next session
 
+## LEADS-FOUNDATION — brief ready, 26.11.2026
+
+Alon opened the next leads phase (A-49): data structure and phone/desktop UI only. He will supply screenshots and collected lead information in the build chat. [Brief](handoffs/LEADS-FOUNDATION.md), [task](tasks/LEADS-FOUNDATION.md), WORK_PLAN § LEADS-FOUNDATION. No build chat launched; recent chats and worktrees were checked and no leads implementation duplicate was found. This PM prepared documentation only, from refreshed `origin/main` at `0a510d1`; no system completion, deployment or cloud acceptance audit was performed. Historical state below is not revalidated.
+
+Next owner: Alon opens the build chat with the brief and sends screenshots; the task session clarifies fields/actions/permissions, records the proposed design and requests exact file ownership from the PM before code. Integrations (webhook, forms/campaigns, Make, GREEN API and sending messages) are excluded. D31 approval must cover a concrete migration and rollback before cloud changes, and deployment separately. Do not invent lead permissions or revive old demo requirements. Reviewer must follow A-39; if Sonnet is unavailable, surface the model constraint rather than silently substituting.
+
 ## Working rule update — A-48, 26.11.2026
 
 Alon requested fewer duplicate merge checks and immediate notification when a PR merges. Updated AGENTS.md, task brief template and PM brief: preserve valid evidence, inspect incoming changes before selecting reruns, batch docs before final CI, put late approval/results/SHA in the PR body rather than triggering another bookkeeping commit. Required CI remains mandatory; no workflow changes. Send merge link/SHA immediately after GitHub confirmation, then continue authorized deployment/main checks/sync and report their outcome separately. [Task](tasks/PM-MERGE-EFFICIENCY.md). Docs-only; no code tests required. Alon explicitly requested merging this instruction update to main.

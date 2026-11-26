@@ -29,7 +29,7 @@ A project management system for the construction company "חי עוצמה בבנ
 - Maor relays what Ben wants. His words are not a direct approval from Ben.
 - The desktop design matches the demo exactly (A-23), without bringing back scope that was cut. The Excel file is a source for data and calculations only.
 - Don't claim something was read or checked unless it was. Don't widen the scope. A task is a note with a due date, with no assignee and no reminders.
-- Leads, Make and GREEN API belong to the next phase (A-01). They get no navigation, screen, table or permission.
+- Leads foundation is now in scope under A-49: data structure and phone/desktop UI, defined from Alon's screenshots in LEADS-FOUNDATION. Make, webhooks, campaign/form integrations and GREEN API remain out of scope. D31 still applies; lead fields and permissions are not yet specified.
 
 ## Product
 
