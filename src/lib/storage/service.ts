@@ -57,6 +57,7 @@ export function createStorageService(options: Options): StorageService {
         const valid = bytes && mime === file.declaredMime && !(file.purpose === 'cover' && mime === 'application/pdf') && !(file.purpose !== 'document' && OFFICE_MIME.has(mime)) && await validateContent(bytes, mime!);
         const identity = { fileId: file.fileId, actorId: actor.value.userId, sessionId: sessionId as string };
         if (!valid || !bytes || !mime) {
+          console.error('[upload] content rejected', { fileId: file.fileId, declared: file.declaredMime, detected: mime, declaredSize: file.declaredSize, actualSize: size });
           const rejected = await service.rpc('system_finish_upload', { input: { ...identity, state: 'rejected' } });
           return rejected.error ? { ok: false, error: mapError(rejected.error) } : failure('VALIDATION');
         }
@@ -73,11 +74,11 @@ export function createStorageService(options: Options): StorageService {
               const prior = await service.storage.from('display').download(path);
               if (!prior.error && prior.data && createHash('sha256').update(new Uint8Array(await prior.data.arrayBuffer())).digest('hex') === createHash('sha256').update(display).digest('hex')) { displayState = 'ready'; displayPath = path; }
             }
-          } catch { /* Original remains intact and downloadable when preview conversion fails. */ }
+          } catch (error) { console.error('[upload] display render failed', { fileId: file.fileId, mime, bytes: bytes.length, error: error instanceof Error ? error.name : 'unknown' }); /* Original remains intact and downloadable when preview conversion fails. */ }
         }
         const finished = await service.rpc('system_finish_upload', { input: { ...identity, state: 'ready', mime, sizeBytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex'), displayState, displayPath } as Json });
         return finished.error ? { ok: false, error: mapError(finished.error) } : { ok: true, value: finished.data as FileRef };
-      } catch { return failure('UNAVAILABLE'); }
+      } catch (error) { console.error('[upload] finish failed', { error: error instanceof Error ? error.message : 'unknown' }); return failure('UNAVAILABLE'); }
     },
     async getSignedUrl(ctx, input) {
       const parsed = StorageServiceInputSchemas.getSignedUrl.safeParse(input); if (!parsed.success) return failure('VALIDATION');
