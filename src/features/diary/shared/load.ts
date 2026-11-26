@@ -36,12 +36,17 @@ export type DiaryLoad =
 /** Reads one page of the diary for the general screen (all visible projects) or one project, plus what the form needs. */
 export async function loadDiaryScreen(platform: Platform, ctx: RequestContext, opts: { projectId?: string; filter: DiaryFilter; basePath: string }): Promise<DiaryLoad> {
   const filter = opts.projectId ? { ...opts.filter, projectId: opts.projectId } : opts.filter;
-  const [page, projects, reportable, project] = await Promise.all([
+  const [page, projects, reportable, project, summary] = await Promise.all([
     createDiaryApi(platform).listEntries(ctx, filter),
     opts.projectId ? Promise.resolve(null) : loadVisibleProjects(platform, ctx),
     opts.projectId ? Promise.resolve(null) : loadReportableProjects(platform, ctx),
     // Memoised per request: the project tab layout already read it.
     opts.projectId ? loadProject(opts.projectId) : Promise.resolve(null),
+    opts.projectId ? createDiaryApi(platform).getSummary(ctx, {
+      projectId: opts.projectId,
+      ...(filter.from ? { from: filter.from } : {}),
+      ...(filter.to ? { to: filter.to } : {}),
+    }).catch(() => null) : Promise.resolve(null),
   ]);
   if (!page.ok) {
     const code = page.error.code;
@@ -49,12 +54,18 @@ export async function loadDiaryScreen(platform: Platform, ctx: RequestContext, o
     if (code === 'NOT_FOUND' || code === 'FORBIDDEN' || code === 'VALIDATION') return { kind: 'hidden' };
     return { kind: 'error' };
   }
+  if (summary && !summary.ok) {
+    if (summary.error.code === 'UNAUTHENTICATED') return { kind: 'signed-out' };
+    if (['NOT_FOUND', 'FORBIDDEN', 'VALIDATION'].includes(summary.error.code)) return { kind: 'hidden' };
+  }
   if (!opts.projectId && !reportable) return { kind: 'error' };
   const canReport = project ? project.project.permissions.report && !isReadOnlyProject(project.project) : (reportable?.length ?? 0) > 0;
   const formProjects = project ? (canReport ? [{ id: project.project.id, name: project.project.name }] : []) : reportable ?? [];
   return { kind: 'ok', screen: {
     rows: page.value.items, nextCursor: page.value.nextCursor, filter, projects,
-    fixedProjectId: opts.projectId, canReport, formProjects, isOwner: ctx.actor.isOwner,
+    fixedProjectId: opts.projectId,
+    workDays: opts.projectId ? (summary?.ok ? { status: 'ready', count: summary.value.workDays } : { status: 'error' }) : undefined,
+    canReport, formProjects, isOwner: ctx.actor.isOwner,
     readOnlyNote: canReport ? undefined : READ_ONLY_NOTICE,
     today: ctx.today, basePath: opts.basePath,
   } };

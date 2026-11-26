@@ -1,6 +1,8 @@
 import type { DiaryRow } from '@/types/contracts';
 import type { DiaryFilter, ProjectOption } from './model';
 
+export type WorkDaysState = { status: 'ready'; count: number } | { status: 'loading' } | { status: 'error' };
+
 /** Everything a diary list screen needs, already decided on the server. The views only lay it out. */
 export type DiaryScreen = {
   rows: DiaryRow[];
@@ -10,6 +12,8 @@ export type DiaryScreen = {
   projects: ProjectOption[] | null;
   /** Set on the project tab: print and "new report" are about this project. */
   fixedProjectId?: string;
+  /** Authoritative aggregate, present only in the fixed-project diary. */
+  workDays?: WorkDaysState;
   canReport: boolean;
   /** Why the viewer cannot add reports (finished project), shown instead of the button. */
   readOnlyNote?: string;
