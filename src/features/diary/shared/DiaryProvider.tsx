@@ -28,30 +28,31 @@ export function DiaryProvider({ screen, startOpen, closeHref, children }: { scre
   const currentScreen = useRef(screen);
   useEffect(() => { currentScreen.current = screen; }, [screen]);
   // Each mutation invalidates the complete aggregate, including dates on unloaded pages.
-  // State is tied to the server screen and request version: an old filter/request cannot win a race.
-  const [refresh, setRefresh] = useState<{ screen: DiaryScreen; version: number } | null>(null);
+  // After a mutation, even an incoming server screen may have started reading before the write.
+  // Re-read for every subsequent screen; screen identity and version discard old responses.
+  const [refreshVersion, setRefreshVersion] = useState(0);
   const [summary, setSummary] = useState<{ screen: DiaryScreen; version: number; state: WorkDaysState } | null>(null);
   const refreshSummary = () => {
     const latest = currentScreen.current;
-    if (latest.fixedProjectId) setRefresh(cur => ({ screen: latest, version: (cur?.version ?? 0) + 1 }));
+    if (latest.fixedProjectId) setRefreshVersion(cur => cur + 1);
   };
   useEffect(() => {
-    if (!screen.fixedProjectId || !refresh || refresh.screen !== screen) return;
+    if (!screen.fixedProjectId || refreshVersion === 0) return;
     let live = true;
-    const request = refresh;
+    const version = refreshVersion;
     const input = {
       projectId: screen.fixedProjectId,
       ...(screen.filter.from ? { from: screen.filter.from } : {}),
       ...(screen.filter.to ? { to: screen.filter.to } : {}),
     };
-    const apply = (state: WorkDaysState) => { if (live) setSummary({ screen, version: request.version, state }); };
+    const apply = (state: WorkDaysState) => { if (live) setSummary({ screen, version, state }); };
     getSummary(input).then(r => apply(r.ok ? { status: 'ready', count: r.value.workDays } : { status: 'error' }))
       .catch(() => apply({ status: 'error' }));
     return () => { live = false; };
-  }, [screen, refresh]);
+  }, [screen, refreshVersion]);
   const workDays: WorkDaysState | undefined = !screen.fixedProjectId ? undefined
-    : refresh?.screen === screen
-      ? summary?.screen === screen && summary.version === refresh.version ? summary.state : { status: 'loading' }
+    : refreshVersion > 0
+      ? summary?.screen === screen && summary.version === refreshVersion ? summary.state : { status: 'loading' }
       : screen.workDays ?? { status: 'error' };
   // The one list of both layouts. A save puts the saved report into it at once; the page is never reloaded for that.
   const [seen, setSeen] = useState(screen.rows);
@@ -67,12 +68,12 @@ export function DiaryProvider({ screen, startOpen, closeHref, children }: { scre
     refreshSummary();
     try {
       const r = await getEntry({ id });
-      if (currentScreen.current !== screen) return;
       if (!r.ok) { router.refresh(); return; }
       const entry = r.value;
+      const filter = currentScreen.current.filter;
       setRows(cur => {
         const rest = cur.filter(x => x.id !== id);
-        return matchesFilter(entry, screen.filter) && !entry.cancelledAt ? sortRows([...rest, entry]) : rest;
+        return matchesFilter(entry, filter) && !entry.cancelledAt ? sortRows([...rest, entry]) : rest;
       });
     } catch { if (currentScreen.current === screen) router.refresh(); }
   };

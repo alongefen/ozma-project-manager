@@ -4,7 +4,7 @@ export async function getSummary(input: DateRange & { projectId?: string }): Pro
   const response = await fetch('/fixture/summary', { method: 'POST', body: JSON.stringify(input) });
   return response.json();
 }
-export async function getEntry({ id }: { id: string }) { return ok(window.fixture.entries.find(r => r.id === id)!); }
+export async function getEntry({ id }: { id: string }) { await fetch('/fixture/get-entry'); return ok(window.fixture.entries.find(r => r.id === id)!); }
 export async function cancelEntry({ id }: { id: string }) {
   await fetch('/fixture/cancel', { method: 'POST' });
   window.fixture.entries = window.fixture.entries.filter(r => r.id !== id);

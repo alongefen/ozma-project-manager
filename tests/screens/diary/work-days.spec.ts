@@ -24,7 +24,7 @@ async function save(page: Page, entry: Partial<DiaryRow> & { id: string }) {
 }
 async function setScreen(page: Page, over: Partial<DiaryScreen>) { await page.evaluate(async over => { window.fixture.setScreen(over); await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))); }, over); }
 
-test.beforeEach(async ({ page }) => { page.on('pageerror', e => console.log('PAGE ERROR', e.stack)); page.on('console', m => { if (m.type() === 'error') console.log('BROWSER', m.text()); }); await page.route('**/fixture/cancel', route => route.fulfill({ json: { ok: true } })); await authoritative(page); await page.goto('/'); await expect(count(page)).toHaveText('ימי עבודה שדווחו: 1'); });
+test.beforeEach(async ({ page }) => { page.on('pageerror', e => console.log('PAGE ERROR', e.stack)); page.on('console', m => { if (m.type() === 'error') console.log('BROWSER', m.text()); }); await page.route('**/fixture/get-entry', route => route.fulfill({ json: { ok: true } })); await page.route('**/fixture/cancel', route => route.fulfill({ json: { ok: true } })); await authoritative(page); await page.goto('/'); await expect(count(page)).toHaveText('ימי עבודה שדווחו: 1'); });
 
 test('refresh after saves: second report on a date, new date, date move, project move', async ({ page }) => {
   await save(page, { id: 'second', workDate: '2026-11-25' });
@@ -66,10 +66,19 @@ test('loading hides stale value, refresh failure is not zero, and recovery works
 test('old filter response cannot overwrite a newer server screen', async ({ page }) => {
   let release!: () => void;
   const pending = new Promise<void>(r => { release = r; });
-  await page.route('**/fixture/summary', async route => { await pending; await route.fulfill({ json: ok(99) }); });
+  let requests = 0;
+  await page.route('**/fixture/summary', async route => {
+    const request = ++requests;
+    if (request === 1) await pending;
+    await route.fulfill({ json: ok(request === 1 ? 99 : 7) });
+  });
   await save(page, { id: 'third', workDate: '2026-11-26' });
+  await expect.poll(() => requests).toBe(1);
   await setScreen(page, { filter: { projectId: '11111111-1111-4111-8111-111111111111', from: '2026-11-26' }, workDays: { status: 'ready', count: 7 }, rows: [] });
-  release();
+  await expect(count(page)).toHaveText('ימי עבודה שדווחו: 7');
+  const response = page.waitForResponse(r => r.url().endsWith('/fixture/summary'));
+  release(); await response;
+  await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   await expect(count(page)).toHaveText('ימי עבודה שדווחו: 7');
 });
 
@@ -141,3 +150,27 @@ test('cancellation finishing after a filter change refreshes the current range',
   release();
   await expect(count(page)).toHaveText('ימי עבודה שדווחו: 0');
 });
+
+test('a filter screen read before a save cannot restore its pre-save aggregate', async ({ page }) => {
+  await save(page, { id: 'third', workDate: '2026-11-26' });
+  await expect(count(page)).toHaveText('ימי עבודה שדווחו: 2');
+  // This server screen started loading before the save but arrives after its summary.
+  await setScreen(page, { filter: { projectId: '11111111-1111-4111-8111-111111111111', from: '2026-11-25' }, workDays: { status: 'ready', count: 1 } });
+  await expect(count(page)).toHaveText('ימי עבודה שדווחו: 2');
+});
+
+for (const included of [true, false]) {
+test(`a saved row arriving after a filter change follows current filter (included=${included})`, async ({ page }) => {
+  let release!: () => void;
+  const pending = new Promise<void>(r => { release = r; });
+  await page.route('**/fixture/get-entry', async route => { await pending; await route.fulfill({ json: { ok: true } }); });
+  const entryRequest = page.waitForRequest(r => r.url().endsWith('/fixture/get-entry'));
+  await save(page, { id: 'third', workDate: '2026-11-26', body: 'דיווח חדש בטווח הנוכחי' });
+  await entryRequest;
+  await setScreen(page, { filter: { projectId: '11111111-1111-4111-8111-111111111111', from: included ? '2026-11-26' : '2026-11-27' }, rows: [], workDays: { status: 'ready', count: 0 } });
+  release();
+  await expect(count(page)).toHaveText(`ימי עבודה שדווחו: ${included ? 1 : 0}`);
+  if (included) await expect(page.locator('.dr:visible')).toContainText('דיווח חדש בטווח הנוכחי');
+  else await expect(page.locator('.dr:visible')).not.toContainText('דיווח חדש בטווח הנוכחי');
+});
+}
