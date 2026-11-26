@@ -11,7 +11,7 @@ A project management system for the construction company "חי עוצמה בבנ
 ## How we work (A-39)
 
 - **Two layers.** The project manager opens a task session with a brief that follows the [template](docs/handoffs/TEMPLATE.md). The task session builds the code itself and runs one `reviewer` subagent for review and tests. Use the `builder` subagent only for a large, isolated piece in separate files.
-- **Models.** Subagents run on Sonnet. Use Opus only for an especially hard design or debugging task.
+- **Models.** Subagents run on Sonnet. If Sonnet is unavailable, use GPT-6.1 Sol (`gpt-6.1-sol`) instead. Use Opus only for an especially hard design or debugging task.
 - **Parallel work (A-33, A-37).** On its own initiative, the project manager finds isolated work within the approved scope and opens sessions for it, without asking for approval of the order. Before that, it checks the existing sessions and worktrees to avoid duplicates. At most two task sessions run at once.
 - **The project manager stays short-lived.** It opens a task, updates NEXT_SESSION and closes. It doesn't watch sessions in a loop, write code or run tests. A new manager session starts from NEXT_SESSION and Git.
 - **Docs-only changes** are made directly in the session, with no subagents and no code checks (A-36). Read the diff once before committing.
