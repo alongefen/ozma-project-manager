@@ -6,8 +6,9 @@ import { Button, Notice } from '@/components/ui';
 import type { FilePurpose, FileRef, Result, UploadTarget } from '@/types/contracts';
 import { MAX_FILES, acceptFor, checkFile, declaredMime, formatSize, messageForStatus, resolveMime, sniffMime } from './rules';
 import css from './UploadToast.module.css';
+import { isDngInput, prepareDng } from './dng/prepare';
 
-type Status = 'uploading' | 'done' | 'error';
+type Status = 'preparing' | 'uploading' | 'done' | 'error';
 type Item = { key: string; file: File; mime: string | null; status: Status; progress: number; error?: string; ref?: FileRef };
 
 export type FileUploadProps = {
@@ -68,7 +69,7 @@ function sendTus(file: File, mime: string, t: Extract<UploadTarget['target'], { 
  * Shared upload control (P1.5). Consumers (P2.2 cover, P2.4 documents, P2.5 diary) only pass a purpose
  * and project and receive the stored file references; they never edit this component.
  * Upload starts as soon as a file is picked. Flow: begin (server issues one token per file) -> resumable TUS upload -> complete (server validates).
- * The original file is sent exactly as the phone produced it.
+ * DNG is converted locally to JPEG; other original files are sent unchanged.
  */
 export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'בחירת קבצים', disabled, onBusyChange }: FileUploadProps) {
   const [items, setItems] = useState<Item[]>([]);
@@ -84,6 +85,14 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
   const latest = useRef(onUploaded);
   useEffect(() => { latest.current = onUploaded; });
 
+  const preparations = useRef(new Map<string, AbortController>());
+  const selecting = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    const active = preparations.current;
+    return () => { mounted.current = false; active.forEach(c => c.abort()); active.clear(); };
+  }, []);
   const itemsRef = useRef<Item[]>([]);
   useEffect(() => { itemsRef.current = items; });
   const patch = (key: string, change: Partial<Item>) => setItems(list => list.map(i => (i.key === key ? { ...i, ...change } : i)));
@@ -101,24 +110,37 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
   }
 
   async function add(picked: File[]) {
-    if (picked.length === 0) return;
+    if (picked.length === 0 || selecting.current) return;
+    selecting.current = true;
     setNotice(null);
-    const inspected = await Promise.all(picked.map(inspect));
-    const fresh: Item[] = [];
-    const added: Item[] = [];
-    const counted = () => itemsRef.current.concat(added).filter(i => i.mime).length;
-    for (const [index, file] of picked.entries()) {
-      if (counted() >= limit) { setNotice(limit === 1 ? 'אפשר לבחור קובץ אחד בלבד' : `אפשר לבחור עד ${limit} קבצים בכל פעם`); break; }
-      const { mime: sniffed, unreadable } = inspected[index];
-      const base = checkFile({ name: file.name, type: sniffed ?? file.type, size: file.size }, purpose);
-      const check = unreadable ? { ok: false as const, reason: 'לא ניתן לקרוא את הקובץ. אם הוא בענן (Google Photos / iCloud), יש להוריד אותו קודם למכשיר' } : base;
-      const item: Item = { key: newId(), file, mime: check.ok ? check.mime : null, status: check.ok ? 'uploading' : 'error', progress: 0, error: check.ok ? undefined : check.reason };
-      added.push(item);
-      if (check.ok) fresh.push(item);
-    }
+    const available = Math.max(0, limit - itemsRef.current.filter(i => i.mime || i.status === 'preparing').length);
+    if (picked.length > available) setNotice(limit === 1 ? 'אפשר לבחור קובץ אחד בלבד' : `אפשר לבחור עד ${limit} קבצים בכל פעם`);
+    const added: Item[] = picked.slice(0, available).map(file => ({ key: newId(), file, mime: null, status: 'preparing', progress: 0 }));
+    for (const item of added) preparations.current.set(item.key, new AbortController());
     setItems(list => [...list, ...added]);
-    // Upload starts the moment a file is chosen; there is no separate upload button.
-    if (fresh.length > 0) void run(fresh);
+    const fresh: Item[] = [];
+    try {
+      // A single decoder at a time bounds memory, including when selecting multiple RAW photos.
+      for (const item of added) {
+        const controller = preparations.current.get(item.key);
+        if (!controller || controller.signal.aborted) continue;
+        try {
+          const file = isDngInput(item.file) ? await prepareDng(item.file, controller.signal) : item.file;
+          if (!mounted.current || controller.signal.aborted) continue;
+          const { mime: sniffed, unreadable } = await inspect(file);
+          if (!mounted.current || controller.signal.aborted) continue;
+          const base = checkFile({ name: file.name, type: sniffed ?? file.type, size: file.size }, purpose);
+          const check = unreadable ? { ok: false as const, reason: 'לא ניתן לקרוא את הקובץ. אם הוא בענן (Google Photos / iCloud), יש להוריד אותו קודם למכשיר' } : base;
+          const ready: Item = { ...item, file, mime: check.ok ? check.mime : null, status: check.ok ? 'uploading' : 'error', error: check.ok ? undefined : check.reason };
+          patch(item.key, ready);
+          if (check.ok) fresh.push(ready);
+        } catch (error) {
+          if (mounted.current && !controller.signal.aborted) patch(item.key, { status: 'error', error: error instanceof Error ? error.message : 'לא ניתן להכין את התמונה. יש לבחור JPEG' });
+        } finally { preparations.current.delete(item.key); }
+      }
+      // Upload starts automatically, using only prepared bytes, never a RAW fallback.
+      if (mounted.current && fresh.length > 0) void run(fresh);
+    } finally { selecting.current = false; }
   }
 
   /** Uploads the given items. The client id only matches results to items; a retry after a failure leaves the earlier pending server row unused (never attached, never completed). */
@@ -152,7 +174,7 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
     }
   }
 
-  const busy = items.some(i => i.status === 'uploading');
+  const busy = items.some(i => i.status === 'uploading' || i.status === 'preparing');
   useEffect(() => { onBusyChange?.(busy); }, [busy, onBusyChange]);
   const accept = acceptFor(purpose);
   // Accepted files live in the consumer's attachment list. Keep accounting here,
@@ -184,6 +206,7 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
                 <span className="ltr">{item.file.name}</span>
                 <div className="upload__meta">
                   {formatSize(item.file.size)} ·{' '}
+                  {item.status === 'preparing' && 'מכין תמונה להעלאה…'}
                   {item.status === 'uploading' && `מעלה ${item.progress}%`}
                   {item.status === 'error' && item.error}
                 </div>
@@ -192,7 +215,10 @@ export function FileUpload({ purpose, projectId, onUploaded, camera, label = 'ב
               {item.status === 'error' && item.mime && (
                 <Button variant="secondary" size="small" aria-label={`ניסיון חוזר ל${item.file.name}`} onClick={() => void run([item])}>ניסיון חוזר</Button>
               )}
-              {item.status !== 'uploading' && item.status !== 'done' && (
+              {item.status === 'preparing' && (
+                <Button variant="secondary" size="small" aria-label={`ביטול הכנת ${item.file.name}`} onClick={() => { preparations.current.get(item.key)?.abort(); setItems(list => list.filter(i => i.key !== item.key)); }}>ביטול</Button>
+              )}
+              {item.status === 'error' && (
                 <Button variant="secondary" size="small" aria-label={`הסרת ${item.file.name}`} onClick={() => setItems(list => list.filter(i => i.key !== item.key))}>הסרה</Button>
               )}
             </li>
