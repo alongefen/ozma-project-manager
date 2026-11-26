@@ -11,10 +11,10 @@ Existing live DB, Preview only, no cloud writes in first dispatch. No auth-user/
 ### Current execution chats
 
 - LEADS-CLOUD — `01a21858-9862-77b2-8880-c92ed8af5843`, host `local`, worktree `/Users/alongefen/.codex/worktrees/4d4f/ozma-project-manager`. Dispatch snapshot `92e7c3e9778c8f05f73af7d54fb1058ede030481`; phase 1 authorized exact migration/preflight/diagnostics/generated types. Exclusive leads migration/metadata window assigned; task must report release. No fake-lead writes until UI readiness.
-- LEADS-UI — `01a21849-5832-7fa0-8454-bf913467bf68`, host `local`, worktree `/Users/alongefen/.codex/worktrees/35ff/ozma-project-manager`. Local-only guarded actions/routes/navigation and both shells; latest compact snapshot reports duplicate/retry/status rollback/Escape checks passed and archive/delete browser checks in progress. Not yet a final delivered/reviewed commit.
+- LEADS-UI — `01a21849-5832-7fa0-8454-bf913467bf68`, host `local`, worktree `/Users/alongefen/.codex/worktrees/35ff/ozma-project-manager`. Completed reviewed source `698f7cc`, integrated `0adaab9` with identical UI code/tests; 107 affected checks and six-width fixture browser evidence retained. Actual protected Preview/hosted verification pending.
 - DATA-FIX complete: `6becf18` integrated `b72c22a`; original DATA reviewer confirmed P2 resolved. DATA `a67ad3e` integrated `8931860`; ISOLATION `48a58c7` integrated `7b08b8c`, reviewed. Prior task chats idle; do not open duplicates.
 - Alon approved the concrete change on 26 November 2026 as recorded in LEADS-CLOUD. Approval covers exact migration, generated types/read diagnostics, up to 20 marked fake leads with retained soft-deleted records, containment rollback on failure. It does not authorize feature release/main merge.
-- Next manager action: read compact CLOUD and UI completion snapshots; verify actual migration application and history, integrate generated types and reviewed UI, then coordinate approved bounded fake-lead/Preview end-to-end verification. No repeated approval for this same scope; stop on drift/new changes/cost. No deployed success claim before actual evidence. No polling loop.
+- Next manager action: prepare Preview PR/CI in parallel with CLOUD; verify actual migration/history before integrating generated types and coordinating the approved bounded fake-lead/Preview verification. UI is already integrated. No repeated approval for this same scope; stop on drift/new changes/cost. No deployed success claim before actual evidence. No polling loop.
 
 ## Working rule update — A-48, 26.11.2026
 

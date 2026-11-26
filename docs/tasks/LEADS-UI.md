@@ -145,3 +145,7 @@ The feature remains held before main/release until Alon's explicit approval.
 - Next owner: LEADS-FOUNDATION feature manager integrates this local commit into the isolated
   feature branch, coordinates the separate DATA fix, and arranges D31/hosted/Preview work.
   No push/PR/main merge/release is authorized by this handoff.
+
+
+## Manager integration — 26 November 2026
+Source `698f7cc1fa6c9d76f6b65c0cc5326cfcdb5f05d7` integrated as `0adaab9` with no conflict/code change. Code/test comparison with the source is empty for the integrated UI/actions/routes/navigation scope; prior 107-test/typecheck/lint/reviewer/six-width fixture evidence retained under A-48. No second source review or suite run solely for integration. Concrete email-validation SQL fix already integrated separately. Actual DB application is not yet confirmed; protected Preview and hosted positive/negative flows remain pending. Existing shared FilterPopup Escape limitation remains recorded, not silently resolved.
