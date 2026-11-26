@@ -1,5 +1,9 @@
 # Next session
 
+## Working rule update — A-48, 26.11.2026
+
+Alon requested fewer duplicate merge checks and immediate notification when a PR merges. Updated AGENTS.md, task brief template and PM brief: preserve valid evidence, inspect incoming changes before selecting reruns, batch docs before final CI, put late approval/results/SHA in the PR body rather than triggering another bookkeeping commit. Required CI remains mandatory; no workflow changes. Send merge link/SHA immediately after GitHub confirmation, then continue authorized deployment/main checks/sync and report their outcome separately. [Task](tasks/PM-MERGE-EFFICIENCY.md). Docs-only; no code tests required. Alon explicitly requested merging this instruction update to main.
+
 25.11.2026. `origin/main`: `6d5b118`. Agent-facing doc, in English. Start here, then `git log --oneline -15` and `gh pr list`.
 
 ## State

@@ -1,17 +1,18 @@
 'use client';
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import type { DiaryRow } from '@/types/contracts';
 import { Sheet } from '@/components/ui';
 import { REPORT_PATH } from '@/lib/navigation';
-import { getEntry } from '../logic/actions';
+import { getEntry, getSummary } from '../logic/actions';
 import { EntryForm } from './EntryForm';
 import { mergePage, sortRows, matchesFilter } from './model';
-import type { DiaryScreen } from './types';
+import type { DiaryScreen, WorkDaysState } from './types';
 
 type Ctx = {
   openNew: () => void; openEdit: (row: DiaryRow) => void;
   rows: DiaryRow[]; cursor: string | null;
+  workDays?: WorkDaysState;
   appendPage: (items: DiaryRow[], next: string | null) => void;
   remove: (id: string) => void; reload: () => void;
 };
@@ -24,6 +25,35 @@ export const useDiary = () => { const c = useContext(DiaryContext); if (!c) thro
  */
 export function DiaryProvider({ screen, startOpen, closeHref, children }: { screen: DiaryScreen; startOpen?: boolean; closeHref?: string; children: ReactNode }) {
   const router = useRouter();
+  const currentScreen = useRef(screen);
+  useEffect(() => { currentScreen.current = screen; }, [screen]);
+  // Each mutation invalidates the complete aggregate, including dates on unloaded pages.
+  // After a mutation, even an incoming server screen may have started reading before the write.
+  // Re-read for every subsequent screen; screen identity and version discard old responses.
+  const [refreshVersion, setRefreshVersion] = useState(0);
+  const [summary, setSummary] = useState<{ screen: DiaryScreen; version: number; state: WorkDaysState } | null>(null);
+  const refreshSummary = () => {
+    const latest = currentScreen.current;
+    if (latest.fixedProjectId) setRefreshVersion(cur => cur + 1);
+  };
+  useEffect(() => {
+    if (!screen.fixedProjectId || refreshVersion === 0) return;
+    let live = true;
+    const version = refreshVersion;
+    const input = {
+      projectId: screen.fixedProjectId,
+      ...(screen.filter.from ? { from: screen.filter.from } : {}),
+      ...(screen.filter.to ? { to: screen.filter.to } : {}),
+    };
+    const apply = (state: WorkDaysState) => { if (live) setSummary({ screen, version, state }); };
+    getSummary(input).then(r => apply(r.ok ? { status: 'ready', count: r.value.workDays } : { status: 'error' }))
+      .catch(() => apply({ status: 'error' }));
+    return () => { live = false; };
+  }, [screen, refreshVersion]);
+  const workDays: WorkDaysState | undefined = !screen.fixedProjectId ? undefined
+    : refreshVersion > 0
+      ? summary?.screen === screen && summary.version === refreshVersion ? summary.state : { status: 'loading' }
+      : screen.workDays ?? { status: 'error' };
   // The one list of both layouts. A save puts the saved report into it at once; the page is never reloaded for that.
   const [seen, setSeen] = useState(screen.rows);
   const [rows, setRows] = useState(screen.rows);
@@ -35,20 +65,23 @@ export function DiaryProvider({ screen, startOpen, closeHref, children }: { scre
   const close = () => { setDialog(null); if (closeHref) window.history.replaceState(null, '', closeHref); };
   const done = async (id: string) => {
     close();
+    refreshSummary();
     try {
       const r = await getEntry({ id });
       if (!r.ok) { router.refresh(); return; }
       const entry = r.value;
+      const filter = currentScreen.current.filter;
       setRows(cur => {
         const rest = cur.filter(x => x.id !== id);
-        return matchesFilter(entry, screen.filter) && !entry.cancelledAt ? sortRows([...rest, entry]) : rest;
+        return matchesFilter(entry, filter) && !entry.cancelledAt ? sortRows([...rest, entry]) : rest;
       });
-    } catch { router.refresh(); }
+    } catch { if (currentScreen.current === screen) router.refresh(); }
   };
   const value: Ctx = {
     openNew: () => setDialog({ row: null }), openEdit: row => setDialog({ row }),
+    workDays,
     rows, cursor, appendPage: (items, next) => { setRows(cur => mergePage(cur, items)); setCursor(next); },
-    remove: id => setRows(cur => cur.filter(x => x.id !== id)), reload: () => router.refresh(),
+    remove: id => { setRows(cur => cur.filter(x => x.id !== id)); refreshSummary(); }, reload: () => router.refresh(),
   };
   // The menu's report button points at /diary/new. While the diary is on screen it just opens the window here:
   // no navigation, and it works after the window was closed (the router thinks it is already on that address).

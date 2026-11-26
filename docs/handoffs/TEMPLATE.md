@@ -25,6 +25,8 @@ You are the task session for <ID>. Build the code yourself, then run one `review
 - Tests: only the affected suites (A-36). Cloud tests: <allowed / ask the PM for a window>.
 - `docs/tasks/<ID>.md`: what changed, what was checked, the results, and what is still open.
 - One reviewer pass → fix the findings → rebase → PR → merge → fast-forward `main` (A-32).
+- Preserve valid test/review evidence (A-48); inspect incoming changes and rerun only affected checks. Required CI still applies. Batch repo documentation before the final CI push; late approval/results/SHA go in the PR body, without a bookkeeping commit that restarts CI.
+- Immediately after GitHub confirms merge: tell Alon in Hebrew, with PR link and SHA, before waiting for deployment/main CI/local sync. Continue authorized follow-up, then report its result separately.
 
 ## Limits
 - No migrations, new services, costs or deployment without D31 approval. Fake data only.
