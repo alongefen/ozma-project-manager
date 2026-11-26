@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Badge, Button, ConfirmDialog, DeleteIcon, IconButton, Notice, SelectField, TextField } from '@/components/ui';
-import { addToAllProjects, removeMembership, resetPassword, setFinanceAccess, setMembership, setOwnerLevel, setUserActive, updateUser } from '@/features/users/logic/actions';
+import { addToAllProjects, removeMembership, resetPassword, setFinanceAccess, setMembership, setOwnerLevel, setTechnicalAdmin, setUserActive, updateUser } from '@/features/users/logic/actions';
 import type { ProjectCard, ProjectRole, Result, UserAssignment, UserRow } from '@/types/contracts';
 import { ADMIN_LABEL, ROLE_LABEL, addableProjects, adminControls, errorText, ownerErrorText, statusLabel, validateName, validatePassword } from './view-model';
 import css from './PersonPanel.module.css';
@@ -144,6 +144,17 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
     say(enabled ? `${user.fullName} הוגדר/ה כאדמין` : `ההרשאה של ${user.fullName} כאדמין הוסרה`);
   }
 
+  const [techBusy, setTechBusy] = useState(false);
+  async function toggleTechnical(enabled: boolean) {
+    if (techBusy) return;
+    setTechBusy(true);
+    const result = await setTechnicalAdmin({ userId: user.id, enabled, expectedRevision: user.revision });
+    setTechBusy(false);
+    if (!result.ok) { fail(result.error.code); return; }
+    patchUser(user.id, u => ({ ...u, technicalAdmin: enabled, revision: result.value.revision }));
+    say(enabled ? `${user.fullName} לא יופיע/ה בבחירת אחראי` : `${user.fullName} יופיע/ה שוב בבחירת אחראי`);
+  }
+
   async function doReset(e: React.FormEvent) {
     e.preventDefault();
     if (resetBusy) return;
@@ -212,7 +223,19 @@ export function PersonPanel({ user, users, viewerId, projects, patchUser, say, r
       )}
       {accountNotes}
 
-      {user.isOwner ? <Notice>{`${ADMIN_LABEL} רואה ומנהל הכול: כל הפרויקטים, הכספים והמסמכים, וגם אדמינים אחרים. הוא לא משויך לפרויקט מסוים.`}</Notice> : (
+      {user.isOwner ? (
+        <>
+          <Notice>{`${ADMIN_LABEL} רואה ומנהל הכול: כל הפרויקטים, הכספים והמסמכים, וגם אדמינים אחרים. הוא לא משויך לפרויקט מסוים.`}</Notice>
+          <section className={css.section} aria-labelledby="pp-tech">
+            <h3 id="pp-tech" className={css.h}>בחירת אחראי במשימות</h3>
+            <label className={css.check}>
+              <input type="checkbox" checked={user.technicalAdmin} disabled={techBusy || !user.isActive} onChange={e => toggleTechnical(e.target.checked)} />
+              <span>מנהל טכני, לא מופיע בבחירת אחראי</span>
+            </label>
+            <p className={css.muted}>ההרשאות והגישה לא משתנות. משימות שכבר משויכות אליו ממשיכות להציג אותו.</p>
+          </section>
+        </>
+      ) : (
         <>
           <section className={css.section} aria-labelledby="pp-projects">
             <div className={css.sectionHead}>

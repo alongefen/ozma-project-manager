@@ -39,7 +39,7 @@ export const SensitiveEventSchema = z.strictObject({"id": z.number().finite(),"o
 
 export const UserAssignmentSchema = z.strictObject({"projectId": UuidSchema,"projectName": z.string(),"role": ProjectRoleSchema,"financeAccess": z.boolean(),"revision": z.number().int().positive()});
 
-export const UserRowSchema = z.strictObject({"id": UuidSchema,"fullName": z.string().trim().min(1).max(120),"email": z.email(),"isOwner": z.boolean(),"isActive": z.boolean(),"revision": z.number().int().positive(),"assignments": z.array(UserAssignmentSchema)});
+export const UserRowSchema = z.strictObject({"id": UuidSchema,"fullName": z.string().trim().min(1).max(120),"email": z.email(),"isOwner": z.boolean(),"isActive": z.boolean(),"technicalAdmin": z.boolean(),"revision": z.number().int().positive(),"assignments": z.array(UserAssignmentSchema)});
 
 export const MemberRowSchema = z.strictObject({"userId": UuidSchema,"fullName": z.string().trim().min(1).max(120),"role": ProjectRoleSchema,"financeAccess": z.boolean(),"isActive": z.boolean(),"revision": z.number().int().positive()});
 

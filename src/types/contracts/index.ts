@@ -130,7 +130,7 @@ export type UserAssignment = {
   projectId: Uuid; projectName: string; role: ProjectRole; financeAccess: boolean; revision: number
 }
 export type UserRow = {
-  id: Uuid; fullName: string; email: string; isOwner: boolean; isActive: boolean
+  id: Uuid; fullName: string; email: string; isOwner: boolean; isActive: boolean; technicalAdmin: boolean
   revision: number; assignments: UserAssignment[]
 }
 export type MemberRow = {
@@ -195,7 +195,7 @@ export type TaskRow = {
 }
 export type TaskPerson = { id: Uuid; name: string }
 /** Someone a task can be assigned to: an active member of the project or an active owner-level account (no membership row, role null). */
-export type TaskAssignee = { id: Uuid; name: string; role: ProjectRole | null; isOwner: boolean }
+export type TaskAssignee = { id: Uuid; name: string; role: ProjectRole | null; isOwner: boolean; technical: boolean }
 
 export interface TasksApi {
   listTasks: Operation<

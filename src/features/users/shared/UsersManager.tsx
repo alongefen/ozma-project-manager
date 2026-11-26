@@ -113,7 +113,7 @@ function NewPersonForm({ onClose, onCreated }: { onClose: () => void; onCreated:
     const result = await createUser({ requestId: requestId.current, email: values.email.trim(), fullName: values.fullName.trim(), password: values.password });
     setBusy(false);
     if (!result.ok) { setFormError(errorText(result.error.code, 'create')); return; }
-    onCreated({ id: result.value.id, fullName: values.fullName.trim(), email: values.email.trim(), isOwner: false, isActive: true, revision: result.value.revision, assignments: [] }, values.fullName.trim());
+    onCreated({ id: result.value.id, fullName: values.fullName.trim(), email: values.email.trim(), isOwner: false, isActive: true, technicalAdmin: false, revision: result.value.revision, assignments: [] }, values.fullName.trim());
   }
 
   return (

@@ -4,7 +4,7 @@ import { UsersApiInputSchemas } from '@/types/contracts/schemas';
 import { failure } from '@/lib/db/rpc';
 import { ownerOperation } from './shared';
 
-const profileFields = 'id,full_name,email,is_owner,is_active,revision' as const;
+const profileFields = 'id,full_name,email,is_owner,is_active,technical_admin,revision' as const;
 const membershipFields = 'user_id,project_id,role,finance_access,revision' as const;
 
 async function readUsers(platform: Platform, ctx: RequestContext, id?: string): Promise<UserRow[]> {
@@ -31,7 +31,7 @@ async function readUsers(platform: Platform, ctx: RequestContext, id?: string): 
   const names = new Map(projects.map(project => [project.id, project.name]));
   return profiles.map(profile => ({
     id: profile.id, fullName: profile.full_name, email: profile.email,
-    isOwner: profile.is_owner, isActive: profile.is_active, revision: profile.revision,
+    isOwner: profile.is_owner, isActive: profile.is_active, technicalAdmin: profile.technical_admin, revision: profile.revision,
     assignments: memberships.filter(member => member.user_id === profile.id).map(member => {
       const projectName = names.get(member.project_id);
       if (projectName === undefined) throw new Error('UNAVAILABLE');
@@ -71,7 +71,7 @@ export function createUserQueries(platform: Platform) {
       const members = memberships.map(member => {
         const profile = byId.get(member.user_id);
         if (!profile) throw new Error('UNAVAILABLE');
-        return { userId: profile.id, fullName: profile.full_name, role: member.role, financeAccess: member.finance_access, isActive: profile.is_active, revision: member.revision };
+        return { userId: profile.id, fullName: profile.full_name, role: member.role, financeAccess: member.finance_access, isActive: profile.is_active, technicalAdmin: profile.technical_admin, revision: member.revision };
       });
       return { ok: true as const, value: members };
     }),

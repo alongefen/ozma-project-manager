@@ -3,7 +3,7 @@ import { useId, useState } from 'react';
 import type { TaskAssignee, TaskRow } from '@/types/contracts';
 import { DateField, FormActions, MultiSelectField, Notice } from '@/components/ui';
 import { ADMIN_LABEL, ROLE_LABEL } from '@/features/users/shared/view-model';
-import { MAX_BODY, draftOf, parseDraft, type TaskDraft } from './model';
+import { MAX_BODY, assigneeOptions, draftOf, parseDraft, type TaskDraft } from './model';
 
 /** Note, optional due date and optional assignees (A-46, A-47), one form for both layouts (inside the shared sheet). No reminder. */
 export function TaskForm({ task, assignees, busy, error, onSubmit, onCancel }: {
@@ -33,7 +33,7 @@ export function TaskForm({ task, assignees, busy, error, onSubmit, onCancel }: {
       <DateField label="תאריך יעד (רשות)" value={draft.dueDate} error={errors.dueDate}
         onChange={v => setDraft(d => ({ ...d, dueDate: v }))} />
       <MultiSelectField label="אחראים (רשות)" placeholder="בחירת אחראים" unknownLabel="אחראי לשעבר" value={draft.assigneeIds}
-        options={assignees.map(a => ({ value: a.id, label: a.name, hint: a.isOwner ? ADMIN_LABEL : a.role ? ROLE_LABEL[a.role] : undefined }))}
+        options={assigneeOptions(assignees, task).map(a => ({ value: a.id, label: a.name, hint: a.isOwner ? ADMIN_LABEL : a.role ? ROLE_LABEL[a.role] : undefined }))}
         onChange={ids => setDraft(d => ({ ...d, assigneeIds: ids }))} />
       {error && <Notice tone="error">{error}</Notice>}
       <FormActions placement="sheet" submitLabel={busy ? 'שומר…' : 'שמירה'} busy={busy} onCancel={onCancel} />

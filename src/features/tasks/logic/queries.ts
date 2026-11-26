@@ -25,11 +25,12 @@ export function createTaskQueries(platform: Pick<Platform, 'permissions' | 'fetc
           if (count === null) throw new Error('Missing task count');
           return count;
         };
-        const loadAssignees = async (): Promise<TaskAssignee[]> => {
-          const { data, error } = await untypedDb(ctx).rpc('list_project_assignees', { p: projectId });
+        // `keep` = people already assigned on a task here: a technical admin is returned only when in it, so an existing assignment keeps its name.
+        const loadAssignees = async (keep: string[]): Promise<TaskAssignee[]> => {
+          const { data, error } = await untypedDb(ctx).rpc('list_project_assignees', { p: projectId, keep });
           if (error) throw error;
-          return ((data ?? []) as { user_id: string; full_name: string; role: TaskAssignee['role']; is_owner: boolean }[])
-            .map(row => ({ id: row.user_id, name: row.full_name, role: row.role, isOwner: row.is_owner }));
+          return ((data ?? []) as { user_id: string; full_name: string; role: TaskAssignee['role']; is_owner: boolean; is_technical: boolean }[])
+            .map(row => ({ id: row.user_id, name: row.full_name, role: row.role, isOwner: row.is_owner, technical: row.is_technical }));
         };
         // Who is responsible, per task. Inactive people and people who left the project have no name here and are not shown.
         const loadLinks = () => platform.fetchAll(async (from, to) => {
@@ -37,6 +38,7 @@ export function createTaskQueries(platform: Pick<Platform, 'permissions' | 'fetc
           if (error) throw error;
           return (data ?? []) as { task_id: string; user_id: string }[];
         });
+        const linksPromise = loadLinks();
         const [rows, openCount, completedCount, assignees, links] = await Promise.all([
           platform.fetchAll(async (from, to) => {
             const { data, error } = await untypedDb(ctx).from('tasks')
@@ -52,7 +54,7 @@ export function createTaskQueries(platform: Pick<Platform, 'permissions' | 'fetc
               assignees: [],
             }));
           }),
-          countTasks(false), countTasks(true), loadAssignees(), loadLinks(),
+          countTasks(false), countTasks(true), linksPromise.then(l => loadAssignees([...new Set(l.map(x => x.user_id))])), linksPromise,
         ]);
         // Names come from the members read; a person who left the project keeps the id but has no name.
         const names = new Map(assignees.map(a => [a.id, a.name]));

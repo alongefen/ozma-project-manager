@@ -17,7 +17,7 @@ const initial = { open: [row('a', { dueDate: '2026-11-01' })], completed: [row('
 
 function page(canWrite: boolean, canDelete: boolean) {
   return renderToStaticMarkup(
-    h(TasksProvider, { projectId: 'p', initial, canWrite, canDelete, today: '2026-11-23', assignees: [{ id: 'u1', name: 'דנה בדויה', role: 'worker', isOwner: false }], userId: 'u1', initialMine: false }, h(TasksMobile), h(TasksDesktop)),
+    h(TasksProvider, { projectId: 'p', initial, canWrite, canDelete, today: '2026-11-23', assignees: [{ id: 'u1', name: 'דנה בדויה', role: 'worker', isOwner: false, technical: false }], userId: 'u1', initialMine: false }, h(TasksMobile), h(TasksDesktop)),
   );
 }
 
@@ -43,7 +43,7 @@ describe('הרשאות במסך', () => {
   });
   it('שתי הקבוצות ומצבי ריק', () => {
     const html = renderToStaticMarkup(
-      h(TasksProvider, { projectId: 'p', initial: { open: [], completed: [] }, canWrite: true, canDelete: false, today: '2026-11-23', assignees: [{ id: 'u1', name: 'דנה בדויה', role: 'worker', isOwner: false }], userId: 'u1', initialMine: false }, h(TasksMobile)),
+      h(TasksProvider, { projectId: 'p', initial: { open: [], completed: [] }, canWrite: true, canDelete: false, today: '2026-11-23', assignees: [{ id: 'u1', name: 'דנה בדויה', role: 'worker', isOwner: false, technical: false }], userId: 'u1', initialMine: false }, h(TasksMobile)),
     );
     expect(html).toContain('אין משימות לביצוע');
     // Completed tasks are hidden on entry (item 3); the toggle says how many there are.
