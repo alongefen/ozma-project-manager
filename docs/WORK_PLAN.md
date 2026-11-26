@@ -22,9 +22,13 @@
 
 ### LEADS-FOUNDATION — A-49, 26.11.2026
 
-| Task | State and ownership | Completion gate |
+| Task | State and coordination | Completion gate |
 |---|---|---|
-| LEADS-FOUNDATION | Launched chat `01a217e2-212a-7a72-a84d-2b0339c37e9a` (local) at Alon's request: existing live DB, isolated branch/worktree and Preview; production UI must remain unaffected. Await Alon's screenshots in the build chat before defining fields, actions, permissions or implementation ownership. Current ownership: `docs/tasks/LEADS-FOUNDATION.md` only. PM owns shared docs; no code/SQL/navigation ownership allocated yet. [Brief](handoffs/LEADS-FOUNDATION.md). | Agree screenshot-based scope and exact file ownership; data/RLS/RPC first, then phone and desktop UI; one reviewer and affected checks. Preview workflow on the existing service authorized; concrete migrations still need D31 approval. STOP before main merge until Alon explicitly approves release, because main auto-deploys (task exception to A-26). No external integrations. |
+| LEADS-FOUNDATION | Scope closed with Alon; this chat is now feature construction manager. File-allocation approval explicitly waived for isolated feature branches. [Spec](tasks/LEADS-FOUNDATION.md), [construction plan](handoffs/LEADS-CONSTRUCTION.md). | Concrete D31 before DB application; verified Preview and explicit Alon release approval before main merge. |
+| LEADS-DATA | Dispatch now: contracts, additive DB/rollback proposal, feature logic and affected local tests. [Brief](tasks/LEADS-DATA.md). | No live SQL/test writes in initial dispatch; return commit/interface/D31 proposal. |
+| LEADS-ISOLATION | Dispatch in parallel: server Preview/admin guard, local policy tests and read-only Preview readiness. [Brief](tasks/LEADS-ISOLATION.md). | No production activation/config changes; return guard contract/checks. |
+| LEADS-UI | Queued after DATA contracts and ISOLATION guard. Both shells, shared model, guarded nav and UI checks. | No invented interface; use actual committed outputs. |
+| LEADS-INTEGRATION | Queued: authorized bounded cloud tests, reviewed PR, CI and Preview evidence. | No automatic/main merge or production deployment. Sonnet unavailability must remain explicit. |
 
 ### PM-MERGE-EFFICIENCY — A-48, 26.11.2026
 
