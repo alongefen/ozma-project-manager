@@ -24,7 +24,7 @@
 
 | Task | State and ownership | Completion gate |
 |---|---|---|
-| LEADS-FOUNDATION | Brief prepared; no task chat launched. Await Alon's screenshots in the build chat before defining fields, actions, permissions or implementation ownership. Current ownership: `docs/tasks/LEADS-FOUNDATION.md` only. PM owns shared docs; no code/SQL/navigation ownership allocated yet. [Brief](handoffs/LEADS-FOUNDATION.md). | Agree screenshot-based scope and exact file ownership; data/RLS/RPC first, then phone and desktop UI; one reviewer and affected checks. Concrete migration/cloud-test/deployment approvals under D31 remain pending. No external integrations. |
+| LEADS-FOUNDATION | Updated brief ready for dispatch: existing live DB, isolated branch/worktree and Preview; production UI must remain unaffected. Await Alon's screenshots in the build chat before defining fields, actions, permissions or implementation ownership. Current ownership: `docs/tasks/LEADS-FOUNDATION.md` only. PM owns shared docs; no code/SQL/navigation ownership allocated yet. [Brief](handoffs/LEADS-FOUNDATION.md). | Agree screenshot-based scope and exact file ownership; data/RLS/RPC first, then phone and desktop UI; one reviewer and affected checks. Preview workflow on the existing service authorized; concrete migrations still need D31 approval. STOP before main merge until Alon explicitly approves release, because main auto-deploys (task exception to A-26). No external integrations. |
 
 ### PM-MERGE-EFFICIENCY — A-48, 26.11.2026
 

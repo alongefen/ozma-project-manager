@@ -30,6 +30,7 @@ A project management system for the construction company "חי עוצמה בבנ
 - The desktop design matches the demo exactly (A-23), without bringing back scope that was cut. The Excel file is a source for data and calculations only.
 - Don't claim something was read or checked unless it was. Don't widen the scope. A task is a note with a due date, with no assignee and no reminders.
 - Leads foundation is now in scope under A-49: data structure and phone/desktop UI, defined from Alon's screenshots in LEADS-FOUNDATION. Make, webhooks, campaign/form integrations and GREEN API remain out of scope. D31 still applies; lead fields and permissions are not yet specified.
+- LEADS-FOUNDATION release exception (Alon, 26.11.2026): existing live DB, isolated feature branch/worktree and Preview only. No changes to the client's live UI. Stop before merge to `main` until Alon explicitly approves release; `main` auto-deploys. This overrides A-26 for this task. Concrete DB changes still require D31 approval.
 
 ## Product
 
