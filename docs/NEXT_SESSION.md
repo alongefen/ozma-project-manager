@@ -14,7 +14,7 @@ Existing live DB, Preview only, no cloud writes in first dispatch. No auth-user/
 - LEADS-UI — `01a21849-5832-7fa0-8454-bf913467bf68`, host `local`, worktree `/Users/alongefen/.codex/worktrees/35ff/ozma-project-manager`. Guarded actions/routes/navigation and both screen shells, local fake fixtures only; one Sonnet or authorized GPT-6.1 Sol reviewer.
 - Dispatch snapshot `fb357e17a502ae72b9f1d5c3880d3dfb614f2b66`; UI remains in progress; DATA-FIX completed and reviewed. No hosted verification claim.
 - Completed predecessors: DATA chat `01a217f9-687b-77f2-8aea-061e47cf23d4` delivered `a67ad3e`, integrated `8931860`; ISOLATION chat `01a217f9-ba14-7922-8e83-c27dc4de4747` delivered `48a58c7`, integrated `7b08b8c`, reviewed without findings.
-- Next manager action: await Alon approval of the concrete migration/bounded fake-lead tests/access-only rollback in `docs/tasks/LEADS-CLOUD.md`; do not execute before approval. UI is independent and stays local until cloud authorization. Resume with bounded compact wait_threads snapshots, not polling loops. No new duplicate task chats.
+- Alon approved the concrete migration/bounded fake-lead tests/access-only rollback in `docs/tasks/LEADS-CLOUD.md`. Dispatch CLOUD phase 1 for exact migration/diagnostics/types, alongside local-only UI. Fake-lead writes wait for UI readiness; no second permission question for the same approved scope. Main release remains unapproved. Resume with bounded compact wait_threads snapshots, not polling loops. No new duplicate task chats.
 
 ## Working rule update — A-48, 26.11.2026
 
