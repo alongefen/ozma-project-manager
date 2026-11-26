@@ -1,0 +1,18 @@
+import { beforeEach,afterEach,expect,it,vi } from 'vitest';
+vi.mock('server-only',()=>({}));
+const m=vi.hoisted(()=>({getContext:vi.fn()}));
+vi.mock('@/components/shell/request',()=>({getContext:m.getContext}));
+vi.mock('next/navigation',()=>({redirect:(path:string)=>{throw new Error(path);}}));
+vi.mock('@/features/auth/SignOutButton',()=>({SignOutButton:()=>null}));
+vi.mock('@/features/more/mobile/MoreMobile',()=>({MoreMobile:()=>null}));
+vi.mock('@/features/more/desktop/MoreDesktop',()=>({MoreDesktop:()=>null}));
+vi.mock('@/components/shell/mobile/BottomNav',()=>({BottomNav:()=>null}));
+vi.mock('@/components/shell/mobile/MobileHeader',()=>({MobileHeader:()=>null}));
+vi.mock('@/components/shell/desktop/DesktopHeader',()=>({DesktopHeader:()=>null}));
+vi.mock('@/components/shell/desktop/DesktopSidebar',()=>({DesktopSidebar:()=>null}));
+import Layout from '@/app/(app)/layout';
+import More from '@/app/(app)/more/page';
+beforeEach(()=>{vi.stubEnv('LEADS_PREVIEW_ENABLED','true');m.getContext.mockResolvedValue({ok:true,value:{actor:{isOwner:true,fullName:'בדוי'}}});});
+afterEach(()=>vi.unstubAllEnvs());
+for(const env of ['production','preview'])it(`${env} uses the same availability for sidebar and both More views`,async()=>{vi.stubEnv('VERCEL_ENV',env);const layout=await Layout({children:null});const sidebar=layout.props.children[0];const more=await More();expect(sidebar.props.items.some((i:{key:string})=>i.key==='leads')).toBe(env==='preview');for(const view of more.props.children)expect(view.props.leadsAvailable).toBe(env==='preview');expect(layout.props.children[2].props.items[2].key).toBe('report');});
+it('non-owner Preview has no lead navigation',async()=>{vi.stubEnv('VERCEL_ENV','preview');m.getContext.mockResolvedValue({ok:true,value:{actor:{isOwner:false,fullName:'בדוי'}}});const layout=await Layout({children:null});expect(layout.props.children[0].props.items.some((i:{key:string})=>i.key==='leads')).toBe(false);const more=await More();expect(more.props.children.every((v:{props:{leadsAvailable:boolean}})=>!v.props.leadsAvailable)).toBe(true);});

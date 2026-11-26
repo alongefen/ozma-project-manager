@@ -1,3 +1,4 @@
+import { isLeadsAvailable } from '@/features/leads/logic/availability';
 import { redirect } from 'next/navigation';
 import { getContext } from '@/components/shell/request';
 import { SIGN_IN_PATH } from '@/lib/navigation';
@@ -12,8 +13,8 @@ export default async function MorePage() {
   const { actor } = context.value;
   return (
     <>
-      <MoreMobile actor={actor} />
-      <MoreDesktop actor={actor} />
+      <MoreMobile actor={actor} leadsAvailable={isLeadsAvailable(actor.isOwner)} />
+      <MoreDesktop actor={actor} leadsAvailable={isLeadsAvailable(actor.isOwner)} />
     </>
   );
 }

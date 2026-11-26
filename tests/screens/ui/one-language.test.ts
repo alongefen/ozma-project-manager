@@ -54,7 +54,7 @@ describe('filter popup', () => {
     const own = features.filter(f => /fin-pop|fin-count|dr-toolbar__count|dr-filter|fin-filters/.test(read(f)));
     expect(own).toEqual([]);
     const users = features.filter(f => f.endsWith('.tsx') && read(f).includes('<FilterPopup'));
-    expect(users.map(f => f.split('/').pop()).sort()).toEqual(['DesktopFilterBar.tsx', 'DiaryToolbar.tsx', 'FinanceMobile.tsx']);
+    expect(users.map(f => f.split('/').pop()).sort()).toEqual(['DesktopFilterBar.tsx', 'DiaryToolbar.tsx', 'FinanceMobile.tsx', 'LeadFilters.tsx']);
   });
   it('the trigger shows the count badge only when something is active, and apply comes before clear', () => {
     const none = renderToStaticMarkup(h(FilterPopup, { count: 0, onApply: () => {}, onClear: () => {}, children: null }));

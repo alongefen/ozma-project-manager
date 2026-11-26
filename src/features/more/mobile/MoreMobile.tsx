@@ -6,8 +6,8 @@ import { AccountCard } from '@/features/account/shared/AccountCard';
 import type { Actor } from '@/types/contracts';
 
 /** Phone "more": account first, owner-only links as a plain list, sign-out at the bottom (UX-19: no tabs). */
-export function MoreMobile({ actor }: { actor: Actor }) {
-  const links = moreLinks(actor.isOwner);
+export function MoreMobile({ actor, leadsAvailable = false }: { actor: Actor; leadsAvailable?: boolean }) {
+  const links = moreLinks(actor.isOwner, leadsAvailable);
   return (
     <div className="more m-only">
       <Card>

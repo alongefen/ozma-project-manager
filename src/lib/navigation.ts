@@ -2,7 +2,7 @@
 // Roles: only the owner (Ben) is global. Manager and worker are per-project roles (A-06), so the
 // shell only ever branches on `isOwner`.
 
-export type IconName = 'projects' | 'diary' | 'report' | 'finance' | 'more' | 'users' | 'archive' | 'log' | 'account' | 'logout';
+export type IconName = 'projects' | 'diary' | 'report' | 'finance' | 'more' | 'users' | 'archive' | 'log' | 'account' | 'logout' | 'leads';
 
 export type NavItem = {
   key: string;
@@ -22,6 +22,7 @@ const projects: NavItem = { key: 'projects', href: '/projects', label: 'פרוי
 const diary: NavItem = { key: 'diary', href: '/diary', label: 'יומן', icon: 'diary' };
 const report: NavItem = { key: 'report', href: REPORT_PATH, label: 'דיווח חדש', icon: 'report', prominent: true };
 const finance: NavItem = { key: 'finance', href: '/finance', label: 'כספים', icon: 'finance' };
+const leads: NavItem = { key: 'leads', href: '/leads', label: 'לידים', icon: 'leads' };
 const more: NavItem = { key: 'more', href: '/more', label: 'עוד', icon: 'more' };
 
 /**
@@ -33,10 +34,10 @@ export function phoneNav(isOwner: boolean): NavItem[] {
 }
 
 /** Desktop sidebar (DESIGN S01): the demo navigation, with the report entry first-class. */
-export function desktopNav(isOwner: boolean): NavItem[] {
+export function desktopNav(isOwner: boolean, leadsAvailable = false): NavItem[] {
   const base: NavItem[] = [projects, diary, report];
   return isOwner
-    ? [...base, finance, { key: 'users', href: '/users', label: 'עובדים והרשאות', icon: 'users' }]
+    ? [...base, finance, ...(leadsAvailable ? [leads] : []), { key: 'users', href: '/users', label: 'עובדים והרשאות', icon: 'users' }]
     : base;
 }
 
@@ -45,9 +46,9 @@ export function desktopNav(isOwner: boolean): NavItem[] {
  * The archive list and the action log (DESIGN S16) have no screen yet, so they are not linked:
  * a link must never lead to a 404 or to a page that ignores it.
  */
-export function moreLinks(isOwner: boolean): NavItem[] {
+export function moreLinks(isOwner: boolean, leadsAvailable = false): NavItem[] {
   if (!isOwner) return [];
-  return [{ key: 'users', href: '/users', label: 'עובדים והרשאות', icon: 'users' }];
+  return [...(leadsAvailable ? [leads] : []), { key: 'users', href: '/users', label: 'עובדים והרשאות', icon: 'users' }];
 }
 
 const PROJECT_ROUTE = /^\/projects\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\/|$)/i;
@@ -87,6 +88,7 @@ const TITLES: [string, string][] = [
   ['/finance', 'כספים'],
   ['/users', 'עובדים והרשאות'],
   ['/more', 'עוד'],
+  ['/leads', 'לידים'],
 ];
 
 export function screenTitle(pathname: string): string {
