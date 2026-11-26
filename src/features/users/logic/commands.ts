@@ -9,6 +9,10 @@ import { ownerOperation } from './shared';
 export const SetOwnerLevelSchema = z.strictObject({ userId: z.uuid(), enabled: z.boolean(), expectedRevision: z.number().int().positive() });
 export type SetOwnerLevelInput = z.infer<typeof SetOwnerLevelSchema>;
 
+/** HIDE-TECH-ADMINS: flag an admin as technical (not an assignee option). Local to this feature, like `setOwnerLevel`. */
+export const SetTechnicalAdminSchema = z.strictObject({ userId: z.uuid(), enabled: z.boolean(), expectedRevision: z.number().int().positive() });
+export type SetTechnicalAdminInput = z.infer<typeof SetTechnicalAdminSchema>;
+
 /** Item 1 of CLIENT-FEEDBACK-A: add one person to every open project at once. Local to this feature, like `setOwnerLevel`. */
 export const AddToAllProjectsSchema = z.strictObject({ userId: z.uuid(), role: z.enum(['manager', 'worker']) });
 export type AddToAllProjectsInput = z.infer<typeof AddToAllProjectsSchema>;
@@ -69,5 +73,11 @@ export function createUserCommands(platform: Platform) {
 export function createOwnerLevelCommand(platform: Platform) {
   return {
     setOwnerLevel: ownerOperation(platform, SetOwnerLevelSchema, (ctx, input) => platform.rpc<SetOwnerLevelInput, { id: string; revision: number }>(ctx, 'set_owner_level', input)),
+  };
+}
+
+export function createTechnicalAdminCommand(platform: Platform) {
+  return {
+    setTechnicalAdmin: ownerOperation(platform, SetTechnicalAdminSchema, (ctx, input) => platform.rpc<SetTechnicalAdminInput, { id: string; revision: number }>(ctx, 'set_technical_admin', input)),
   };
 }

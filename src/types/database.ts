@@ -383,6 +383,7 @@ export type Database = {
           is_owner: boolean
           revision: number
           sessions_valid_after: string
+          technical_admin: boolean
           updated_at: string
         }
         Insert: {
@@ -395,6 +396,7 @@ export type Database = {
           is_owner?: boolean
           revision?: number
           sessions_valid_after?: string
+          technical_admin?: boolean
           updated_at?: string
         }
         Update: {
@@ -407,6 +409,7 @@ export type Database = {
           is_owner?: boolean
           revision?: number
           sessions_valid_after?: string
+          technical_admin?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -928,6 +931,7 @@ export type Database = {
       set_project_cover: { Args: { input: Json }; Returns: Json }
       set_project_status: { Args: { input: Json }; Returns: Json }
       set_owner_level: { Args: { input: Json }; Returns: Json }
+      set_technical_admin: { Args: { input: Json }; Returns: Json }
       set_task_completed: { Args: { input: Json }; Returns: Json }
       set_user_active: { Args: { input: Json }; Returns: Json }
       system_add_owner: { Args: { input: Json }; Returns: Json }

@@ -1,4 +1,4 @@
-import type { IsoDate, TaskRow } from '@/types/contracts';
+import type { IsoDate, TaskAssignee, TaskRow } from '@/types/contracts';
 import { format } from '@/lib/format';
 
 export const MAX_BODY = 2000;
@@ -55,3 +55,7 @@ export const sameIds = (a: string[], b: string[]) => a.length === b.length && a.
 
 /** "המשימות שלי": open tasks assigned to the signed-in user. Pure filter over the loaded list. */
 export const onlyMine = (tasks: TaskRow[], userId: string): TaskRow[] => tasks.filter(t => t.assignees.some(a => a.id === userId));
+
+/** Who the form offers. A technical admin (HIDE-TECH-ADMINS) is offered only on a task that already has them, so nothing is dropped. */
+export const assigneeOptions = (assignees: TaskAssignee[], task: TaskRow | null): TaskAssignee[] =>
+  assignees.filter(a => !a.technical || (task?.assignees.some(x => x.id === a.id) ?? false));

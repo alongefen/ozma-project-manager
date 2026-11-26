@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { TaskRow } from '@/types/contracts';
-import { MAX_BODY, dueInfo, onlyMine, parseDraft, sameIds, withRevision, withToggled, withoutTask } from '@/features/tasks/shared/model';
+import { MAX_BODY, assigneeOptions, dueInfo, onlyMine, parseDraft, sameIds, withRevision, withToggled, withoutTask } from '@/features/tasks/shared/model';
 
 const row = (id: string, over: Partial<TaskRow> = {}): TaskRow => ({
   id, projectId: '11111111-1111-4111-8111-111111111111', body: 'בדוי', completed: false, dueDate: null, createdAt: '2026-11-23T08:00:00.000Z', revision: 1, assignees: [], ...over,
@@ -82,5 +82,17 @@ describe('אחראים (A-46, A-47)', () => {
   it('אותה רשימה בכל סדר נחשבת בלי שינוי', () => {
     expect(sameIds(['a', 'b'], ['b', 'a'])).toBe(true);
     expect(sameIds(['a'], ['a', 'b'])).toBe(false);
+  });
+});
+
+describe('אחראים בטופס (HIDE-TECH-ADMINS)', () => {
+  const person = (id: string, technical: boolean) => ({ id, name: id, role: null, isOwner: true, technical });
+  const all = [person('ben', false), person('tech', true)];
+  it('מנהל טכני לא מוצע במשימה חדשה או במשימה בלי', () => {
+    expect(assigneeOptions(all, null).map(a => a.id)).toEqual(['ben']);
+    expect(assigneeOptions(all, row('t1')).map(a => a.id)).toEqual(['ben']);
+  });
+  it('משימה שכבר משויכת אליו ממשיכה להציג אותו', () => {
+    expect(assigneeOptions(all, row('t2', { assignees: [{ id: 'tech', name: 'tech' }] })).map(a => a.id)).toEqual(['ben', 'tech']);
   });
 });

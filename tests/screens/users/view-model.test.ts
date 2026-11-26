@@ -3,7 +3,7 @@ import type { ProjectCard, UserRow } from '@/types/contracts';
 import { ADMIN_LABEL, LAST_ADMIN_REASON, activeAdminCount, adminControls, ownerErrorText, addableProjects, assignmentLabel, errorText, filterUsers, sortUsers, statusLabel, validateNewPerson, validatePassword } from '@/features/users/shared/view-model';
 
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
-const user = (n: number, over: Partial<UserRow> = {}): UserRow => ({ id: id(n), fullName: `אדם ${n}`, email: `p${n}@example.invalid`, isOwner: false, isActive: true, revision: 1, assignments: [], ...over });
+const user = (n: number, over: Partial<UserRow> = {}): UserRow => ({ id: id(n), fullName: `אדם ${n}`, email: `p${n}@example.invalid`, isOwner: false, isActive: true, technicalAdmin: false, revision: 1, assignments: [], ...over });
 const project = (n: number, over: Partial<ProjectCard> = {}): ProjectCard => ({ id: id(100 + n), name: `פרויקט ${n}`, businessName: '', siteAddress: '', status: 'active', archived: false, coverFileId: null, reportCount: 0, openTaskCount: 0, ...over });
 
 describe('users view model', () => {
@@ -43,7 +43,7 @@ describe('users view model', () => {
 
 import { filterUsers as filterAll, projectOptions, EMPTY_FILTER, NO_PROJECT } from '@/features/users/shared/view-model';
 
-const mk = (id: string, p: Partial<UserRow>): UserRow => ({ id, fullName: id, email: `${id}@x.test`, isOwner: false, isActive: true, revision: 1, assignments: [], ...p });
+const mk = (id: string, p: Partial<UserRow>): UserRow => ({ id, fullName: id, email: `${id}@x.test`, isOwner: false, isActive: true, technicalAdmin: false, revision: 1, assignments: [], ...p });
 const asg = (projectId: string, role: 'manager' | 'worker') => ({ projectId, projectName: `P${projectId}`, role, financeAccess: false, revision: 1 });
 describe('user filters', () => {
   const users = [

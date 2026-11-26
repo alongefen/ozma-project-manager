@@ -4,7 +4,7 @@ import { UsersApiInputSchemas } from '@/types/contracts/schemas';
 import { createPlatform } from '@/lib/auth/platform';
 import { failure } from '@/lib/db/rpc';
 import { createUsersApi } from './index';
-import { AddToAllProjectsSchema, SetOwnerLevelSchema, createBulkAccessCommand, createOwnerLevelCommand, type AddToAllProjectsInput, type AddToAllProjectsResult, type SetOwnerLevelInput } from './commands';
+import { AddToAllProjectsSchema, SetOwnerLevelSchema, SetTechnicalAdminSchema, createBulkAccessCommand, createOwnerLevelCommand, createTechnicalAdminCommand, type AddToAllProjectsInput, type AddToAllProjectsResult, type SetOwnerLevelInput, type SetTechnicalAdminInput } from './commands';
 
 type Input<K extends keyof UsersApi> = Parameters<UsersApi[K]>[1];
 type Output<K extends keyof UsersApi> = Awaited<ReturnType<UsersApi[K]>>;
@@ -52,5 +52,17 @@ export async function addToAllProjects(input: AddToAllProjectsInput): Promise<Re
     const parsed = AddToAllProjectsSchema.safeParse(input);
     if (!parsed.success) return failure('VALIDATION');
     return await createBulkAccessCommand(platform).addToAllProjects(context.value, parsed.data);
+  } catch { return failure('UNAVAILABLE'); }
+}
+
+/** Mark an admin as technical, so the person is not offered as a task assignee (owner only; the server checks). */
+export async function setTechnicalAdmin(input: SetTechnicalAdminInput): Promise<Result<{ id: string; revision: number }>> {
+  try {
+    const platform = await createPlatform();
+    const context = await platform.auth.getContext();
+    if (!context.ok) return context;
+    const parsed = SetTechnicalAdminSchema.safeParse(input);
+    if (!parsed.success) return failure('VALIDATION');
+    return await createTechnicalAdminCommand(platform).setTechnicalAdmin(context.value, parsed.data);
   } catch { return failure('UNAVAILABLE'); }
 }
