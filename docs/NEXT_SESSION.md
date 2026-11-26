@@ -6,13 +6,15 @@ Alon closed the screenshot-based scope, authorized necessary file edits on isola
 
 Dispatch two independent task chats: LEADS-DATA (contracts, additive SQL/rollback proposal, logic/local checks) and LEADS-ISOLATION (server production/Preview guard, local checks and read-only Preview readiness). No duplicate leads implementation chat found in current recent inventory/worktrees. UI waits for their committed interfaces; integration/cloud verification follows concrete D31 approval. Keep two task chats maximum. Use compact wait_threads snapshots on resumption, not polling loops. Alon authorized GPT-6.1 Sol (`gpt-6.1-sol`) fallback for unavailable Sonnet; rule merged in main `189d65d` / PR #165 and brought into the feature branch.
 
-Existing live DB, Preview only, no cloud writes in first dispatch. No auth-user/client-data changes, seed/reset, external integrations, auto-merge, main merge or production deployment. Alon's explicit feature-release approval remains required. Child tasks keep their own notes; this manager maintains shared docs. Next owner: DATA/ISOLATION task chats; manager resumes from their commits to prepare UI and present concrete D31 request.
+Existing live DB, Preview only, no cloud writes in first dispatch. No auth-user/client-data changes, seed/reset, external integrations, auto-merge, main merge or production deployment. Alon's explicit feature-release approval remains required. Child tasks keep their own notes; this manager maintains shared docs. Next owners: DATA-FIX and UI task chats; manager integrates their commits and presents the reviewed concrete D31 request.
 
-### Active task chats
+### Current execution chats
 
-- LEADS-DATA — `01a217f9-687b-77f2-8aea-061e47cf23d4`, host `local`, worktree `/Users/alongefen/.codex/worktrees/fe2a/ozma-project-manager`.
-- LEADS-ISOLATION — `01a217f9-ba14-7922-8e83-c27dc4de4747`, host `local`, worktree `/Users/alongefen/.codex/worktrees/1ee1/ozma-project-manager`.
-- Dispatch bootstrap snapshot `000e30e18ef025efe75957e24af3916e14ad0882` on `codex/leads-foundation`, rebased onto `6f87ea1`. ISOLATION completed and selectively integrated as `7b08b8c` from `48a58c7`; one GPT-6.1 Sol reviewer found no actionable issues. DATA delivered `a67ad3e`, integrated as `8931860`; 50 local tests and TypeScript/lint reported passing, GPT-6.1 Sol review found one P2 SQL/Zod email mismatch, with LEADS-DATA-FIX ready in parallel with UI. D31 held until corrected. UI ready using `docs/tasks/LEADS-UI.md`; no cloud writes authorized. No actual route/action/nav or deployed leads Preview verification yet. Resume with compact bounded waits, not polling loops.
+- LEADS-DATA-FIX — `01a21848-3714-7682-822c-2c56c489b5b9`, host `local`, worktree `/Users/alongefen/.codex/worktrees/ef76/ozma-project-manager`. Focused P2 email SQL/Zod parity correction; no cloud SQL. Reuse the original DATA reviewer for the changed lines.
+- LEADS-UI — `01a21849-5832-7fa0-8454-bf913467bf68`, host `local`, worktree `/Users/alongefen/.codex/worktrees/35ff/ozma-project-manager`. Guarded actions/routes/navigation and both screen shells, local fake fixtures only; one Sonnet or authorized GPT-6.1 Sol reviewer.
+- Both dispatched from snapshot `fb357e17a502ae72b9f1d5c3880d3dfb614f2b66`; initial snapshots confirm active work. No completion/hosted verification claim.
+- Completed predecessors: DATA chat `01a217f9-687b-77f2-8aea-061e47cf23d4` delivered `a67ad3e`, integrated `8931860`; ISOLATION chat `01a217f9-ba14-7922-8e83-c27dc4de4747` delivered `48a58c7`, integrated `7b08b8c`, reviewed without findings.
+- Next manager action: integrate focused fix, recheck original review finding, then present the concrete D31 proposal/containment rollback. UI is independent and stays local until cloud authorization. Resume with bounded compact wait_threads snapshots, not polling loops. No new duplicate task chats.
 
 ## Working rule update — A-48, 26.11.2026
 
