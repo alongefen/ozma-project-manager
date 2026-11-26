@@ -22,3 +22,6 @@ Not causes (checked in code): `accept` list and 20-file limit are fine; tus chun
 
 ## Ask the client
 Phone model and OS version, browser (Safari/Chrome), whether the picked photo came from the gallery or Google Photos/iCloud, and the exact Hebrew message shown under the file. After deploy: ask them to retry and send the message; the Vercel logs (`[upload]`) must be read within 1 hour of the attempt.
+
+## Follow-up: regression in #158 (found 26.11.2026)
+The pick handler cleared `input.value` and only then read the FileList; the list is live, so it was empty and no upload started. Fixed by copying to an array before clearing. Lesson: the unit tests do not cover the input handler; not covered by an automated test (no DOM test harness for it), verify in a browser after deploy.
