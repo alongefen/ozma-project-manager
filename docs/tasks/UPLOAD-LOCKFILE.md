@@ -29,11 +29,11 @@ All local checks used Node `24.22.3` / npm `11.19.1` in the new worktree without
 - `npm test -- --passWithNoTests --reporter=dot`: 83 files / 1,122 tests passed; 2 files / 9 tests skipped.
 - `NEXT_TELEMETRY_DISABLED=1 npm run build`: PASS.
 - Full lock diff and `git diff --check`: PASS; structural comparison verified all existing entries unchanged.
-Remote PR CI pending; will also verify the Linux-only smoke.
+Remote CI [run 45805605602](https://github.com/alongefen/ozma-project-manager/actions/runs/45805605602) on implementation commit `94ea261` completed SUCCESS with the same Node/npm combination: fresh npm ci, scope tests, lint, typecheck, both foundation checks (including Linux Chromium), 85 unit-test files / 1,127 tests passed (4 skipped), and build. The logs were read.
 
 ## Reviewer and limits
-Sonnet is absent from the available collaboration model list. No substitute reviewer has been launched and no independent review is claimed. A-39 review and merge remain blocked pending access to the required reviewer or an explicit Alon waiver. Implementation and verification continue independently.
-No cloud tests, env-value reads, migrations, services, production mutations or deployments. No upload implementation changes or repeated upload acceptance checks. macOS cannot run the Linux Chromium foundation smoke; remote CI must cover it.
+Sonnet is absent from the available collaboration model list. No substitute reviewer has been launched and no independent review is claimed. A-39 review and merge remain blocked pending access to the required reviewer or an explicit Alon waiver. Implementation and independent local/remote verification are complete; the review gate is still open.
+No cloud tests, env-value reads, migrations, services, production mutations or deployment commands. GitHub/Vercel automatically attached a preview check to the PR; no production deployment was triggered. No upload implementation changes or repeated upload acceptance checks. The Linux Chromium smoke skipped on macOS passed in remote CI.
 
 ## Handoff
-PR/SHA pending. Do not resume #160 until this separate repair is merged and its reviewer requirement is resolved. Existing unchanged upload evidence stays valid; its remaining full Next/live storage and real-device gates stay with that task.
+Draft PR [#161](https://github.com/alongefen/ozma-project-manager/pull/161), implementation commit `94ea2612dc8fe4407ab67ad25ff345e02ced258c`. Fetched and rebased onto `origin/main` after the implementation commit; the base remained `804f9f7` with no incoming content. Remote CI run `45805605602` passed. This documentation follow-up does not alter the verified lockfile. No merge or local-main fast-forward has occurred; the PM checkout remains on its original branch. Do not resume #160 until this separate repair is merged and its reviewer requirement is resolved. Existing unchanged upload evidence stays valid; its remaining full Next/live storage and real-device gates stay with that task.
