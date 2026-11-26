@@ -20,6 +20,12 @@
 
 ## עדכון המעקב הנוכחי
 
+### PM-MERGE-EFFICIENCY — A-48, 26.11.2026
+
+| Task | State and ownership | Verification |
+|---|---|---|
+| PM-MERGE-EFFICIENCY | Alon requested fewer duplicate merge checks and immediate merge reports, then explicitly requested main integration. Docs-only ownership: `AGENTS.md`, `docs/handoffs/{TEMPLATE,PROJECT_MANAGER}.md`, `docs/{DECISIONS,WORK_PLAN,NEXT_SESSION}.md`, `docs/tasks/PM-MERGE-EFFICIENCY.md`. [Task](tasks/PM-MERGE-EFFICIENCY.md). | Diff/consistency review only. No code, CI configuration, deployments or model-policy changes. |
+
 משימת `PM-TOKEN-EFFICIENCY` מכוח A-39: זרימת עבודה חסכונית בטוקנים. בעלות תיעוד ותצורת סוכנים בלבד: `AGENTS.md`, ‏`.claude/agents/**`, ‏`docs/DECISIONS.md`, ‏`docs/WORK_PLAN.md`, ‏`docs/NEXT_SESSION.md`, ‏`docs/handoffs/PROJECT_MANAGER.md`, ‏`docs/handoffs/TEMPLATE.md` ו-`docs/tasks/PM-TOKEN-EFFICIENCY.md`. אין קוד או ענן. [מסירה](tasks/PM-TOKEN-EFFICIENCY.md).
 
 ## כללי עבודה

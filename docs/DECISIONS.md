@@ -484,6 +484,14 @@ D31-1 אושרה לסביבת פיתוח Free בפרנקפורט, בבעלות �
 
 > "building a new webapp project for a new client. the webapp should be easy to use on both mobile and computer. it should have user auth, roles, and permissions. the app should help the client manage his projects, income vs expenses for each project, tasks for each project, work diary for each project and for all projects. files uploaded and organized in catagories. the app should be hebrew native, rtl native."
 
+## החלטה A-48: פחות בדיקות כפולות ודיווח מיד אחרי מיזוג
+
+- **תאריך:** 26.11.2026.
+- **מקור:** אלון בשיחת ״מנהל עבודה - תיקונים״ ב-Codex: ״תעדכן את הוראות העבודה כדי לצמצם את הבדיקות הכפולות במיזוגים הבאים, ושידווחו לי מיד כשהמיזוג הושלם״.
+- שומרים ראיות בדיקה וסקירה תקפות כשהתוכן שנבדק והתלויות הרלוונטיות לא השתנו. אחרי rebase בודקים מה נכנס וחוזרים רק על בדיקות שהושפעו, או כשיש כישלון או ממצא פתוח. שינוי SHA כשלעצמו אינו סיבה להרצה חוזרת. בדיקות CI נדרשות נשארות חובה.
+- מרכזים תיעוד בקבצים לפני הדחיפה האחרונה ל-CI. אישור מאוחר, תוצאת CI ו-SHA מיזוג נרשמים בתיאור ה-PR או בתגובה מורשית, בלי קומיט תיעוד נוסף רק לצורך הרישום. אין בכך אישור לשנות את הגדרות CI.
+- מיד כש-GitHub מאשר שה-PR מוזג, מודיעים לאלון בעברית עם קישור ו-SHA. לא ממתינים לפריסה, לבדיקות main או לסנכרון המקומי כדי להודיע. משלימים את ההמשך המורשה ומדווחים על תוצאתו בנפרד; מיזוג ופריסה מאומתת הם מצבים שונים. D31 נשאר בתוקף.
+
 ## טרם הוחלט
 
 D31-3 להקמת ייצור ואישור פריסה. המיגרציה הראשונה ב-P1.2 מורשית לפי A-27. נושא הגיבוי חוזר לאלון לפני נתונים אמיתיים. G1 ו-D31-1 כבר אושרו; פירוט ב-A-21 וב-A-22 וב-[OPEN_QUESTIONS](OPEN_QUESTIONS.md).
