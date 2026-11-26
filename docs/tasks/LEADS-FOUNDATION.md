@@ -13,7 +13,7 @@ Alon, 26 November 2026 (A-49), requested a new leads page with data structure an
 - Preview access, actual configuration and regression evidence must be verified by the task session; they are not verified by these instructions. Missing Preview credentials/configuration or additional cost requires a concrete request, without exposing secrets.
 
 ## Current state and ownership
-Brief ready; build chat not launched. No implementation started. This task owns this task file only until screenshot-based scope and exact code/shared-file ownership are allocated by the PM in WORK_PLAN. No SQL or navigation ownership yet. Do not copy old demo lead requirements as approved scope.
+Build chat launched: `01a217e2-212a-7a72-a84d-2b0339c37e9a` (local). No implementation started. This task owns this task file only until screenshot-based scope and exact code/shared-file ownership are allocated by the PM in WORK_PLAN. No SQL or navigation ownership yet. Do not copy old demo lead requirements as approved scope.
 
 ## Next steps for the task session
 1. Receive screenshots; extract visible fields, actions and layout. Do not commit screenshots containing client data or real lead details.
