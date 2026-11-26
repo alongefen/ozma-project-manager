@@ -28,7 +28,7 @@ when foreign_key_violation then perform private.fail('VALIDATION'); return null;
 when invalid_text_representation or numeric_value_out_of_range or check_violation or not_null_violation or invalid_datetime_format or datetime_field_overflow then
  perform private.fail('VALIDATION'); return null;
 end $$;
-revoke all on function public.set_technical_admin(jsonb) from public, anon;
+revoke all on function public.set_technical_admin(jsonb) from public, anon, service_role;
 grant execute on function public.set_technical_admin(jsonb) to authenticated;
 
 drop function public.list_project_assignees(uuid);

@@ -19,9 +19,12 @@ Client request (Alon, 26.11.2026): the two technical admins (Alon the developer,
 - Tests: `tests/screens/tasks/model.test.ts` (options rule); `tests/db/technical-admin.test.ts` (server checks: flagged admin not returned for any caller, Ben and members are, only owner toggles, non-owner target and stale revision refused, `keep` restores only the listed id, audit rows). The db test is written but **not run**: it needs the migration applied (D31) and a PM cloud window.
 
 ## Checks and results
-- `tsc --noEmit`: clean. `vitest tests/screens/tasks tests/screens/users`: pass (74 passed, 2 skipped). The `tests/logic/users` cloud test fails at sign-in (known owner fixture gap, unrelated).
+- `tsc --noEmit`: clean. `vitest tests/screens/tasks tests/screens/users`: pass (43 tests in tests/screens/tasks and tests/screens/users). The `tests/logic/users` cloud test fails at sign-in (known owner fixture gap, unrelated).
 - Not checked: cloud DB test (before migration), browser at 360-1280 (the new control is one existing `check` row, 44px, in the shared PersonPanel; unverified visually), live toggle.
 
 ## Open
 - D31 "כן" from Alon; then apply, run `tests/db/technical-admin.test.ts` in a PM window, and Alon flags himself and Maor.
 - DECISIONS entry: the PM records it.
+
+## Review
+One reviewer pass: approved, no blocking findings. Applied: `service_role` also revoked on `set_technical_admin`; test count corrected. Accepted: the task page now waits for the links read before the picker read (one extra round trip). **The PR must not be merged before the migration is applied:** the app reads `profiles.technical_admin`, so merging first would break the people screen.
