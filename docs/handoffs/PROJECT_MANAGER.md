@@ -14,6 +14,7 @@ Repo: `/Users/alongefen/ozma-project-manager`, `https://github.com/alongefen/ozm
 - Make small docs fixes directly, without subagents. Change files only when Alon asks or the tracking needs it.
 - Don't reopen G0, G1 or GU, and don't start a new planning round when there is enough information to build.
 - End every message with the next step and who does it.
+- Apply A-48 in every handoff: preserve valid checks/review, batch docs before final CI, and require immediate merge notification followed by a separate authorized deployment/post-merge result. Check for changed content/dependencies before asking for reruns; a different SHA alone is insufficient. Required CI must still pass; do not alter CI scope without a separate task.
 
 ## Limits
 
